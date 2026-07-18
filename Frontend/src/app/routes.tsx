@@ -61,11 +61,7 @@ export const router = createBrowserRouter([
     {
         path: '/dashboard',
         element: (
-            <ProtectedRoute
-                isAuthenticated={true}
-                allowedRoles={["admin", "doctor", "reception", "patient"]}
-                userRole={"admin"}
-            />
+            <ProtectedRoute allowedRoles={["admin", "doctor", "reception", "patient"]} />
         ),
         children: [
             {
@@ -73,7 +69,7 @@ export const router = createBrowserRouter([
                 children: [
                     {
                         path: 'admin',
-                        element: <ProtectedRoute allowedRoles={["admin"]} userRole={"admin"} />,
+                        element: <ProtectedRoute allowedRoles={["admin"]} />,
                         children: [
                             {
                                 index: true,
@@ -100,7 +96,7 @@ export const router = createBrowserRouter([
 
                     {
                         path: 'doctor',
-                        element: <ProtectedRoute allowedRoles={["doctor"]} userRole={"doctor"} />,
+                        element: <ProtectedRoute allowedRoles={["doctor"]} />,
                         children: [
                             {
                                 index: true,
@@ -131,7 +127,7 @@ export const router = createBrowserRouter([
 
                     {
                         path: 'reception',
-                        element: <ProtectedRoute allowedRoles={["reception"]} userRole={"reception"} />,
+                        element: <ProtectedRoute allowedRoles={["reception"]} />,
                         children: [
                             {
                                 index: true,
@@ -162,7 +158,7 @@ export const router = createBrowserRouter([
 
                     {
                         path: 'patient',
-                        element: <ProtectedRoute allowedRoles={["patient"]} userRole={"patient"} />,
+                        element: <ProtectedRoute allowedRoles={["patient"]} />,
                         children: [
                             {
                                 index: true,
@@ -192,7 +188,7 @@ export const router = createBrowserRouter([
     },
     {
         path: "*",
-        element: <h1 className="text-center text-2xl">404 Not Found</h1>,
+        element: <h1 className="text-center text-2xl mt-5">404 Not Found</h1>,
     },
 
 ])
