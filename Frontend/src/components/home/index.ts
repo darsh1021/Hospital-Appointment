@@ -1,0 +1,12 @@
+// Barrel export — re-exports everything from the home component folder
+export { default as FontLink }             from "./FontLink"
+export { default as SectionLabel }         from "./SectionLabel"
+export { default as Display }              from "./Display"
+export { default as InkPill }              from "./InkPill"
+export { default as HeroSection }          from "./HeroSection"
+export { default as StatsStrip }           from "./StatsStrip"
+export { default as OrbCardsSection }      from "./OrbCardsSection"
+export { default as FeatureCardsSection }  from "./FeatureCardsSection"
+export { default as TokenShowcaseSection } from "./TokenShowcaseSection"
+export { default as TestimonialsSection }  from "./TestimonialsSection"
+export { default as CtaBandSection }       from "./CtaBandSection"
