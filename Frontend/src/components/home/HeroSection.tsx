@@ -20,7 +20,7 @@ const HeroSection = () => (
     >
       {/* Main pastel bloom */}
       <div
-        className="h-[600px] w-[800px] opacity-55 dark:opacity-70"
+        className="h-150 w-200 opacity-55 dark:opacity-70"
         style={{
           background:
             "radial-gradient(ellipse 60% 55% at 40% 50%, #a7e5d3 0%, transparent 55%)," +
@@ -41,7 +41,7 @@ const HeroSection = () => (
       }}
     />
 
-    <div className="relative mx-auto flex max-w-[1200px] flex-col items-center px-6 text-center">
+    <div className="relative mx-auto flex max-w-300 flex-col items-center px-6 text-center">
       {/* Badge pill */}
       <span
         className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#e7e5e4] dark:border-[rgba(110,231,183,0.25)] bg-[#f0efed] dark:bg-[rgba(110,231,183,0.08)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[1px] text-[#292524] dark:text-[#6ee7b7]"
@@ -54,7 +54,7 @@ const HeroSection = () => (
       {/* Hero headline */}
       <h1
         id="hero-heading"
-        className="mx-auto max-w-[820px] text-[#0c0a09] dark:text-white"
+        className="mx-auto max-w-205 text-[#0c0a09] dark:text-white"
         style={{
           fontFamily: "'EB Garamond', 'Times New Roman', serif",
           fontSize: "clamp(36px, 6vw, 64px)",
