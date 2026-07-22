@@ -1,12 +1,17 @@
-// import React from "react"
+import { CalendarDays, ArrowRight } from "lucide-react"
 
 const AppointmentSummaryCard = () => {
+  const scrollToForm = () => {
+    const element = document.getElementById("booking-form")
+    element?.scrollIntoView({ behavior: "smooth" })
+  }
+
   return (
-    <div className="w-full max-w-sm rounded-3xl bg-[#F8F9F3] p-4 text-[#1A1A1A] shadow-xl">
-      {/* Top Header */}
+    <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-[#0a0a0f] border border-zinc-200 dark:border-white/10 p-4 shadow-xl">
+      {/* Header */}
       <div className="mb-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#B45F3D] mb-1">Your Token</p>
-        <h1 className="text-xl font-bold tracking-tight text-[#1A1A1A]">You're in the queue</h1>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[#B45F3D] dark:text-emerald-400 mb-1">Your Token</p>
+        <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">You're in the queue</h1>
       </div>
 
       {/* Token Card */}
@@ -18,54 +23,49 @@ const AppointmentSummaryCard = () => {
         <h2 className="text-4xl font-bold tracking-tighter mb-2">014</h2>
         
         {/* Dashed Separator */}
-        <div className="border-t border-dashed border-[#3D635D] pt-2 flex justify-between text-[11px]">
+        <div className="border-t border-dashed border-[#3D635D] pt-2 flex justify-between text-[11px] text-[#C8D1CE]">
             <div>
-                <p className="text-[#C8D1CE] mb-0.5">Now serving</p>
-                <p className="font-semibold text-base">009</p>
+                <p className="mb-0.5">Now serving</p>
+                <p className="font-semibold text-base text-white">009</p>
             </div>
             <div>
-                <p className="text-[#C8D1CE] mb-0.5">Your turn in</p>
-                <p className="font-semibold text-base">~48 min</p>
+                <p className="mb-0.5">Your turn in</p>
+                <p className="font-semibold text-base text-white">~48 min</p>
             </div>
             <div>
-                <p className="text-[#C8D1CE] mb-0.5">Patients ahead</p>
-                <p className="font-semibold text-base">4</p>
+                <p className="mb-0.5">Patients ahead</p>
+                <p className="font-semibold text-base text-white">4</p>
             </div>
         </div>
       </div>
 
-      {/* Progress Section */}
-      <div className="rounded-3xl bg-white p-4 border border-[#E9E9E9]">
+      {/* Progress & Actions */}
+      <div className="rounded-3xl bg-zinc-50 dark:bg-white/5 p-4 border border-zinc-100 dark:border-white/5">
         <div className="flex justify-between items-center mb-3">
-            <h3 className="font-bold text-sm">Queue progress</h3>
-            <span className="text-[10px] text-[#5D5D5D]">updates live</span>
+            <h3 className="font-bold text-sm text-zinc-900 dark:text-white">Queue progress</h3>
+            <span className="text-[10px] text-zinc-500 dark:text-white/50">updates live</span>
         </div>
 
         {/* Progress Bar */}
-        <div className="flex items-center gap-1.5 mb-3">
+        <div className="flex items-center gap-1.5 mb-4">
             {[1,2,3,4,5].map((i) => (
-                <div key={i} className={`h-1.5 flex-1 rounded-full ${i === 5 ? "bg-[#B45F3D]" : "bg-[#E9E9E9]"}`}></div>
+                <div key={i} className={`h-1.5 flex-1 rounded-full ${i === 5 ? "bg-[#B45F3D] dark:bg-emerald-500" : "bg-zinc-200 dark:bg-white/10"}`}></div>
             ))}
         </div>
 
-        <div className="rounded-xl bg-[#F0F4F2] p-3 mb-3 flex gap-2 text-[11px]">
-            <span className="text-lg">ℹ️</span>
-            <p className="text-[#1A1A1A]">4 patients ahead of you. Feel free to run errands nearby.</p>
-        </div>
-
-        <div className="space-y-2 text-[11px] text-[#5D5D5D]">
-            <div className="flex justify-between">
-                <p>Doctor's avg. time</p>
-                <p className="font-bold text-[#1A1A1A]">12 min</p>
-            </div>
-            <div className="flex justify-between">
-                <p>Visit type</p>
-                <p className="font-bold text-[#1A1A1A]">New patient · ₹400</p>
-            </div>
-            <div className="flex justify-between">
-                <p>Registered via</p>
-                <p className="font-bold text-[#1A1A1A]">Online booking</p>
-            </div>
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+            <button 
+                onClick={scrollToForm}
+                className="flex items-center justify-center gap-1 rounded-xl bg-emerald-600 py-2 text-[11px] font-semibold text-white transition hover:bg-emerald-700"
+            >
+                Get Token
+                <ArrowRight size={12} />
+            </button>
+            <button className="flex items-center justify-center gap-1 rounded-xl bg-zinc-200 dark:bg-white/10 py-2 text-[11px] font-semibold text-zinc-900 dark:text-white transition hover:bg-zinc-300 dark:hover:bg-white/20">
+                <CalendarDays size={12} />
+                Schedule
+            </button>
         </div>
       </div>
     </div>
