@@ -1,4 +1,5 @@
 import AppointmentSummaryCard from "./AppointmentSummaryCard"
+import { ArrowRight, CalendarDays, Info, PersonStanding } from "lucide-react"
 
 // ════════════════════════════════════════════════════
 // BOOK TOKEN — HERO SECTION
@@ -22,7 +23,7 @@ const BookHeroSection = () => (
       }}
     />
 
-    <div className="relative mx-auto max-w-[1280px] px-6 py-20 lg:py-28">
+    <div className="relative mx-auto max-w-[1280px] px-6 py-20 lg:py-10">
       <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
         {/* ── Left: copy ── */}
         <div>
@@ -60,7 +61,7 @@ const BookHeroSection = () => (
           </p>
 
           {/* Micro-stat pills */}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 mb-10">
           {[
             { value: "< 60 s", label: "to book" },
             { value: "80+",    label: "doctors" },
@@ -82,6 +83,31 @@ const BookHeroSection = () => (
               </span>
             </div>
           ))}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-4">
+            <button 
+              onClick={() => {
+                const form = document.getElementById("booking-form");
+                form?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="flex items-center gap-2 rounded-2xl border border-emerald-600 bg-transparent px-6 py-3.5 text-[15px] font-semibold text-emerald-600 dark:text-emerald-400 transition-all hover:bg-emerald-50 dark:hover:bg-emerald-500/10 active:scale-95"
+            >
+              Get Your Token Now
+              <ArrowRight size={18} />
+            </button>
+
+            <button 
+              onClick={() => {
+                const form = document.getElementById("how-it-works");
+                form?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="flex items-center gap-2 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/5 px-6 py-3.5 text-[15px] font-semibold text-zinc-900 dark:text-white transition-all hover:bg-zinc-50 dark:hover:bg-white/10 active:scale-95"
+            >
+              <PersonStanding size={19} />
+              How it work
+            </button>
           </div>
         </div>
 

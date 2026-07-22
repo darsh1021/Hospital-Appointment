@@ -11,6 +11,7 @@ const BookHowItWorks = () => (
     className="bg-[#fafafa] dark:bg-[#0f0f15]"
     aria-labelledby="how-it-works-heading"
     style={{ paddingBlock: "80px" }}
+    id="how-it-works"
   >
     <div className="mx-auto max-w-[1280px] px-6">
       {/* Section header */}

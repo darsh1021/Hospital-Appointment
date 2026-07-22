@@ -26,6 +26,7 @@ const BookFormSection = () => {
       className="bg-white dark:bg-[#0a0a0f]"
       aria-labelledby="form-heading"
       style={{ paddingBlock: "80px" }}
+      id="booking-form"
     >
       <div className="mx-auto max-w-[1280px] px-6">
         <div className="grid gap-14 lg:grid-cols-[1fr_520px] lg:gap-20 items-start">
