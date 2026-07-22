@@ -80,12 +80,12 @@ const Navbar = () => {
             Log In
           </NavLink>
 
-          <NavLink
+          {/* <NavLink
             to="/auth/signup"
             className="inline-flex h-7 items-center rounded-[6px] bg-[#171717] px-2 text-[14px] font-medium leading-5 tracking-[-0.28px] text-white transition-colors hover:bg-[#2a2a2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-1 dark:bg-white dark:text-[#171717] dark:hover:bg-[#e0e0e0]"
           >
             Sign Up
-          </NavLink>
+          </NavLink> */}
         </div>
 
         {/* ── Mobile hamburger ── */}
@@ -143,13 +143,14 @@ const Navbar = () => {
             >
               Log In
             </NavLink>
-            <NavLink
+
+            {/* <NavLink
               to="/auth/signup"
               onClick={() => setMobileOpen(false)}
               className="inline-flex h-9 items-center justify-center rounded-[6px] bg-[#171717] px-3 text-[14px] font-medium text-white transition-colors hover:bg-[#2a2a2a] dark:bg-white dark:text-[#171717] dark:hover:bg-[#e0e0e0]"
             >
               Sign Up
-            </NavLink>
+            </NavLink> */}
           </div>
         </div>
       )}

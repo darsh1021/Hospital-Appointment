@@ -20,6 +20,12 @@ import ResetPasswordPage from '../pages/auth/ResetPasswordPage'
 // ── Misc ──
 import NotFoundPage from '../pages/NotFoundPage'
 
+// ── Dashboard Pages ──
+import AdminDashboardPage from '../pages/dashboard/AdminDashboardPage'
+import DoctorDashboardPage from '../pages/dashboard/DoctorDashboardPage'
+import ReceptionDashboardPage from '../pages/dashboard/ReceptionDashboardPage'
+import PatientDashboardPage from '../pages/dashboard/PatientDashboardPage'
+
 
 export const router = createBrowserRouter([
     // ────────────────────────────────────────────────
@@ -68,7 +74,7 @@ export const router = createBrowserRouter([
                         path: 'admin',
                         element: <ProtectedRoute allowedRoles={["admin"]} />,
                         children: [
-                            { index: true,          element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Admin Dashboard</h1> },
+                            { index: true,          element: <AdminDashboardPage /> },
                             { path: "doctors",      element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Manage Doctors</h1> },
                             { path: "patients",     element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Manage Patients</h1> },
                             { path: "reports",      element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Generate Reports</h1> },
@@ -81,7 +87,7 @@ export const router = createBrowserRouter([
                         path: 'doctor',
                         element: <ProtectedRoute allowedRoles={["doctor"]} />,
                         children: [
-                            { index: true,                  element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Doctor Dashboard</h1> },
+                            { index: true,                  element: <DoctorDashboardPage /> },
                             { path: "queue",                element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Manage Queue</h1> },
                             { path: "current-patient",      element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Current Patient</h1> },
                             { path: "prescription",         element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Prescription</h1> },
@@ -95,7 +101,7 @@ export const router = createBrowserRouter([
                         path: 'reception',
                         element: <ProtectedRoute allowedRoles={["reception"]} />,
                         children: [
-                            { index: true,                  element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Reception Dashboard</h1> },
+                            { index: true,                  element: <ReceptionDashboardPage /> },
                             { path: "register-patient",     element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Register Patient</h1> },
                             { path: "walk-in",              element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Walk-in Patients</h1> },
                             { path: "live-queue",           element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Live Queue</h1> },
@@ -109,7 +115,7 @@ export const router = createBrowserRouter([
                         path: 'patient',
                         element: <ProtectedRoute allowedRoles={["patient"]} />,
                         children: [
-                            { index: true,              element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Patient Dashboard</h1> },
+                            { index: true,              element: <PatientDashboardPage /> },
                             { path: "appointments",     element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Appointments</h1> },
                             { path: "prescriptions",    element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Prescriptions</h1> },
                             { path: "reports",          element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Medical Reports</h1> },

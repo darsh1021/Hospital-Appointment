@@ -9,11 +9,11 @@ import './index.css'
 
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <Provider store={store}>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <RouterProvider router={router} />
       </ThemeProvider>
     </Provider>
-  </StrictMode>,
+  // </StrictMode>,
 )

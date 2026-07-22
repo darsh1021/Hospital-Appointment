@@ -32,47 +32,47 @@ const BookFormSection = () => {
         <div className="grid gap-14 lg:grid-cols-[1fr_520px] lg:gap-20 items-start">
           {/* ── Left: context copy ── */}
           <div className="lg:pt-4">
-          <p
-            className="mb-3 text-[11px] font-semibold uppercase tracking-[1.1px] text-[#888] dark:text-[#6ee7b7]"
-          >
-            Step 1 of 1
-          </p>
-          <h2
-            id="form-heading"
-            className="mb-5 text-[28px] font-bold leading-[1.15] tracking-[-1.2px] text-[#171717] dark:text-white"
-            style={{ textWrap: "balance" } as React.CSSProperties}
-          >
-            Request an appointment.
-          </h2>
-          <p
-            className="mb-8 max-w-sm text-[15px] leading-[1.65] text-[#5a5a5a] dark:text-[#94a3b8]"
-          >
-            Fill in your details below. You'll receive a token number via
-            SMS and email immediately after confirming.
-          </p>
+            <p
+              className="mb-3 text-[11px] font-semibold uppercase tracking-[1.1px] text-[#888] dark:text-[#6ee7b7]"
+            >
+              Step 1 of 1
+            </p>
+            <h2
+              id="form-heading"
+              className="mb-5 text-[28px] font-bold leading-[1.15] tracking-[-1.2px] text-[#171717] dark:text-white"
+              style={{ textWrap: "balance" } as React.CSSProperties}
+            >
+              Request an appointment.
+            </h2>
+            <p
+              className="mb-8 max-w-sm text-[15px] leading-[1.65] text-[#5a5a5a] dark:text-[#94a3b8]"
+            >
+              Fill in your details below. You'll receive a token number via
+              SMS and email immediately after confirming.
+            </p>
 
-          {/* Trust list */}
-          <ul className="flex flex-col gap-3">
-            {[
-              "Token issued in under 60 seconds",
-              "Live queue tracking via SMS & email",
-              "Cancel or reschedule anytime",
-              "No account required",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2.5">
-                <CheckCircle2
-                  size={15}
-                  className="mt-0.5 shrink-0 text-[#6ee7b7]"
-                  aria-hidden="true"
-                />
-                <span
-                  className="text-[14px] text-[#4d4d4d] dark:text-[#94a3b8]"
-                >
-                  {item}
-                </span>
-              </li>
-            ))}
-          </ul>
+            {/* Trust list */}
+            <ul className="flex flex-col gap-3">
+              {[
+                "Token issued in under 60 seconds",
+                "Live queue tracking via SMS & email",
+                "Cancel or reschedule anytime",
+                "No account required",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5">
+                  <CheckCircle2
+                    size={15}
+                    className="mt-0.5 shrink-0 text-[#6ee7b7]"
+                    aria-hidden="true"
+                  />
+                  <span
+                    className="text-[14px] text-[#4d4d4d] dark:text-[#94a3b8]"
+                  >
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* ── Right: form card ── */}
@@ -211,13 +211,13 @@ const BookFormSection = () => {
                 </div>
                 <h3
                   className="mb-2 text-[22px] font-bold tracking-[-0.8px] text-[#171717] dark:text-white"
-                  
+
                 >
                   You're in the queue!
                 </h3>
                 <p
                   className="mb-6 text-[14px] text-[#5a5a5a] dark:text-[#94a3b8]"
-                  
+
                 >
                   Your token number has been issued.
                   <br />
@@ -228,7 +228,7 @@ const BookFormSection = () => {
                 <div className="mb-8 flex flex-col items-center rounded-[16px] border border-[#e5e7eb] dark:border-[rgba(110,231,183,0.20)] bg-[#f9fafb] dark:bg-[rgba(110,231,183,0.05)] px-10 py-6">
                   <p
                     className="mb-1 text-[11px] font-semibold uppercase tracking-[1.2px] text-[#888] dark:text-[#6ee7b7]"
-                    
+
                   >
                     Your token
                   </p>
@@ -243,7 +243,7 @@ const BookFormSection = () => {
                 <button
                   onClick={() => setStatus("idle")}
                   className="inline-flex h-10 items-center gap-2 rounded-full border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.12)] bg-white dark:bg-transparent px-5 text-[13px] font-medium text-[#3f3f46] dark:text-[#94a3b8] transition-all hover:border-[#d1d5db] dark:hover:border-[rgba(255,255,255,0.25)] hover:text-[#171717] dark:hover:text-white"
-                  
+
                 >
                   Book another appointment
                 </button>

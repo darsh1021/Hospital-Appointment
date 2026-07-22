@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom"
-import Sidebar from "../components/common/Sidebar"
+import Sidebar from "../components/common/sidebar/Sidebar"
 import Header from "../components/common/Header"
 
 const DashboardLayout = () => {
@@ -23,4 +23,4 @@ const DashboardLayout = () => {
     )
 }
 
-export default DashboardLayout
+export default DashboardLayout
