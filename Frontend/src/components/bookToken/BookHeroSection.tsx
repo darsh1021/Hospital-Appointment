@@ -28,65 +28,60 @@ const BookHeroSection = () => (
         <div>
           {/* Badge */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#e5e7eb] dark:border-[rgba(110,231,183,0.20)] bg-[#f9fafb] dark:bg-[rgba(110,231,183,0.06)] px-3 py-1.5">
-            <span className="size-1.5 rounded-full bg-[#6ee7b7] animate-pulse" aria-hidden="true" />
-            <span
-              className="text-[11px] font-semibold uppercase tracking-[0.9px] text-[#3f3f46] dark:text-[#6ee7b7]"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Online booking · No waiting room
-            </span>
+          <span className="size-1.5 rounded-full bg-[#6ee7b7] animate-pulse" aria-hidden="true" />
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.9px] text-[#3f3f46] dark:text-[#6ee7b7]"
+          >
+            Online booking · No waiting room
+          </span>
           </div>
 
           {/* Headline */}
           <h1
-            id="book-hero-heading"
-            className="mb-5 text-[#171717] dark:text-white"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: "clamp(36px, 4vw, 52px)",
-              fontWeight: 700,
-              lineHeight: 1.08,
-              letterSpacing: "-2px",
-              textWrap: "balance",
-            } as React.CSSProperties}
+          id="book-hero-heading"
+          className="mb-5 text-[#171717] dark:text-white"
+          style={{
+            fontSize: "clamp(36px, 4vw, 52px)",
+            fontWeight: 700,
+            lineHeight: 1.08,
+            letterSpacing: "-2px",
+            textWrap: "balance",
+          } as React.CSSProperties}
           >
-            Book your appointment.
+          Book your appointment.
           </h1>
 
           {/* Subhead */}
           <p
-            className="mb-8 max-w-md text-[17px] leading-[1.65] text-[#4d4d4d] dark:text-[#94a3b8]"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+          className="mb-8 max-w-md text-[17px] leading-[1.65] text-[#4d4d4d] dark:text-[#94a3b8]"
           >
-            No phone calls, no waiting. Book a slot online, get your token,
-            and walk in exactly when it's your turn.
+          No phone calls, no waiting. Book a slot online, get your token,
+          and walk in exactly when it's your turn.
           </p>
 
           {/* Micro-stat pills */}
           <div className="flex flex-wrap gap-3">
-            {[
-              { value: "< 60 s", label: "to book" },
-              { value: "80+",    label: "doctors" },
-              { value: "24/7",   label: "available" },
-            ].map((s) => (
-              <div
-                key={s.label}
-                className="flex items-center gap-2 rounded-lg border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.08)] bg-[#fafafa] dark:bg-[rgba(255,255,255,0.04)] px-3.5 py-2"
+          {[
+            { value: "< 60 s", label: "to book" },
+            { value: "80+",    label: "doctors" },
+            { value: "24/7",   label: "available" },
+          ].map((s) => (
+            <div
+              key={s.label}
+              className="flex items-center gap-2 rounded-lg border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.08)] bg-[#fafafa] dark:bg-[rgba(255,255,255,0.04)] px-3.5 py-2"
+            >
+              <span
+                className="text-[15px] font-bold text-[#171717] dark:text-white"
               >
-                <span
-                  className="text-[15px] font-bold text-[#171717] dark:text-white"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  {s.value}
-                </span>
-                <span
-                  className="text-[12px] text-[#888] dark:text-[#64748b]"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  {s.label}
-                </span>
-              </div>
-            ))}
+                {s.value}
+              </span>
+              <span
+                className="text-[12px] text-[#888] dark:text-[#64748b]"
+              >
+                {s.label}
+              </span>
+            </div>
+          ))}
           </div>
         </div>
 

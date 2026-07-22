@@ -87,17 +87,17 @@ const LiveQueueWidget = () => {
               <Users size={15} className="text-[#3f3f46] dark:text-[#6ee7b7]" />
             </div>
             <div>
-              <p className="text-[13px] font-semibold text-[#171717] dark:text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <p className="text-[13px] font-semibold text-[#171717] dark:text-white" >
                 Live Queue
               </p>
-              <p className="text-[11px] text-[#888] dark:text-[#64748b]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <p className="text-[11px] text-[#888] dark:text-[#64748b]" >
                 OPD · All Departments
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 rounded-full border border-[#e5e7eb] dark:border-[rgba(110,231,183,0.20)] bg-[#f9fafb] dark:bg-[rgba(110,231,183,0.06)] px-2.5 py-1">
             <Wifi size={10} className="text-[#6ee7b7] animate-pulse" />
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-[#6ee7b7]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-[#6ee7b7]" >
               Live
             </span>
           </div>
@@ -131,7 +131,7 @@ const LiveQueueWidget = () => {
                       ? "bg-[#6ee7b7] text-[#0f0f13] dark:bg-[#6ee7b7] dark:text-[#0f0f13]"
                       : "bg-[#f4f4f5] dark:bg-[rgba(255,255,255,0.06)] text-[#3f3f46] dark:text-[#94a3b8]"
                   }`}
-                  style={{ fontFamily: "'Inter', sans-serif" }}
+                  
                 >
                   {patient.token}
                 </div>
@@ -142,11 +142,11 @@ const LiveQueueWidget = () => {
                     className={`truncate text-[13px] font-medium transition-colors ${
                       isActive ? "text-[#171717] dark:text-white" : "text-[#3f3f46] dark:text-[#cbd5e1]"
                     }`}
-                    style={{ fontFamily: "'Inter', sans-serif" }}
+                    
                   >
                     {patient.name}
                   </p>
-                  <p className="text-[11px] text-[#888] dark:text-[#475569]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <p className="text-[11px] text-[#888] dark:text-[#475569]" >
                     {patient.dept}
                   </p>
                 </div>
@@ -154,12 +154,12 @@ const LiveQueueWidget = () => {
                 {/* Wait badge */}
                 <div className="shrink-0">
                   {isActive ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#d1fae5] dark:bg-[rgba(110,231,183,0.15)] px-2 py-0.5 text-[11px] font-semibold text-[#065f46] dark:text-[#6ee7b7]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#d1fae5] dark:bg-[rgba(110,231,183,0.15)] px-2 py-0.5 text-[11px] font-semibold text-[#065f46] dark:text-[#6ee7b7]" >
                       <CheckCircle2 size={10} />
                       {patient.wait}
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#f4f4f5] dark:bg-[rgba(255,255,255,0.05)] px-2 py-0.5 text-[11px] text-[#888] dark:text-[#64748b]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#f4f4f5] dark:bg-[rgba(255,255,255,0.05)] px-2 py-0.5 text-[11px] text-[#888] dark:text-[#64748b]" >
                       <Clock size={9} />
                       {patient.wait}
                     </span>
@@ -178,10 +178,10 @@ const LiveQueueWidget = () => {
             { label: "Avg wait", value: "~4 min" },
           ].map((stat) => (
             <div key={stat.label} className="px-4 py-3 text-center">
-              <p className="text-[15px] font-semibold text-[#171717] dark:text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <p className="text-[15px] font-semibold text-[#171717] dark:text-white" >
                 {stat.value}
               </p>
-              <p className="text-[10px] text-[#888] dark:text-[#475569]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <p className="text-[10px] text-[#888] dark:text-[#475569]" >
                 {stat.label}
               </p>
             </div>
@@ -201,7 +201,7 @@ const LiveQueueWidget = () => {
       >
         <div className="flex items-center gap-2 rounded-full border border-[#d1fae5] dark:border-[rgba(110,231,183,0.25)] bg-white dark:bg-[#0f0f13] px-3 py-1.5 shadow-lg dark:shadow-[0_4px_24px_rgba(110,231,183,0.08)]">
           <span className="size-1.5 rounded-full bg-[#6ee7b7] animate-ping" />
-          <span className="text-[11px] font-semibold text-[#065f46] dark:text-[#6ee7b7]" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <span className="text-[11px] font-semibold text-[#065f46] dark:text-[#6ee7b7]" >
             Token #{37 + callCount + 1} joined the queue
           </span>
         </div>

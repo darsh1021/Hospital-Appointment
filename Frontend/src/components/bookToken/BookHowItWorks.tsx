@@ -17,14 +17,13 @@ const BookHowItWorks = () => (
       <div className="mb-12">
         <p
           className="mb-3 text-[11px] font-semibold uppercase tracking-[1.1px] text-[#888] dark:text-[#6ee7b7]"
-          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           Process
         </p>
         <h2
           id="how-it-works-heading"
           className="text-[28px] font-bold leading-[1.15] tracking-[-1.2px] text-[#171717] dark:text-white"
-          style={{ fontFamily: "'Inter', sans-serif", textWrap: "balance" } as React.CSSProperties}
+          style={{ textWrap: "balance" } as React.CSSProperties}
         >
           How it works.
         </h2>
@@ -49,7 +48,6 @@ const BookHowItWorks = () => (
                 {/* Step counter */}
                 <p
                   className="mb-4 text-[11px] font-semibold uppercase tracking-[1.1px] text-[#b0b0b0] dark:text-[#6ee7b7]"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {s.step}
                 </p>
@@ -65,13 +63,11 @@ const BookHowItWorks = () => (
 
                 <h3
                   className="mb-2 text-[15px] font-semibold leading-snug tracking-[-0.3px] text-[#171717] dark:text-white"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {s.title}
                 </h3>
                 <p
                   className="text-[13px] leading-[1.6] text-[#5a5a5a] dark:text-[#94a3b8]"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {s.desc}
                 </p>
