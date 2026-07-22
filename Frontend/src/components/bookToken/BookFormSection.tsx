@@ -163,7 +163,7 @@ const BookFormSection = () => {
                   </div>
 
                   {/* Preferred date */}
-                  <div className="flex flex-col gap-1.5">
+                  {/* <div className="flex flex-col gap-1.5">
                     <label
                       htmlFor="preferred-date"
                       className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
@@ -178,7 +178,7 @@ const BookFormSection = () => {
                       disabled={status === "loading"}
                       className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed [color-scheme:light] dark:[color-scheme:dark]"
                     />
-                  </div>
+                  </div> */}
 
                   {/* Submit */}
                   <button

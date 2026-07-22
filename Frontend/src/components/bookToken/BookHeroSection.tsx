@@ -1,4 +1,4 @@
-import LiveQueueWidget from "./LiveQueueWidget"
+import AppointmentSummaryCard from "./AppointmentSummaryCard"
 
 // ════════════════════════════════════════════════════
 // BOOK TOKEN — HERO SECTION
@@ -87,7 +87,7 @@ const BookHeroSection = () => (
 
         {/* ── Right: animated queue widget ── */}
         <div className="flex justify-center lg:justify-end">
-          <LiveQueueWidget />
+          <AppointmentSummaryCard />
         </div>
       </div>
     </div>
