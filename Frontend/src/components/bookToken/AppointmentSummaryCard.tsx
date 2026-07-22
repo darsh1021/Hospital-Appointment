@@ -1,74 +1,73 @@
-import { useState, useEffect } from "react"
-import { User, CalendarDays, Activity } from "lucide-react"
-
-const PATIENTS = [
-  { name: "Priya K.", wait: "~4m" },
-  { name: "Rohit S.", wait: "~8m" },
-  { name: "Divya P.", wait: "~12m" },
-]
+// import React from "react"
 
 const AppointmentSummaryCard = () => {
-  const [patient, setPatient] = useState(PATIENTS[0])
-  const [isAnimating, setIsAnimating] = useState(false)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(true)
-      setTimeout(() => {
-        setPatient((prev) => {
-          const currentIndex = PATIENTS.indexOf(prev)
-          return PATIENTS[(currentIndex + 1) % PATIENTS.length]
-        })
-        setIsAnimating(false)
-      }, 500)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [])
-
   return (
-    <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/5 p-6 backdrop-blur-xl shadow-2xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Current Session</h2>
-        <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-          <Activity size={20} />
+    <div className="w-full max-w-sm rounded-3xl bg-[#F8F9F3] p-4 text-[#1A1A1A] shadow-xl">
+      {/* Top Header */}
+      <div className="mb-4">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[#B45F3D] mb-1">Your Token</p>
+        <h1 className="text-xl font-bold tracking-tight text-[#1A1A1A]">You're in the queue</h1>
+      </div>
+
+      {/* Token Card */}
+      <div className="relative mb-4 rounded-3xl bg-[#1A423B] p-4 text-white overflow-hidden">
+        <div className="flex justify-between items-start mb-2">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#C8D1CE]">Token</p>
+          <span className="rounded-full bg-[#3D635D] px-2 py-0.5 text-[10px] font-semibold text-white">Waiting</span>
+        </div>
+        <h2 className="text-4xl font-bold tracking-tighter mb-2">014</h2>
+        
+        {/* Dashed Separator */}
+        <div className="border-t border-dashed border-[#3D635D] pt-2 flex justify-between text-[11px]">
+            <div>
+                <p className="text-[#C8D1CE] mb-0.5">Now serving</p>
+                <p className="font-semibold text-base">009</p>
+            </div>
+            <div>
+                <p className="text-[#C8D1CE] mb-0.5">Your turn in</p>
+                <p className="font-semibold text-base">~48 min</p>
+            </div>
+            <div>
+                <p className="text-[#C8D1CE] mb-0.5">Patients ahead</p>
+                <p className="font-semibold text-base">4</p>
+            </div>
         </div>
       </div>
 
-      {/* Main Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="rounded-2xl bg-zinc-100 dark:bg-white/5 p-4 border border-zinc-200 dark:border-white/5">
-          <p className="text-xs text-zinc-500 dark:text-white/50 mb-1">Active Patient</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-white">#38</p>
+      {/* Progress Section */}
+      <div className="rounded-3xl bg-white p-4 border border-[#E9E9E9]">
+        <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold text-sm">Queue progress</h3>
+            <span className="text-[10px] text-[#5D5D5D]">updates live</span>
         </div>
-        <div className="rounded-2xl bg-zinc-100 dark:bg-white/5 p-4 border border-zinc-200 dark:border-white/5">
-          <p className="text-xs text-zinc-500 dark:text-white/50 mb-1">Wait Time</p>
-          <p className="text-xl font-semibold text-emerald-600 dark:text-emerald-400">Now</p>
-        </div>
-      </div>
 
-      {/* Upcoming */}
-      <div className="space-y-3">
-        <p className="text-xs font-semibold text-zinc-500 dark:text-white/50 px-1">Upcoming</p>
-        <div
-          className={`flex items-center gap-3 p-3 rounded-xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 transition-opacity duration-500 ${isAnimating ? "opacity-0" : "opacity-100"}`}
-        >
-          <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400">
-            <User size={16} />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-zinc-900 dark:text-white">{patient.name}</p>
-            <p className="text-xs text-zinc-500 dark:text-white/50">Next in line</p>
-          </div>
-          <p className="text-xs font-mono text-zinc-600 dark:text-white/70">{patient.wait}</p>
+        {/* Progress Bar */}
+        <div className="flex items-center gap-1.5 mb-3">
+            {[1,2,3,4,5].map((i) => (
+                <div key={i} className={`h-1.5 flex-1 rounded-full ${i === 5 ? "bg-[#B45F3D]" : "bg-[#E9E9E9]"}`}></div>
+            ))}
+        </div>
+
+        <div className="rounded-xl bg-[#F0F4F2] p-3 mb-3 flex gap-2 text-[11px]">
+            <span className="text-lg">ℹ️</span>
+            <p className="text-[#1A1A1A]">4 patients ahead of you. Feel free to run errands nearby.</p>
+        </div>
+
+        <div className="space-y-2 text-[11px] text-[#5D5D5D]">
+            <div className="flex justify-between">
+                <p>Doctor's avg. time</p>
+                <p className="font-bold text-[#1A1A1A]">12 min</p>
+            </div>
+            <div className="flex justify-between">
+                <p>Visit type</p>
+                <p className="font-bold text-[#1A1A1A]">New patient · ₹400</p>
+            </div>
+            <div className="flex justify-between">
+                <p>Registered via</p>
+                <p className="font-bold text-[#1A1A1A]">Online booking</p>
+            </div>
         </div>
       </div>
-      
-      {/* Footer Button */}
-      <button className="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02]">
-        <CalendarDays size={16} />
-        View Full Schedule
-      </button>
     </div>
   )
 }
