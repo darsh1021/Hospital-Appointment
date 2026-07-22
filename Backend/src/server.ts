@@ -3,6 +3,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { initDb } from "./database/initDb.js";
 import { router as authRouter } from "./routes/authRoutes.js";
+import { router as doctorRouter } from "./routes/doctorRoutes.js";
+import { router as appointmentRouter } from "./routes/appointmentRoutes.js";
+import { router as patientRouter } from "./routes/patientRoutes.js";
+import { initSocket } from "./socket/socketManager.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
@@ -24,12 +28,24 @@ initDb().then(() => {
     // 2. Auth Routes
     app.use('/api/auth', authRouter);
 
-    // 3. Global Error Handling Middleware (must be registered last)
+    // 3. Public Doctor/Hospital Routes
+    app.use('/api', doctorRouter);
+
+    // 4. Appointment Routes
+    app.use('/api/appointments', appointmentRouter);
+
+    // 5. Patient Dashboard Routes
+    app.use('/api/patient', patientRouter);
+
+    // 6. Global Error Handling Middleware (must be registered last)
     app.use(errorHandler);
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
     });
+
+    // Initialize Socket.io
+    initSocket(server);
 }).catch((error) => {
     console.error("Application failed to start due to database error:", error);
     process.exit(1);
