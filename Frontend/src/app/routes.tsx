@@ -26,6 +26,27 @@ import DoctorDashboardPage from '../pages/dashboard/DoctorDashboardPage'
 import ReceptionDashboardPage from '../pages/dashboard/ReceptionDashboardPage'
 import PatientDashboardPage from '../pages/dashboard/PatientDashboardPage'
 
+// ── Admin Pages ──
+import AdminDoctorsPage from '../pages/dashboard/admin/AdminDoctorsPage'
+import AdminPatientsPage from '../pages/dashboard/admin/AdminPatientsPage'
+import AdminReceptionPage from '../pages/dashboard/admin/AdminReceptionPage'
+import AdminReportsPage from '../pages/dashboard/admin/AdminReportsPage'
+import AdminSettingsPage from '../pages/dashboard/admin/AdminSettingsPage'
+
+// ── Reception Pages ──
+import ReceptionWalkInPage from '../pages/dashboard/reception/ReceptionWalkInPage'
+import ReceptionLiveQueuePage from '../pages/dashboard/reception/ReceptionLiveQueuePage'
+import ReceptionPaymentsPage from '../pages/dashboard/reception/ReceptionPaymentsPage'
+import ReceptionFollowUpPage from '../pages/dashboard/reception/ReceptionFollowUpPage'
+import ReceptionRegisterPatientPage from '../pages/dashboard/reception/ReceptionRegisterPatientPage'
+
+// ── Doctor Pages ──
+import DoctorQueuePage from '../pages/dashboard/doctor/DoctorQueuePage'
+import DoctorCurrentPatientPage from '../pages/dashboard/doctor/DoctorCurrentPatientPage'
+import DoctorPrescriptionPage from '../pages/dashboard/doctor/DoctorPrescriptionPage'
+import DoctorFollowUpsPage from '../pages/dashboard/doctor/DoctorFollowUpsPage'
+import DoctorProfilePage from '../pages/dashboard/doctor/DoctorProfilePage'
+
 // ── Patient Pages ──
 import PatientAppointmentsPage from '../pages/dashboard/patient/PatientAppointmentsPage'
 import PatientPrescriptionsPage from '../pages/dashboard/patient/PatientPrescriptionsPage'
@@ -81,11 +102,11 @@ export const router = createBrowserRouter([
                         element: <ProtectedRoute allowedRoles={["admin"]} />,
                         children: [
                             { index: true, element: <AdminDashboardPage /> },
-                            { path: "doctors", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Manage Doctors...</h1> },
-                            { path: "patients", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Manage Patients</h1> },
-                            { path: "reception", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Manage Reception</h1> },
-                            { path: "reports", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Generate Reports</h1> },
-                            { path: "settings", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Admin Settings</h1> },
+                            { path: "doctors", element: <AdminDoctorsPage /> },
+                            { path: "patients", element: <AdminPatientsPage /> },
+                            { path: "reception", element: <AdminReceptionPage /> },
+                            { path: "reports", element: <AdminReportsPage /> },
+                            { path: "settings", element: <AdminSettingsPage /> },
                         ],
                     },
 
@@ -95,11 +116,11 @@ export const router = createBrowserRouter([
                         element: <ProtectedRoute allowedRoles={["doctor"]} />,
                         children: [
                             { index: true, element: <DoctorDashboardPage /> },
-                            { path: "queue", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Manage Queue</h1> },
-                            { path: "current-patient", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Current Patient</h1> },
-                            { path: "prescription", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Prescription</h1> },
-                            { path: "follow-ups", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Follow-ups</h1> },
-                            { path: "profile", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Doctor Profile</h1> },
+                            { path: "queue", element: <DoctorQueuePage /> },
+                            { path: "current-patient", element: <DoctorCurrentPatientPage /> },
+                            { path: "prescription", element: <DoctorPrescriptionPage /> },
+                            { path: "follow-ups", element: <DoctorFollowUpsPage /> },
+                            { path: "profile", element: <DoctorProfilePage /> },
                         ],
                     },
 
@@ -109,11 +130,12 @@ export const router = createBrowserRouter([
                         element: <ProtectedRoute allowedRoles={["reception"]} />,
                         children: [
                             { index: true, element: <ReceptionDashboardPage /> },
-                            { path: "register-patient", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Register Patient</h1> },
-                            { path: "walk-in", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Walk-in Patients</h1> },
-                            { path: "live-queue", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Live Queue</h1> },
-                            { path: "payments", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Payments</h1> },
-                            { path: "follow-up", element: <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Follow-up Patients</h1> },
+                            { path: "walk-in", element: <ReceptionWalkInPage /> },
+                            { path: "live-queue", element: <ReceptionLiveQueuePage /> },
+                            { path: "payments", element: <ReceptionPaymentsPage /> },
+                            { path: "follow-up", element: <ReceptionFollowUpPage /> },
+                            { path: "follow-ups", element: <ReceptionFollowUpPage /> },
+                            { path: "register", element: <ReceptionRegisterPatientPage /> },
                         ],
                     },
 

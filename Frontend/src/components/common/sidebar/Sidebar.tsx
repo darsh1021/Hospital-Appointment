@@ -59,11 +59,6 @@ const navByRole: Record<string, NavItem[]> = {
   reception: [
     { label: "Dashboard", to: "/dashboard/reception", icon: LayoutDashboard },
     {
-      label: "Register Patient",
-      to: "/dashboard/reception/register-patient",
-      icon: UserRound,
-    },
-    {
       label: "Walk-In",
       to: "/dashboard/reception/walk-in",
       icon: Users,
@@ -110,7 +105,7 @@ const navByRole: Record<string, NavItem[]> = {
 // Sidebar
 // ──────────────────────────────────────────────
 const Sidebar = () => {
-  const userRole = useSelector((s: RootState) => s.auth.user?.role ?? "patient")
+  const userRole = useSelector((s: RootState) => s.auth.user?.role)
   const items = navByRole[userRole] ?? []
 
   return (
