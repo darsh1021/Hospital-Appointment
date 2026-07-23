@@ -1,84 +1,84 @@
-import { Download, Pill, CalendarDays, QrCode } from "lucide-react"
+import { ClipboardList, Download, AlertCircle, Clock, Pill } from "lucide-react"
+
+const prescriptions = [
+  { id: 1, doctor: "Dr. Sarah Jenkins", date: "Sep 28, 2026", diagnosis: "Acne Vulgaris", active: true },
+  { id: 2, doctor: "Dr. Robert Chen", date: "May 15, 2026", diagnosis: "Contact Dermatitis", active: false },
+]
 
 const PatientPrescriptions = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 md:space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-[32px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white">
+          <h1 className="text-[28px] md:text-[32px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white">
             Prescriptions
           </h1>
-          <p className="mt-2 text-[16px] text-[#4d4d4d] dark:text-[#888888]">
-            View your prescriptions. Present your latest prescription at reception for the ₹200 follow-up fee.
+          <p className="mt-1 md:mt-2 text-[15px] md:text-[16px] text-[#4d4d4d] dark:text-[#888888]">
+            View and download your digital prescriptions.
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
-        <div className="border-b border-[#ebebeb] px-6 py-4 flex justify-between items-center dark:border-white/10">
-          <h2 className="font-mono text-[12px] uppercase text-[#888888]">Prescription History</h2>
-        </div>
-        <div className="flex flex-col divide-y divide-[#ebebeb] dark:divide-white/10">
-          {[
-            {
-              doctor: "Dr. Sarah Jenkins",
-              date: "Oct 10, 2026",
-              medications: ["Amoxicillin 500mg", "Ibuprofen 400mg"],
-              status: "Valid for Follow-up",
-              isLatest: true,
-            },
-            {
-              doctor: "Dr. Robert Chen",
-              date: "Sep 28, 2026",
-              medications: ["Paracetamol 500mg"],
-              status: "Archived",
-              isLatest: false,
-            },
-          ].map((prescription, idx) => (
-            <div key={idx} className={`flex flex-col gap-4 p-6 sm:flex-row sm:items-start sm:justify-between ${prescription.isLatest ? 'bg-[#fafafa]/50 dark:bg-white/[0.02]' : ''}`}>
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
-                  <Pill className={`h-5 w-5 ${prescription.isLatest ? 'text-[#0070f3]' : 'text-[#888888]'}`} />
+      <div className="flex flex-col gap-4 md:gap-6">
+        {prescriptions.map(rx => (
+          <div key={rx.id} className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
+            {/* Header / Title */}
+            <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 dark:border-white/10 bg-[#fafafa] dark:bg-[#171717]">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
+                  <ClipboardList size={16} className="text-[#888888]" />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-[16px] font-medium text-[#171717] dark:text-white">{prescription.doctor}</h3>
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[12px] font-medium ${
-                      prescription.isLatest 
-                        ? 'bg-[#d3e5ff] text-[#0761d1] dark:bg-[#0070f3]/20 dark:text-[#50e3c2]' 
-                        : 'bg-[#fafafa] text-[#888888] dark:bg-white/5 dark:text-[#888888]'
-                    }`}>
-                      {prescription.status}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 text-[13px] text-[#888888]">
-                    <CalendarDays size={14} />
-                    <span>Issued on {prescription.date}</span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {prescription.medications.map((med, i) => (
-                      <span key={i} className="rounded-md border border-[#ebebeb] bg-white px-2 py-1 text-[12px] text-[#4d4d4d] dark:border-white/10 dark:bg-black dark:text-[#888888]">
-                        {med}
-                      </span>
-                    ))}
-                  </div>
+                <div>
+                  <h3 className="text-[15px] font-semibold text-[#171717] dark:text-white">{rx.diagnosis}</h3>
+                  <p className="text-[13px] text-[#888888]">{rx.doctor} · {rx.date}</p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                {prescription.isLatest && (
-                  <button className="flex h-8 items-center justify-center gap-2 rounded-full bg-[#171717] px-4 text-[13px] font-medium text-white transition hover:bg-[#171717]/90 dark:bg-white dark:text-[#171717] dark:hover:bg-white/90">
-                    <QrCode size={14} />
-                    Show at Reception
-                  </button>
+              <div className="flex items-center gap-2">
+                {rx.active && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#d3e5ff]/50 px-2 py-0.5 text-[11px] font-medium text-[#0761d1] dark:bg-[#0070f3]/20 dark:text-[#50e3c2]">
+                    Active
+                  </span>
                 )}
-                <button className="flex h-8 items-center justify-center gap-2 rounded-full border border-[#ebebeb] px-4 text-[13px] font-medium text-[#171717] transition hover:bg-[#fafafa] dark:border-white/10 dark:text-white dark:hover:bg-white/5">
-                  <Download size={14} />
-                  PDF
+                <button className="flex h-8 items-center gap-1.5 rounded-full border border-[#ebebeb] bg-white px-3 text-[12px] font-medium text-[#171717] transition hover:bg-[#f5f5f5] dark:border-white/10 dark:bg-[#0a0a0a] dark:text-white dark:hover:bg-white/5">
+                  <Download size={13} />
+                  Download PDF
                 </button>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Meds list preview */}
+            <div className="p-5 md:p-6">
+              <h4 className="font-mono text-[11px] uppercase text-[#888888] mb-4">Medications</h4>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start gap-3">
+                  <Pill size={15} className="mt-0.5 text-[#888888]" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-[14px] font-medium text-[#171717] dark:text-white">Isotretinoin 20mg</p>
+                    <p className="text-[13px] text-[#4d4d4d] dark:text-[#888888]">1 capsule daily after dinner for 3 months.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Pill size={15} className="mt-0.5 text-[#888888]" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-[14px] font-medium text-[#171717] dark:text-white">Clindamycin Gel 1%</p>
+                    <p className="text-[13px] text-[#4d4d4d] dark:text-[#888888]">Apply locally on active acne twice a day.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Advice */}
+            <div className="border-t border-[#ebebeb] bg-[#fafafa]/50 p-5 md:px-6 md:py-4 dark:border-white/10 dark:bg-white/5">
+              <div className="flex items-start gap-2">
+                <AlertCircle size={15} className="text-[#888888] mt-0.5" />
+                <p className="text-[13px] text-[#4d4d4d] dark:text-[#888888]">
+                  <strong className="font-medium text-[#171717] dark:text-white">Doctor's Note:</strong> Use gentle cleanser. Avoid excessive sun exposure and strictly use SPF 50 sunscreen daily.
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
