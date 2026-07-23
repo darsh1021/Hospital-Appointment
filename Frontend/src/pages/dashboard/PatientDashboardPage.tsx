@@ -1,9 +1,7 @@
+import PatientOverview from "../../components/dashboard/patient/PatientOverview"
+
 const PatientDashboardPage = () => {
-    return (
-        <div>
-            <h1 className="text-2xl font-semibold text-[#171717] dark:text-white">Patient Dashboard</h1>
-        </div>
-    )
+    return <PatientOverview />
 }
 
 export default PatientDashboardPage

@@ -72,7 +72,7 @@ const Header = () => {
         <button
           type="button"
           aria-label="Open user menu"
-          className="inline-flex size-8 items-center justify-center rounded-full bg-[#171717] text-[12px] font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-1 dark:bg-white dark:text-[#171717]"
+          className="inline-flex size-7 items-center justify-center rounded-full bg-[#171717] text-[15px] font-semibold text-white focus-visible:outline-none focus-  :ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-1 dark:bg-white dark:text-[#171717]"
         >
           U
         </button>
