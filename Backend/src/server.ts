@@ -6,6 +6,8 @@ import { router as authRouter } from "./routes/authRoutes.js";
 import { router as doctorRouter } from "./routes/doctorRoutes.js";
 import { router as appointmentRouter } from "./routes/appointmentRoutes.js";
 import { router as patientRouter } from "./routes/patientRoutes.js";
+import { router as receptionRouter } from "./routes/receptionRoutes.js";
+import { router as adminRouter } from "./routes/adminRoutes.js";
 import { initSocket } from "./socket/socketManager.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 
@@ -37,7 +39,13 @@ initDb().then(() => {
     // 5. Patient Dashboard Routes
     app.use('/api/patient', patientRouter);
 
-    // 6. Global Error Handling Middleware (must be registered last)
+    // 6. Reception Dashboard Routes
+    app.use('/api/reception', receptionRouter);
+
+    // 7. Admin Dashboard Routes
+    app.use('/api/admin', adminRouter);
+
+    // 8. Global Error Handling Middleware (must be registered last)
     app.use(errorHandler);
 
     const server = app.listen(PORT, () => {

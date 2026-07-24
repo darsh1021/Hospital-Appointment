@@ -63,6 +63,25 @@ export const createTable = async () => {
             status VARCHAR(50) NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'waiting', 'in-consultation', 'completed', 'cancelled')),
             symptoms TEXT,
             prescription TEXT,
+            checked_in_at TIMESTAMP,
+            consultation_started_at TIMESTAMP,
+            completed_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    `);
+
+    // Ensure columns are added to existing databases
+    await pool.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS checked_in_at TIMESTAMP;`);
+    await pool.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS consultation_started_at TIMESTAMP;`);
+    await pool.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;`);
+
+    // 6. Create Payments Table
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS payments (
+            id SERIAL PRIMARY KEY,
+            appointment_id INTEGER NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+            amount NUMERIC(10, 2) NOT NULL,
+            method VARCHAR(50) NOT NULL CHECK (method IN ('cash', 'card', 'upi')),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `);

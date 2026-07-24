@@ -210,9 +210,18 @@ export const updateAppointmentStatus = async (
             return;
         }
 
+        let timeField = "";
+        if (status === "waiting") {
+            timeField = ", checked_in_at = COALESCE(checked_in_at, CURRENT_TIMESTAMP)";
+        } else if (status === "in-consultation") {
+            timeField = ", consultation_started_at = COALESCE(consultation_started_at, CURRENT_TIMESTAMP)";
+        } else if (status === "completed") {
+            timeField = ", completed_at = COALESCE(completed_at, CURRENT_TIMESTAMP)";
+        }
+
         const updateRes = await pool.query(
             `UPDATE appointments 
-             SET status = $1 
+             SET status = $1 ${timeField}
              WHERE id = $2 AND doctor_id = $3
              RETURNING id, status, token_number`,
             [status, appointmentId, doctorId]
@@ -274,7 +283,8 @@ export const completeConsultation = async (
             `UPDATE appointments 
              SET status = 'completed', 
                  prescription = $1, 
-                 symptoms = COALESCE($2, symptoms)
+                 symptoms = COALESCE($2, symptoms),
+                 completed_at = COALESCE(completed_at, CURRENT_TIMESTAMP)
              WHERE id = $3 AND doctor_id = $4
              RETURNING id, status, prescription, symptoms, token_number`,
             [prescription, symptoms || null, appointmentId, doctorId]
