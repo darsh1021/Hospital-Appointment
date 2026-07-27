@@ -60,7 +60,7 @@ export const createTable = async () => {
             hospital_id INTEGER NOT NULL REFERENCES hospitals(id) ON DELETE CASCADE,
             appointment_date DATE NOT NULL,
             token_number INTEGER NOT NULL,
-            status VARCHAR(50) NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'waiting', 'in-consultation', 'completed', 'cancelled')),
+            status VARCHAR(50) NOT NULL DEFAULT 'waiting' CHECK (status IN ('scheduled', 'waiting', 'in-consultation', 'completed', 'cancelled')),
             symptoms TEXT,
             prescription TEXT,
             checked_in_at TIMESTAMP,
@@ -75,7 +75,33 @@ export const createTable = async () => {
     await pool.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS consultation_started_at TIMESTAMP;`);
     await pool.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;`);
 
-    // 6. Create Payments Table
+    // 6. Create Departments Table
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS departments (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) UNIQUE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    `);
+
+    // Seed default departments
+    const defaultDepartments = [
+        "Cardiology",
+        "Neurology",
+        "Orthopaedics",
+        "Ophthalmology",
+        "Paediatrics",
+        "General Medicine",
+        "Dermatology",
+        "Radiology"
+    ];
+    for (const dept of defaultDepartments) {
+        await pool.query(`
+            INSERT INTO departments (name) VALUES ($1) ON CONFLICT (name) DO NOTHING;
+        `, [dept]);
+    }
+
+    // 7. Create Payments Table
     await pool.query(`
         CREATE TABLE IF NOT EXISTS payments (
             id SERIAL PRIMARY KEY,

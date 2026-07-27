@@ -6,7 +6,7 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "npx tsx src/server.ts",
-    "dev": "nodemon --exec npx tsx src/server.ts"
+    "dev": "npx tsx watch src/server.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

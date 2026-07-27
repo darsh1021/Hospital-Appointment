@@ -131,7 +131,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
         if (phone_number) {
             // Check if phone number exists
             const userRes = await pool.query("SELECT * FROM users WHERE phone_number = $1", [phone_number]);
-            
+
             const isNewUser = userRes.rows.length === 0;
 
             // Generate and send OTP (same procedure for both existing and auto-registering new patients)
@@ -139,8 +139,8 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
             res.status(200).json({
                 success: true,
-                message: isNewUser 
-                    ? "OTP sent successfully for auto-registration." 
+                message: isNewUser
+                    ? "OTP sent successfully for auto-registration."
                     : "OTP sent successfully to your registered phone number.",
                 phone_number,
                 isNewUser
@@ -184,6 +184,17 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     } catch (error) {
         next(error);
     }
+};
+
+
+export const getCurrentUser = (
+    req: AuthenticatedRequest,
+    res: Response
+): void => {
+    res.status(200).json({
+        success: true,
+        user: req.user,
+    });
 };
 
 /**
@@ -260,3 +271,48 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response, next:
         next(error);
     }
 };
+
+/**
+ * Direct login or auto-register patient by Phone Number and Name
+ */
+export const patientLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { name, phone_number, number, phone } = req.body;
+        const inputPhone = phone_number || number || phone;
+
+        if (!inputPhone) {
+            res.status(400).json({ success: false, error: "Please provide your phone number." });
+            return;
+        }
+
+        // Check if patient user already exists
+        let userRes = await pool.query("SELECT * FROM users WHERE phone_number = $1", [inputPhone]);
+
+        let user: any;
+        if (userRes.rows.length === 0) {
+            // Auto-register new patient
+            const patientName = name || `Patient-${inputPhone.slice(-4)}`;
+            const newUserRes = await pool.query(
+                `INSERT INTO users (name, phone_number, role) 
+                 VALUES ($1, $2, 'patient') 
+                 RETURNING id, name, email, phone_number, role, created_at`,
+                [patientName, inputPhone]
+            );
+            user = newUserRes.rows[0];
+        } else {
+            user = userRes.rows[0];
+            // If patient provided name, update user name if needed
+            if (name && user.name !== name) {
+                const updateRes = await pool.query(
+                    `UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, phone_number, role, created_at`,
+                    [name, user.id]
+                );
+                user = updateRes.rows[0];
+            }
+        }
+
+        sendTokenResponse(user, 200, res);
+    } catch (error) {
+        next(error);
+    }
+};

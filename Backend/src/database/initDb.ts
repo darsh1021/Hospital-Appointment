@@ -1,9 +1,13 @@
 import { createTable } from "./schema.js";
 import { seedData } from "./seed.js";
+import { verifyDatabaseConnection } from "../config/db.js";
 
 export const initDb = async () => {
     try {
         console.log("Starting database initialization...");
+
+        // Fail fast with a clearer message before schema setup starts.
+        await verifyDatabaseConnection();
         
         // 1. Create tables if they do not exist
         await createTable();
