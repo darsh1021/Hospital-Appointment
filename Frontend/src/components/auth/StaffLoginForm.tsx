@@ -1,16 +1,41 @@
 import { useState } from "react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { Eye, EyeOff } from "lucide-react"
+import { useAppDispatch, useAppSelector } from "../../app/store"
+import { loginUser } from "../../Features/auth/authSlice"
 
 export const StaffLoginForm = () => {
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const { loading, error } = useAppSelector((state) => state.auth)
+
+  type loginDataModule = {
+    email: string,
+    password: string
+  }
+
   const [showPassword, setShowPassword] = useState(false)
+  const [loginData, setLoginData] = useState<loginDataModule>({ email: "", password: "" })
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginData.email.trim() && loginData.password.trim()) {
+      try {
+        const response = await dispatch(loginUser(loginData)).unwrap();
+        
+        // Redirect the user to their specific dashboard based on their role
+        if (response.user && response.user.role) {
+            navigate(`/dashboard/${response.user.role}`);
+        }
+      } catch (err: any) {
+        console.error("Login failed", err);
+      }
+    } 
+  }
 
   return (
     <div className="flex flex-col">
-      {/* <div className="mb-4 rounded-md bg-[#fefce8] p-3 text-[13px] text-[#854d0e] dark:bg-[#422006] dark:text-[#fde047]">
-        <strong>Note:</strong> This section is strictly for hospital authorities (Doctors, Receptionists, Admins). Patients should use the Patient Login.
-      </div> */}
-      <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+      <form className="flex flex-col gap-4" onSubmit={(e) => handleLogin(e)}>
         {/* Email */}
         <div className="flex flex-col gap-1.5">
           <label
@@ -23,6 +48,8 @@ export const StaffLoginForm = () => {
             id="login-email"
             type="email"
             name="email"
+            value={loginData.email}
+            onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
             autoComplete="email"
             spellCheck={false}
             placeholder="you@example.com…"
@@ -52,6 +79,8 @@ export const StaffLoginForm = () => {
               id="login-password"
               type={showPassword ? "text" : "password"}
               name="password"
+              value={loginData.password}
+              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
               autoComplete="current-password"
               placeholder="Your password…"
               required
@@ -70,12 +99,19 @@ export const StaffLoginForm = () => {
           </div>
         </div>
 
+        {error && (
+          <div className="rounded-[6px] bg-[#fef2f2] p-2.5 text-[13px] text-[#991b1b] dark:bg-[#450a0a] dark:text-[#fca5a5]">
+            {error}
+          </div>
+        )}
+
         {/* Submit */}
         <button
           type="submit"
-          className="mt-1 inline-flex h-10 w-full items-center justify-center rounded-full bg-[#171717] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[#2a2a2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-1 dark:bg-white dark:text-[#171717] dark:hover:bg-[#e0e0e0]"
+          disabled={loading}
+          className="mt-1 inline-flex h-10 w-full items-center justify-center rounded-full bg-[#171717] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[#2a2a2a] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-1 dark:bg-white dark:text-[#171717] dark:hover:bg-[#e0e0e0]"
         >
-          Sign in
+          {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
     </div>

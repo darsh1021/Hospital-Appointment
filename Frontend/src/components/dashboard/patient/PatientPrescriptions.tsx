@@ -1,4 +1,4 @@
-import { ClipboardList, Download, AlertCircle, Clock, Pill } from "lucide-react"
+import { ClipboardList, Download, AlertCircle, Pill } from "lucide-react"
 
 const prescriptions = [
   { id: 1, doctor: "Dr. Sarah Jenkins", date: "Sep 28, 2026", diagnosis: "Acne Vulgaris", active: true },

@@ -1,4 +1,4 @@
-import { FileText, Download, Activity, FileStack, AlertCircle } from "lucide-react"
+import { FileText, Download, Activity, FileStack } from "lucide-react"
 
 const PatientMedicalRecord = () => {
   return (

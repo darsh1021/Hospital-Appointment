@@ -1,4 +1,4 @@
-import { CalendarDays, Clock, MapPin, Ticket, AlertCircle, ChevronRight, CheckCircle2 } from "lucide-react"
+import { CalendarDays, Clock, MapPin, Ticket, CheckCircle2 } from "lucide-react"
 
 const appointments = [
   { id: 1, doctor: "Dr. Sarah Jenkins", spec: "Dermatologist", date: "Today", time: "11:15 AM", status: "confirmed", token: 42, type: "General Consultation" },

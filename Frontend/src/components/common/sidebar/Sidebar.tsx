@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom"
+import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import {
   LayoutDashboard,
   Users,
@@ -13,8 +13,8 @@ import {
   ListOrdered,
   History,
 } from "lucide-react"
-import { useSelector } from "react-redux"
-import type { RootState } from "../../../app/store"
+import { useAppDispatch, useAppSelector } from "../../../app/store"
+import { logoutUser } from "../../../Features/auth/authSlice"
 import SidebarLink from "./SidebarLink"
 
 
@@ -105,8 +105,15 @@ const navByRole: Record<string, NavItem[]> = {
 // Sidebar
 // ──────────────────────────────────────────────
 const Sidebar = () => {
-  const userRole = useSelector((s: RootState) => s.auth.user?.role)
-  const items = navByRole[userRole] ?? []
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const userRole = useAppSelector((s) => s.auth.user?.role)
+  const items = navByRole[userRole ?? ''] ?? []
+
+  const handleLogout = async () => {
+    await dispatch(logoutUser())
+    navigate('/auth/login')
+  }
 
   return (
     <aside
@@ -136,6 +143,7 @@ const Sidebar = () => {
         <button
           type="button"
           aria-label="Log out"
+          onClick={handleLogout}
           className="group flex w-full items-center gap-2.5 rounded-[6px] px-3 py-2 text-[14px] text-[#4d4d4d] transition-colors hover:bg-[#fafafa] hover:text-[#ee0000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] dark:text-[#888888] dark:hover:bg-white/5 dark:hover:text-[#ee0000] dark:focus-visible:ring-white"
         >
           <LogOut
@@ -151,3 +159,4 @@ const Sidebar = () => {
 }
 
 export default Sidebar
+

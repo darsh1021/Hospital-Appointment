@@ -1,4 +1,4 @@
-import { User, Mail, Phone, MapPin, Shield } from "lucide-react"
+import { User, Mail, Phone, MapPin } from "lucide-react"
 
 const PatientProfile = () => {
   const inputClass = "w-full rounded-[6px] border border-[#ebebeb] bg-white px-3 py-2 text-[14px] text-[#171717] placeholder:text-[#888888] focus:border-[#171717] focus:outline-none dark:border-white/10 dark:bg-[#0a0a0a] dark:text-white dark:focus:border-white"
