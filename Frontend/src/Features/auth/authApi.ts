@@ -1,6 +1,7 @@
 import axiosInstance from "../../api/axios";
-import type { LoginPayload, LoginResponse, BookTokenPayload, BookTokenResponse } from "./authType";
+import type { LoginPayload, LoginResponse } from "./authType";
 
+// Authenticate a user with email/username and password.
 export const login = async (
     data: LoginPayload
 ): Promise<LoginResponse> => {
@@ -12,6 +13,8 @@ export const login = async (
     return response.data;
 };
 
+
+// Login a patient using name or phone number.
 export const patientLoginApi = async (
     data: { name?: string; number?: string; phone_number?: string }
 ): Promise<LoginResponse> => {
@@ -23,24 +26,15 @@ export const patientLoginApi = async (
     return response.data;
 };
 
-export const bookPatientToken = async (
-    data: BookTokenPayload
-): Promise<BookTokenResponse> => {
-    const response = await axiosInstance.post<BookTokenResponse>(
-        "/api/appointments/book-token",
-        data
-    );
-
-    return response.data;
-};
-
+// Log out the currently authenticated user.
 export const logout = async (): Promise<void> => {
     await axiosInstance.post("/api/auth/logout");
 };
 
+// Retrieve the profile of the currently logged-in user.
 export const getCurrentUser = async () => {
     const response = await axiosInstance.get("/api/auth/profile");
 
     return response.data;
 };
-
+

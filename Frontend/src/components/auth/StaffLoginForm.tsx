@@ -22,15 +22,16 @@ export const StaffLoginForm = () => {
     if (loginData.email.trim() && loginData.password.trim()) {
       try {
         const response = await dispatch(loginUser(loginData)).unwrap();
-        
+        console.log(response)
+
         // Redirect the user to their specific dashboard based on their role
         if (response.user && response.user.role) {
-            navigate(`/dashboard/${response.user.role}`);
+          navigate(`/dashboard/${response.user.role}`);
         }
       } catch (err: any) {
         console.error("Login failed", err);
       }
-    } 
+    }
   }
 
   return (

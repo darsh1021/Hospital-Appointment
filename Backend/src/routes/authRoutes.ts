@@ -11,4 +11,4 @@ router.post("/verify-otp", verifyOtp);
 router.post("/logout", logout);
 router.get("/profile", protect, getProfile);
 
-router.get("/me", protect, getCurrentUser);
+router.get("/me", protect, getCurrentUser);

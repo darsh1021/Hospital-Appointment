@@ -126,11 +126,20 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { email, password, phone_number } = req.body;
+        
+        console.log("Email: ", email)
+        console.log("Password: ", password)
+        console.log("Number: ", phone_number)
 
         // DUAL FLOW: If phone_number is supplied
         if (phone_number) {
             // Check if phone number exists
             const userRes = await pool.query("SELECT * FROM users WHERE phone_number = $1", [phone_number]);
+
+            if (!userRes) {
+                res.status(500).json({ success: false, error: "Database error while checking phone number." });
+                return;
+            }
 
             const isNewUser = userRes.rows.length === 0;
 
@@ -196,7 +205,7 @@ export const getCurrentUser = (
         user: req.user,
     });
 };
-
+    
 /**
  * Verify OTP (completes login or signup)
  */
@@ -288,31 +297,40 @@ export const patientLogin = async (req: Request, res: Response, next: NextFuncti
         // Check if patient user already exists
         let userRes = await pool.query("SELECT * FROM users WHERE phone_number = $1", [inputPhone]);
 
-        let user: any;
+        // let user: any;
+        // if (userRes.rows.length === 0) {
+        //     // Auto-register new patient
+        //     const patientName = name || `Patient-${inputPhone.slice(-4)}`;
+        //     const newUserRes = await pool.query(
+        //         `INSERT INTO users (name, phone_number, role) 
+        //          VALUES ($1, $2, 'patient') 
+        //          RETURNING id, name, email, phone_number, role, created_at`,
+        //         [patientName, inputPhone]
+        //     );
+        //     user = newUserRes.rows[0];
+        // } else {
+        //     user = userRes.rows[0];
+        //     // If patient provided name, update user name if needed
+        //     if (name && user.name !== name) {
+        //         const updateRes = await pool.query(
+        //             `UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, phone_number, role, created_at`,
+        //             [name, user.id]
+        //         );
+        //         user = updateRes.rows[0];
+        //     }
+        // }
+
         if (userRes.rows.length === 0) {
-            // Auto-register new patient
-            const patientName = name || `Patient-${inputPhone.slice(-4)}`;
-            const newUserRes = await pool.query(
-                `INSERT INTO users (name, phone_number, role) 
-                 VALUES ($1, $2, 'patient') 
-                 RETURNING id, name, email, phone_number, role, created_at`,
-                [patientName, inputPhone]
-            );
-            user = newUserRes.rows[0];
-        } else {
-            user = userRes.rows[0];
-            // If patient provided name, update user name if needed
-            if (name && user.name !== name) {
-                const updateRes = await pool.query(
-                    `UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, phone_number, role, created_at`,
-                    [name, user.id]
-                );
-                user = updateRes.rows[0];
-            }
+            // Patient not found, inform front-end to show Book Token button
+            res.status(404).json({ success: false, error: "User not found.", showBookToken: true });
+            return;
+        }
+        console.log("userRes", userRes.rows[0]);
+        if (userRes.rows.length !== 0) {
+            sendTokenResponse(userRes.rows[0], 200, res);
         }
 
-        sendTokenResponse(user, 200, res);
-    } catch (error) {
+        } catch (error) {
         next(error);
     }
-};
+};

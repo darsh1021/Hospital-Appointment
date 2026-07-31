@@ -5,7 +5,6 @@ import { initializeAuth } from "../Features/auth/authSlice";
 export const AuthInit = ({ children }: { children: React.ReactNode }) => {
     const dispatch = useAppDispatch();
     const { loading } = useAppSelector((state) => state.auth);
-
     useEffect(() => {
         dispatch(initializeAuth());
     }, [dispatch]);

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { login as loginApi, logout as logoutApi, getCurrentUser, patientLoginApi, bookPatientToken } from "./authApi";
-import type { authState, LoginPayload, LoginResponse, User, BookTokenPayload, BookTokenResponse } from "./authType";
+import { login as loginApi, logout as logoutApi, getCurrentUser, patientLoginApi } from "./authApi";
+import type { authState, LoginPayload, LoginResponse, User } from "./authType";
+import { bookAppointmentUser } from "../appointment/appointmentSlice";
 
 const initialState: authState = {
     user: null,
@@ -9,6 +10,7 @@ const initialState: authState = {
     error: null,
 };
 
+// Initialize authentication
 export const initializeAuth = createAsyncThunk(
     "auth/initialize",
     async (_, { rejectWithValue }) => {
@@ -21,6 +23,7 @@ export const initializeAuth = createAsyncThunk(
     }
 );
 
+// Login a user
 export const loginUser = createAsyncThunk(
     "auth/login",
     async (data: LoginPayload, { rejectWithValue }) => {
@@ -33,6 +36,7 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+// Login a patient
 export const loginPatientUser = createAsyncThunk(
     "auth/patientLogin",
     async (data: { name?: string; number?: string; phone_number?: string }, { rejectWithValue }) => {
@@ -45,18 +49,7 @@ export const loginPatientUser = createAsyncThunk(
     }
 );
 
-export const bookTokenUser = createAsyncThunk(
-    "auth/bookToken",
-    async (data: BookTokenPayload, { rejectWithValue }) => {
-        try {
-            const response = await bookPatientToken(data);
-            return response;
-        } catch (error: any) {
-            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || "Token booking failed");
-        }
-    }
-);
-
+// Logout a user
 export const logoutUser = createAsyncThunk(
     "auth/logout",
     async (_, { rejectWithValue }) => {
@@ -72,6 +65,7 @@ const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
+        // Login success
         loginSuccess(state, action: PayloadAction<LoginResponse | { user: User }>) {
             state.user = action.payload.user;
             state.isAuthenticated = true;
@@ -79,6 +73,7 @@ const authSlice = createSlice({
             state.error = null;
         },
 
+        // Logout
         logout(state) {
             state.user = null;
             state.isAuthenticated = false;
@@ -86,6 +81,7 @@ const authSlice = createSlice({
             state.error = null;
         },
 
+        // Set auth loading
         setAuthLoading(state, action: PayloadAction<boolean>) {
             state.loading = action.payload;
         },
@@ -108,6 +104,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.loading = false;
             })
+
             // loginUser
             .addCase(loginUser.pending, (state) => {
                 state.loading = true;
@@ -125,6 +122,7 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = (action.payload as string) || "Login failed";
             })
+
             // loginPatientUser
             .addCase(loginPatientUser.pending, (state) => {
                 state.loading = true;
@@ -142,21 +140,23 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = (action.payload as string) || "Patient login failed";
             })
-            // bookTokenUser
-            .addCase(bookTokenUser.pending, (state) => {
+
+            // bookAppointmentUser
+            .addCase(bookAppointmentUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(bookTokenUser.fulfilled, (state, action: PayloadAction<BookTokenResponse>) => {
+            .addCase(bookAppointmentUser.fulfilled, (state, action) => {
                 state.user = action.payload.user;
                 state.isAuthenticated = true;
                 state.loading = false;
                 state.error = null;
             })
-            .addCase(bookTokenUser.rejected, (state, action) => {
+            .addCase(bookAppointmentUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = (action.payload as string) || "Token booking failed";
             })
+            
             // logoutUser
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;

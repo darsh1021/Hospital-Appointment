@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import authSlice from '../Features/auth/authSlice'
+import appointmentSlice from '../Features/appointment/appointmentSlice'
 
 export const store = configureStore({
     reducer: {
         auth: authSlice,
+        appointment: appointmentSlice,
     }
 })
 

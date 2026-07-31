@@ -23,7 +23,7 @@ export const PatientLoginForm = () => {
             number: formData.number.trim(),
           })
         ).unwrap()
-
+        console.log(response)
         if (response?.user) {
           navigate("/dashboard/patient")
         }

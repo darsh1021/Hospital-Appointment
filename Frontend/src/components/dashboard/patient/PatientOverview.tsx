@@ -1,19 +1,9 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Clock, Users, Ticket, AlertCircle, History, ChevronRight } from "lucide-react"
-import axiosInstance from "../../../api/axios"
-import { useAppSelector } from "../../../app/store"
-
-interface PatientAppointment {
-  id: number
-  token_number: number
-  appointment_date: string
-  status: string
-  symptoms?: string
-  doctor_name?: string
-  doctor_specialization?: string
-  hospital_name?: string
-}
+import { useAppDispatch, useAppSelector } from "../../../app/store"
+import { fetchPatientAppointments } from "../../../Features/appointment/appointmentSlice"
+import type { Appointment } from "../../../Features/appointment/appointmentType"
 
 const formatReadableDate = (dateStr?: string) => {
   if (!dateStr) return "Today";
@@ -50,32 +40,22 @@ const formatReadableDate = (dateStr?: string) => {
 
 const PatientOverview = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth.user)
-  const [appointments, setAppointments] = useState<PatientAppointment[]>([])
-  const [loading, setLoading] = useState(true)
+  const { appointments, loading } = useAppSelector((state) => state.appointment)
 
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const response = await axiosInstance.get("/api/patient/appointments")
-        if (response.data?.appointments) {
-          setAppointments(response.data.appointments)
-        }
-      } catch (err) {
-        console.error("Failed to fetch patient appointments:", err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchAppointments()
-  }, [])
+    dispatch(fetchPatientAppointments())
+  }, [dispatch])
 
   const activeAppointment = appointments.find(
-    (a) => a.status === "scheduled" || a.status === "waiting" || a.status === "in-consultation"
-  ) || appointments[0]
+    (a) => a.status === "waiting" || a.status === "in-consultation"
+  );
 
-  const hasActiveToken = Boolean(activeAppointment)
+  const hasActiveToken = Boolean(activeAppointment);
+  const historyAppointments = appointments.filter(
+    (a) => a.status === "completed" || a.status === "cancelled"
+  );
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -106,7 +86,7 @@ const PatientOverview = () => {
             <p className="text-[13px]">Loading your token info...</p>
           </div>
         </div>
-      ) : hasActiveToken ? (
+      ) : hasActiveToken && activeAppointment ? (
         <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] overflow-hidden dark:border-white/10 dark:bg-[#0a0a0a]">
           {/* Status Banner */}
           <div className="bg-[#d3e5ff]/50 px-5 md:px-6 py-3.5 dark:bg-[#0070f3]/10 flex items-start sm:items-center gap-3">
@@ -114,7 +94,7 @@ const PatientOverview = () => {
             <span className="text-[13px] md:text-[14px] font-medium text-[#0761d1] dark:text-[#50e3c2]">
               You have an active appointment token <strong>#{activeAppointment.token_number}</strong> scheduled for 
               <strong>
-                {formatReadableDate(activeAppointment.appointment_date)}</strong>.
+                {" "}{formatReadableDate(activeAppointment.appointment_date)}</strong>.
             </span>
           </div>
 
@@ -194,14 +174,14 @@ const PatientOverview = () => {
       )}
 
       {/* Recent Activity */}
-      {appointments.length > 0 && (
+      {historyAppointments.length > 0 && (
         <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
           <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 flex items-center gap-2 dark:border-white/10">
             <History size={15} className="text-[#888888]" />
             <h2 className="font-mono text-[12px] uppercase text-[#888888]">Your Appointment History</h2>
           </div>
           <div className="flex flex-col divide-y divide-[#ebebeb] dark:divide-white/10">
-            {appointments.map((visit) => (
+            {historyAppointments.map((visit) => (
               <div key={visit.id} className="flex items-center justify-between px-5 md:px-6 py-4">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
@@ -211,7 +191,7 @@ const PatientOverview = () => {
                     <p className="text-[14px] font-medium text-[#171717] dark:text-white truncate">
                       {visit.doctor_specialization || "Consultation"} — {visit.doctor_name || "Doctor"}
                     </p>
-                    <p className="text-[12px] text-[#888888]">{visit.appointment_date}</p>
+                    <p className="text-[12px] text-[#888888]">{formatReadableDate(visit.appointment_date)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">

@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom"
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
 import { departments } from "./bookTokenData"
 import { useAppDispatch, useAppSelector } from "../../app/store"
-import { bookTokenUser } from "../../Features/auth/authSlice"
+import { bookAppointmentUser } from "../../Features/appointment/appointmentSlice"
 
 const BookFormSection = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { loading: authLoading, error: authError } = useAppSelector((state) => state.auth)
+  const { loading: appointmentLoading, error: appointmentError } = useAppSelector((state) => state.appointment)
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,7 +28,7 @@ const BookFormSection = () => {
 
     try {
       const result = await dispatch(
-        bookTokenUser({
+        bookAppointmentUser({
           name: formData.name.trim(),
           phone: formData.phone.trim(),
           department: formData.department || undefined,
@@ -119,9 +119,9 @@ const BookFormSection = () => {
               Book your slot
             </h3>
 
-            {(errorMessage || authError) && (
+            {(errorMessage || appointmentError) && (
               <div className="mb-4 rounded-[8px] bg-[#fef2f2] p-3 text-[13px] text-[#991b1b] dark:bg-[#450a0a] dark:text-[#fca5a5]">
-                {errorMessage || authError}
+                {errorMessage || appointmentError}
               </div>
             )}
 
@@ -139,7 +139,7 @@ const BookFormSection = () => {
                   name="department"
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  disabled={authLoading}
+                  disabled={appointmentLoading}
                   className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">Select a department…</option>
@@ -168,7 +168,7 @@ const BookFormSection = () => {
                   required
                   autoComplete="name"
                   placeholder="Full name"
-                  disabled={authLoading}
+                  disabled={appointmentLoading}
                   className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
@@ -190,7 +190,7 @@ const BookFormSection = () => {
                   required
                   autoComplete="tel"
                   placeholder="e.g. 9876543210"
-                  disabled={authLoading}
+                  disabled={appointmentLoading}
                   className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
@@ -198,10 +198,10 @@ const BookFormSection = () => {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={authLoading}
+                disabled={appointmentLoading}
                 className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#171717] dark:bg-white px-6 text-[14px] font-semibold text-white dark:text-[#0a0a0f] transition-all hover:bg-[#2a2a2a] dark:hover:bg-[#e2e8f0] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7]"
               >
-                {authLoading ? (
+                {appointmentLoading ? (
                   <>
                     <Loader2 size={15} className="animate-spin" aria-hidden="true" />
                     Generating token & signing in…

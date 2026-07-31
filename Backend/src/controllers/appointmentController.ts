@@ -33,6 +33,7 @@ export const bookToken = async (req: Request, res: Response, next: NextFunction)
                     "SELECT id, hospital_id FROM doctors WHERE specialization ILIKE $1 LIMIT 1",
                     [`%${department}%`]
                 );
+                
                 if (docByDept.rows.length > 0) {
                     resolvedDoctorId = docByDept.rows[0].id;
                     resolvedHospitalId = resolvedHospitalId || docByDept.rows[0].hospital_id;
@@ -106,24 +107,31 @@ export const bookToken = async (req: Request, res: Response, next: NextFunction)
         // 5. Calculate estimated wait time
         const estimatedWaitTime = await calculateEstimatedWaitTime(resolvedDoctorId, targetDate);
 
-        // 6. Compute next token_number for this doctor on this date (starts from 1 and increments)
+        // 6. Compute next token_number for the given date (starts from 1 each day)
         const tokenRes = await pool.query(
             `SELECT COALESCE(MAX(token_number), 0) + 1 AS next_token 
              FROM appointments 
-             WHERE doctor_id = $1 AND appointment_date = $2`,
-            [resolvedDoctorId, targetDate]
+             WHERE appointment_date = $1`,
+            [targetDate]
         );
         const tokenNumber = parseInt(tokenRes.rows[0].next_token, 10);
 
-        // 7. Insert appointment record
+        // 7. Insert appointment record with default status 'waiting'
         const newAppointmentRes = await pool.query(
-            `INSERT INTO appointments (patient_id, doctor_id, hospital_id, appointment_date, token_number, status, symptoms) 
-             VALUES ($1, $2, $3, $4, $5, 'scheduled', $6) 
-             RETURNING id, patient_id, doctor_id, hospital_id, appointment_date, token_number, status, symptoms, created_at`,
+            `INSERT INTO appointments (patient_id, doctor_id, hospital_id, appointment_date, token_number, status, symptoms)
+             VALUES ($1, $2, $3, $4, $5, 'waiting', $6)
+             RETURNING *`,
             [patientUser.id, resolvedDoctorId, resolvedHospitalId, targetDate, tokenNumber, symptoms || null]
         );
+        const newAppointment = newAppointmentRes.rows[0];
 
-        // 8. Set HttpOnly JWT auth cookie for the patient
+        // 8. Fetch all appointments for the patient
+        const allAppointmentsRes = await pool.query(
+            `SELECT * FROM appointments WHERE patient_id = $1 ORDER BY appointment_date DESC, token_number DESC`,
+            [patientUser.id]
+        );
+
+        // 9. Set HttpOnly JWT auth cookie for the patient
         const token = generateToken({ id: patientUser.id, role: patientUser.role });
         const cookieOptions = {
             expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
@@ -138,10 +146,10 @@ export const bookToken = async (req: Request, res: Response, next: NextFunction)
             token,
             user: patientUser,
             estimated_wait_time_minutes: estimatedWaitTime,
-            appointment: newAppointmentRes.rows[0]
+            appointment: newAppointment,
+            allAppointments: allAppointmentsRes.rows
         });
     } catch (error) {
         next(error);
     }
 };
-

@@ -60,7 +60,7 @@ export const createTable = async () => {
             hospital_id INTEGER NOT NULL REFERENCES hospitals(id) ON DELETE CASCADE,
             appointment_date DATE NOT NULL,
             token_number INTEGER NOT NULL,
-            status VARCHAR(50) NOT NULL DEFAULT 'waiting' CHECK (status IN ('scheduled', 'waiting', 'in-consultation', 'completed', 'cancelled')),
+            status VARCHAR(50) NOT NULL DEFAULT 'waiting' CHECK (status IN ('waiting', 'in-consultation', 'completed', 'cancelled')),
             symptoms TEXT,
             prescription TEXT,
             checked_in_at TIMESTAMP,

@@ -42,7 +42,7 @@ export const protect = async (
         // 1. Check Authorization Header (Bearer <token>)
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
             token = req.headers.authorization.split(" ")[1];
-        } 
+        }
         // 2. Check cookies
         else if (req.headers.cookie) {
             const cookies = parseCookies(req.headers.cookie);
