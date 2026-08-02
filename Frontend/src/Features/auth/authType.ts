@@ -1,6 +1,7 @@
 
 // User data interface
 export interface User {
+    phone_number: string;
     id: string | number;
     name: string;
     email?: string;
