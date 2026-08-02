@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Clock, Users, Ticket, AlertCircle, History, ChevronRight } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "../../../app/store"
 import { fetchPatientAppointments } from "../../../Features/appointment/appointmentSlice"
-import type { Appointment } from "../../../Features/appointment/appointmentType"
+// import type { Appointment } from "../../../Features/appointment/appointmentType"
 
 const formatReadableDate = (dateStr?: string) => {
   if (!dateStr) return "Today";
@@ -80,14 +80,14 @@ const PatientOverview = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12 rounded-[12px] border border-[#ebebeb] bg-white dark:border-white/10 dark:bg-[#0a0a0a]">
+        <div className="flex items-center justify-center py-12 rounded-xl border border-[#ebebeb] bg-white dark:border-white/10 dark:bg-[#0a0a0a]">
           <div className="flex flex-col items-center gap-2 text-[#888888]">
             <div className="size-6 animate-spin rounded-full border-2 border-current border-t-transparent text-[#171717] dark:text-white" />
             <p className="text-[13px]">Loading your token info...</p>
           </div>
         </div>
       ) : hasActiveToken && activeAppointment ? (
-        <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] overflow-hidden dark:border-white/10 dark:bg-[#0a0a0a]">
+        <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] overflow-hidden dark:border-white/10 dark:bg-[#0a0a0a]">
           {/* Status Banner */}
           <div className="bg-[#d3e5ff]/50 px-5 md:px-6 py-3.5 dark:bg-[#0070f3]/10 flex items-start sm:items-center gap-3">
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 sm:mt-0 text-[#0761d1] dark:text-[#50e3c2]" />
@@ -102,7 +102,7 @@ const PatientOverview = () => {
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
               
               {/* Token Info */}
-              <div className="flex flex-col items-center justify-center rounded-[12px] border border-[#ebebeb] bg-[#fafafa] w-full md:w-1/3 py-8 px-4 dark:border-white/10 dark:bg-[#171717] text-center">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-[#ebebeb] bg-[#fafafa] w-full md:w-1/3 py-8 px-4 dark:border-white/10 dark:bg-[#171717] text-center">
                 <span className="font-mono text-[12px] uppercase text-[#888888]">Your Token</span>
                 <span className="text-[56px] md:text-[64px] font-semibold tracking-[-2.4px] text-[#171717] leading-none mt-2 dark:text-white">
                   #{activeAppointment.token_number}
@@ -114,7 +114,7 @@ const PatientOverview = () => {
 
               {/* Live Tracker */}
               <div className="grid grid-cols-2 gap-4 md:gap-6 w-full md:w-2/3">
-                <div className="flex flex-col gap-2 rounded-[12px] border border-[#ebebeb] bg-white p-4 md:p-5 dark:border-white/10 dark:bg-[#0a0a0a]">
+                <div className="flex flex-col gap-2 rounded-xl border border-[#ebebeb] bg-white p-4 md:p-5 dark:border-white/10 dark:bg-[#0a0a0a]">
                   <span className="flex items-center gap-2 text-[13px] text-[#888888]">
                     <Ticket size={14} /> Doctor
                   </span>
@@ -125,7 +125,7 @@ const PatientOverview = () => {
                   </div>
                 </div>
                 
-                <div className="flex flex-col gap-2 rounded-[12px] border border-[#ebebeb] bg-white p-4 md:p-5 dark:border-white/10 dark:bg-[#0a0a0a]">
+                <div className="flex flex-col gap-2 rounded-xl border border-[#ebebeb] bg-white p-4 md:p-5 dark:border-white/10 dark:bg-[#0a0a0a]">
                   <span className="flex items-center gap-2 text-[13px] text-[#888888]">
                     <Users size={14} /> Hospital
                   </span>
@@ -134,7 +134,7 @@ const PatientOverview = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-col gap-2 rounded-[12px] border border-[#ebebeb] bg-white p-4 md:p-5 dark:border-white/10 dark:bg-[#0a0a0a]">
+                <div className="flex flex-col gap-2 rounded-xl border border-[#ebebeb] bg-white p-4 md:p-5 dark:border-white/10 dark:bg-[#0a0a0a]">
                   <span className="flex items-center gap-2 text-[13px] text-[#888888]">
                     <Clock size={14} /> Date
                   </span>
@@ -143,7 +143,7 @@ const PatientOverview = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-col gap-2 rounded-[12px] border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]">
+                <div className="flex flex-col gap-2 rounded-xl border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]">
                   <span className="flex items-center gap-2 text-[13px] text-[#888888]">
                     <AlertCircle size={14} /> Token Status
                   </span>
@@ -156,7 +156,7 @@ const PatientOverview = () => {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-[12px] border border-[#ebebeb] border-dashed bg-[#fafafa] py-16 px-6 text-center dark:border-white/10 dark:bg-[#171717]">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-[#ebebeb] border-dashed bg-[#fafafa] py-16 px-6 text-center dark:border-white/10 dark:bg-[#171717]">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border border-[#ebebeb] dark:bg-[#0a0a0a] dark:border-white/10">
             <Ticket className="h-5 w-5 text-[#888888]" />
           </div>
@@ -175,7 +175,7 @@ const PatientOverview = () => {
 
       {/* Recent Activity */}
       {historyAppointments.length > 0 && (
-        <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
+        <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
           <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 flex items-center gap-2 dark:border-white/10">
             <History size={15} className="text-[#888888]" />
             <h2 className="font-mono text-[12px] uppercase text-[#888888]">Your Appointment History</h2>

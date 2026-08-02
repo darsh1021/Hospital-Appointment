@@ -80,12 +80,12 @@ const PatientAppointments = () => {
           {active.map((apt) => (
             <div
               key={apt.id}
-              className={`flex flex-col md:flex-row gap-4 md:gap-6 rounded-[12px] border bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:bg-[#0a0a0a] ${
+              className={`flex flex-col md:flex-row gap-4 md:gap-6 rounded-xl border bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:bg-[#0a0a0a] ${
                 apt.status === "in-consultation" ? "border-[#d3e5ff] dark:border-[#0070f3]/30" : "border-[#ebebeb] dark:border-white/10"
               }`}
             >
               {/* Date/Status Block */}
-              <div className={`flex flex-col items-center justify-center rounded-[8px] min-w-[120px] py-4 px-2 border ${
+              <div className={`flex flex-col items-center justify-center rounded-lg min-w-30 py-4 px-2 border ${
                 apt.status === "in-consultation" 
                   ? "bg-[#d3e5ff]/30 border-[#d3e5ff] dark:bg-[#0070f3]/10 dark:border-[#0070f3]/20" 
                   : "bg-[#fafafa] border-[#ebebeb] dark:bg-[#171717] dark:border-white/10"
@@ -137,7 +137,7 @@ const PatientAppointments = () => {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-[12px] border border-[#ebebeb] border-dashed bg-[#fafafa] py-10 px-6 text-center dark:border-white/10 dark:bg-[#171717]">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-[#ebebeb] border-dashed bg-[#fafafa] py-10 px-6 text-center dark:border-white/10 dark:bg-[#171717]">
           <AlertCircle className="h-6 w-6 text-[#888888] mb-2" />
           <h3 className="text-[15px] font-medium text-[#171717] dark:text-white">No Upcoming Appointments</h3>
           <p className="text-[13px] text-[#888888] mt-1">You do not have any active token or scheduled consultation at this moment.</p>
@@ -146,7 +146,7 @@ const PatientAppointments = () => {
 
       {/* Past Appointments (only shown if history is available) */}
       {past.length > 0 && (
-        <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
+        <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
           <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 dark:border-white/10">
             <h2 className="font-mono text-[12px] uppercase text-[#888888]">Past Appointments</h2>
           </div>
@@ -154,7 +154,7 @@ const PatientAppointments = () => {
             {past.map((apt) => (
               <div key={apt.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-5 md:px-6 py-4 opacity-75">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
                     <CalendarDays size={16} className="text-[#888888]" />
                   </div>
                   <div className="min-w-0">

@@ -53,7 +53,7 @@ const DoctorPrescription = () => {
         {/* ── Form ── */}
         <div className="flex flex-col gap-6">
           {/* Patient info strip */}
-          <div className="flex items-center gap-4 rounded-[12px] border border-[#ebebeb] bg-[#fafafa] p-4 dark:border-white/10 dark:bg-[#171717]">
+          <div className="flex items-center gap-4 rounded-xl border border-[#ebebeb] bg-[#fafafa] p-4 dark:border-white/10 dark:bg-[#171717]">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
               <span className="font-mono text-[12px] font-medium text-[#171717] dark:text-white">#42</span>
             </div>
@@ -71,7 +71,7 @@ const DoctorPrescription = () => {
               rows={2}
               value={diagnosis}
               onChange={e => setDiagnosis(e.target.value)}
-              placeholder="e.g. Acne Vulgaris (Grade II), Contact Dermatitis..."
+              placeholder="e.g. Acne Vulgars (Grade II), Contact Dermatitis..."
               className={inputClass}
             />
           </div>
@@ -93,7 +93,7 @@ const DoctorPrescription = () => {
               {medications.map((med, idx) => (
                 <div
                   key={med.id}
-                  className="flex flex-col gap-3 rounded-[8px] border border-[#ebebeb] p-4 dark:border-white/10"
+                  className="flex flex-col gap-3 rounded-lg border border-[#ebebeb] p-4 dark:border-white/10"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ const DoctorPrescription = () => {
         {/* ── Preview ── */}
         <div className="flex flex-col gap-4">
           <p className="font-mono text-[12px] uppercase text-[#888888]">Preview</p>
-          <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] gap-5 dark:border-white/10 dark:bg-[#0a0a0a]">
+          <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] gap-5 dark:border-white/10 dark:bg-[#0a0a0a]">
             {/* Clinic header */}
             <div className="border-b border-[#ebebeb] pb-4 dark:border-white/10">
               <p className="text-[13px] font-semibold text-[#171717] dark:text-white">Clearskin Clinic</p>

@@ -2,7 +2,7 @@ import { User, Stethoscope, Clock, CalendarDays, CheckCircle2, XCircle, Trending
 
 const doctor = {
   name: "Dr. Sarah Jenkins",
-  specialisation: "Dermatology & Skin Care",
+  specialization: "Dermatology & Skin Care",
   email: "s.jenkins@clearskin.clinic",
   phone: "+91 98765 00000",
   qualification: "MBBS, MD (Dermatology)",
@@ -43,7 +43,7 @@ const DoctorProfile = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
         {/* ── Left: Profile card ── */}
-        <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] overflow-hidden dark:border-white/10 dark:bg-[#0a0a0a]">
+        <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] overflow-hidden dark:border-white/10 dark:bg-[#0a0a0a]">
           {/* Avatar */}
           <div className="flex flex-col items-center px-6 pt-8 pb-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-[#171717]">
@@ -54,7 +54,7 @@ const DoctorProfile = () => {
             </h2>
             <div className="mt-1 flex items-center gap-1.5 text-[13px] text-[#888888]">
               <Stethoscope size={13} />
-              <span>{doctor.specialisation}</span>
+              <span>{doctor.specialization}</span>
             </div>
             <span className="mt-3 inline-flex items-center rounded-full bg-[#fafafa] border border-[#ebebeb] px-3 py-1 text-[12px] font-medium text-[#171717] dark:bg-white/5 dark:border-white/10 dark:text-white">
               {doctor.qualification}
@@ -84,7 +84,7 @@ const DoctorProfile = () => {
         {/* ── Right: Stats + Activity ── */}
         <div className="flex flex-col gap-6">
           {/* Session progress */}
-          <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
+          <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-mono text-[12px] uppercase text-[#888888]">Today's Session Progress</h3>
               <span className="text-[13px] text-[#888888]">
@@ -110,7 +110,7 @@ const DoctorProfile = () => {
             ].map(stat => (
               <div
                 key={stat.label}
-                className="flex flex-col gap-3 rounded-[12px] border border-[#ebebeb] bg-[#fafafa] p-5 dark:border-white/10 dark:bg-[#171717]"
+                className="flex flex-col gap-3 rounded-xl border border-[#ebebeb] bg-[#fafafa] p-5 dark:border-white/10 dark:bg-[#171717]"
               >
                 <stat.icon size={18} className={stat.color} />
                 <div>
@@ -124,7 +124,7 @@ const DoctorProfile = () => {
           </div>
 
           {/* Recent activity */}
-          <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
+          <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
             <div className="border-b border-[#ebebeb] px-6 py-4 dark:border-white/10">
               <h3 className="font-mono text-[12px] uppercase text-[#888888]">Recent Activity</h3>
             </div>

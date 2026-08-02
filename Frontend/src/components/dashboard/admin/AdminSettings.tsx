@@ -1,4 +1,4 @@
-import { Settings, Save, Store, Clock, Users, Shield } from "lucide-react"
+import { Save, Store, Clock, Users } from "lucide-react"
 
 const AdminSettings = () => {
   const inputClass = "w-full rounded-[6px] border border-[#ebebeb] bg-white px-3 py-2 text-[14px] text-[#171717] placeholder:text-[#888888] focus:border-[#171717] focus:outline-none dark:border-white/10 dark:bg-[#0a0a0a] dark:text-white dark:focus:border-white"
@@ -25,7 +25,7 @@ const AdminSettings = () => {
       </div>
 
       {/* General Settings */}
-      <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
+      <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
         <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 flex items-center gap-2 dark:border-white/10">
           <Store size={16} className="text-[#888888]" />
           <h2 className="font-mono text-[12px] uppercase text-[#888888]">Clinic Details</h2>
@@ -47,7 +47,7 @@ const AdminSettings = () => {
       </div>
 
       {/* Operations & Queue */}
-      <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
+      <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
         <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 flex items-center gap-2 dark:border-white/10">
           <Clock size={16} className="text-[#888888]" />
           <h2 className="font-mono text-[12px] uppercase text-[#888888]">Operations & Queue</h2>
@@ -72,7 +72,7 @@ const AdminSettings = () => {
       </div>
 
       {/* Fees */}
-      <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
+      <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
         <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 flex items-center gap-2 dark:border-white/10">
           <Users size={16} className="text-[#888888]" />
           <h2 className="font-mono text-[12px] uppercase text-[#888888]">Fee Structure</h2>

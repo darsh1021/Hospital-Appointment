@@ -1,33 +1,30 @@
 import { Users, Search, CalendarDays, Ticket, MoreHorizontal } from "lucide-react"
 import { useState } from "react"
 
-type PatientEntry = {
-  id: number
-  name: string
-  age: number
-  phone: string
-  visitCount: number
-  lastVisit: string
-  type: "New" | "Follow-up"
-}
-
-const allPatients: PatientEntry[] = [
-  { id: 1,  name: "Priya Sharma",   age: 34, phone: "+91 98765 43210", visitCount: 4,  lastVisit: "Oct 24, 2026", type: "Follow-up" },
-  { id: 2,  name: "Rahul Mehta",    age: 28, phone: "+91 97200 33445", visitCount: 1,  lastVisit: "Oct 24, 2026", type: "New" },
-  { id: 3,  name: "Anita Desai",    age: 52, phone: "+91 98100 11223", visitCount: 7,  lastVisit: "Oct 24, 2026", type: "Follow-up" },
-  { id: 4,  name: "Suresh Kumar",   age: 45, phone: "+91 99100 77889", visitCount: 2,  lastVisit: "Oct 24, 2026", type: "New" },
-  { id: 5,  name: "Deepa Nair",     age: 29, phone: "+91 98200 99001", visitCount: 3,  lastVisit: "Oct 2, 2026",  type: "Follow-up" },
-  { id: 6,  name: "Arjun Singh",    age: 22, phone: "+91 95500 12312", visitCount: 1,  lastVisit: "Sep 28, 2026", type: "New" },
-  { id: 7,  name: "Meena Joshi",    age: 38, phone: "+91 94100 45656", visitCount: 5,  lastVisit: "Oct 5, 2026",  type: "Follow-up" },
-  { id: 8,  name: "Karan Patel",    age: 31, phone: "+91 96800 78978", visitCount: 2,  lastVisit: "Sep 20, 2026", type: "New" },
-]
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../../app/store";
+import { fetchPatientsAdmin } from "../../../Features/admin/adminSlice";
 
 const AdminPatients = () => {
-  const [query, setQuery] = useState("")
-  const filtered = allPatients.filter(p =>
+  const dispatch = useAppDispatch();
+  const { patients: allPatients, loading, error } = useAppSelector((state) => state.admin);
+
+  useEffect(() => {
+    dispatch(fetchPatientsAdmin());
+  }, [dispatch]);
+
+  const [query, setQuery] = useState("");
+  const filtered = allPatients.filter((p) =>
     p.name.toLowerCase().includes(query.toLowerCase()) ||
-    p.phone.includes(query)
-  )
+    p.phone_number.includes(query)
+  );
+
+  if (loading) {
+    return <div className="text-[#888888] p-6">Loading patients...</div>;
+  }
+  if (error) {
+    return <div className="text-red-500 p-6">Error: {error}</div>;
+  }
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -80,33 +77,25 @@ const AdminPatients = () => {
               {/* Mobile: name + type */}
               <div className="flex items-center justify-between w-full md:contents">
                 <p className="text-[14px] font-medium text-[#171717] dark:text-white">{patient.name}</p>
-                <span className={`md:hidden inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                  patient.type === "Follow-up"
-                    ? "bg-[#d3e5ff] text-[#0761d1] dark:bg-[#0070f3]/20 dark:text-[#50e3c2]"
-                    : "bg-[#fafafa] text-[#888888] dark:bg-white/5"
-                }`}>
-                  {patient.type}
+                <span className={`md:hidden inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium bg-[#fafafa] text-[#888888] dark:bg-white/5`}>
+                  N/A
                 </span>
               </div>
 
-              <p className="text-[13px] text-[#888888]">{patient.age}</p>
-              <p className="text-[13px] text-[#888888] font-mono">{patient.phone}</p>
+              <p className="text-[13px] text-[#888888]">-</p>
+              <p className="text-[13px] text-[#888888] font-mono">{patient.phone_number}</p>
               <div className="flex items-center gap-1.5 text-[13px] text-[#888888]">
                 <Ticket size={12} />
-                <span>{patient.visitCount} visit{patient.visitCount !== 1 ? "s" : ""}</span>
+                <span>- visit(s)</span>
               </div>
               <div className="flex items-center gap-1.5 text-[12px] md:text-[13px] text-[#888888]">
                 <CalendarDays size={12} />
-                <span>{patient.lastVisit}</span>
+                <span>{new Date(patient.created_at).toLocaleDateString()}</span>
               </div>
 
               {/* Type (desktop) */}
-              <span className={`hidden md:inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                patient.type === "Follow-up"
-                  ? "bg-[#d3e5ff] text-[#0761d1] dark:bg-[#0070f3]/20 dark:text-[#50e3c2]"
-                  : "bg-[#fafafa] text-[#888888] dark:bg-white/5"
-              }`}>
-                {patient.type}
+              <span className={`hidden md:inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium bg-[#fafafa] text-[#888888] dark:bg-white/5`}>
+                N/A
               </span>
 
               <button

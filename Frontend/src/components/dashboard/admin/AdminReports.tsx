@@ -38,7 +38,7 @@ const AdminReports = () => {
       {/* Report Types */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {reportTypes.map(type => (
-          <div key={type.label} className="flex flex-col gap-3 rounded-[12px] border border-[#ebebeb] bg-white p-5 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] transition hover:border-[#171717] dark:border-white/10 dark:bg-[#0a0a0a] dark:hover:border-white cursor-pointer">
+          <div key={type.label} className="flex flex-col gap-3 rounded-xl border border-[#ebebeb] bg-white p-5 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] transition hover:border-[#171717] dark:border-white/10 dark:bg-[#0a0a0a] dark:hover:border-white cursor-pointer">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
               <type.icon size={18} className="text-[#171717] dark:text-white" />
             </div>
@@ -51,7 +51,7 @@ const AdminReports = () => {
       </div>
 
       {/* Generated Reports List */}
-      <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
+      <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
         <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 dark:border-white/10">
           <h2 className="font-mono text-[12px] uppercase text-[#888888]">Recent Reports</h2>
         </div>
@@ -60,7 +60,7 @@ const AdminReports = () => {
           {reports.map(report => (
             <div key={report.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 md:px-6 md:py-4">
               <div className="flex items-center gap-4 min-w-0">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
                   <FileText size={16} className="text-[#888888]" />
                 </div>
                 <div className="min-w-0">

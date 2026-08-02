@@ -24,7 +24,7 @@ const PatientMedicalRecord = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Left Col: Vitals / Info */}
         <div className="flex flex-col gap-4 md:gap-6">
-          <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
+          <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
             <div className="border-b border-[#ebebeb] px-5 py-4 flex items-center gap-2 dark:border-white/10">
               <Activity size={15} className="text-[#888888]" />
               <h2 className="font-mono text-[12px] uppercase text-[#888888]">Patient Profile</h2>
@@ -47,7 +47,7 @@ const PatientMedicalRecord = () => {
         </div>
 
         {/* Right Col: Timeline */}
-        <div className="md:col-span-2 flex flex-col rounded-[12px] border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
+        <div className="md:col-span-2 flex flex-col rounded-xl border border-[#ebebeb] bg-white shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a] overflow-hidden">
           <div className="border-b border-[#ebebeb] px-5 md:px-6 py-4 flex items-center gap-2 dark:border-white/10">
             <FileStack size={15} className="text-[#888888]" />
             <h2 className="font-mono text-[12px] uppercase text-[#888888]">Clinical History</h2>

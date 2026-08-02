@@ -44,7 +44,7 @@ const AdminReception = () => {
           { label: "Active Today", value: receptionists.filter(r => r.status === "active").length },
           { label: "Off-duty",     value: receptionists.filter(r => r.status === "off-duty").length },
         ].map(s => (
-          <div key={s.label} className="flex flex-col gap-1 rounded-[12px] border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]">
+          <div key={s.label} className="flex flex-col gap-1 rounded-xl border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]">
             <p className="text-[24px] md:text-[28px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white leading-none">{s.value}</p>
             <p className="text-[11px] md:text-[13px] text-[#888888]">{s.label}</p>
           </div>
@@ -56,7 +56,7 @@ const AdminReception = () => {
         {receptionists.map(staff => (
           <div
             key={staff.id}
-            className="flex flex-col md:flex-row md:items-center gap-4 rounded-[12px] border border-[#ebebeb] bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]"
+            className="flex flex-col md:flex-row md:items-center gap-4 rounded-xl border border-[#ebebeb] bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]"
           >
             {/* Avatar + info */}
             <div className="flex items-start gap-4 flex-1 min-w-0">

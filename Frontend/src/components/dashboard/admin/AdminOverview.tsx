@@ -3,35 +3,52 @@ import {
   Clock, CalendarDays, BarChart3, CheckCircle2, XCircle,
 } from "lucide-react"
 
-const stats = {
-  totalPatients: 1243,
-  totalDoctors: 3,
-  todayRegistered: 23,
-  todayRevenue: 7800,
-  avgConsultTime: 12,
-  noShowRate: 8.7,
-  onlineSplit: 61,
-  walkInSplit: 39,
-}
-
-const weeklyData = [
-  { day: "Mon", patients: 20, revenue: 7200 },
-  { day: "Tue", patients: 25, revenue: 9000 },
-  { day: "Wed", patients: 18, revenue: 6400 },
-  { day: "Thu", patients: 23, revenue: 7800 },
-  { day: "Fri", patients: 27, revenue: 9600 },
-  { day: "Sat", patients: 15, revenue: 5200 },
-]
-
-const maxPatients = Math.max(...weeklyData.map(d => d.patients))
-
-const recentAlerts = [
-  { type: "warning", message: "Avg. consultation time up 2 min from last week." },
-  { type: "info",    message: "No-show rate is within acceptable range (< 10%)." },
-  { type: "success", message: "Online booking cap at 61% — walk-in slots are protected." },
-]
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../../app/store";
+import { fetchReportsAdmin, fetchDoctorsAdmin, fetchPatientsAdmin } from "../../../Features/admin/adminSlice";
 
 const AdminOverview = () => {
+  const dispatch = useAppDispatch();
+  const { statistics, doctors, patients, loading, error } = useAppSelector((state) => state.admin);
+
+  useEffect(() => {
+    dispatch(fetchReportsAdmin({ startDate: "2024-01-01", endDate: "2024-12-31" })); // Fetch reports for the year 2024
+    dispatch(fetchDoctorsAdmin());
+    dispatch(fetchPatientsAdmin());
+  }, [dispatch]);
+
+  const stats = {
+    totalPatients: patients.length,
+    totalDoctors: doctors.length,
+    todayRegistered: 0, // Placeholder
+    todayRevenue: statistics?.revenue_generated || 0,
+    avgWaitTime: statistics?.average_waiting_time_minutes || 0,
+    noShowRate: 0, // Placeholder
+    onlineSplit: 0, // Placeholder
+    walkInSplit: 0, // Placeholder
+  };
+
+  const weeklyData = [
+    { day: "Mon", patients: 20, revenue: 7200 },
+    { day: "Tue", patients: 25, revenue: 9000 },
+    { day: "Wed", patients: 18, revenue: 6400 },
+    { day: "Thu", patients: 23, revenue: 7800 },
+    { day: "Fri", patients: 27, revenue: 9600 },
+    { day: "Sat", patients: 15, revenue: 5200 },
+  ];
+  const maxPatients = Math.max(...weeklyData.map(d => d.patients));
+
+  const recentAlerts = [
+    { type: "info", message: "Live data integration is partially complete for Overview." },
+  ];
+
+  if (loading) {
+    return <div className="text-[#888888] p-6">Loading overview...</div>;
+  }
+  if (error) {
+    return <div className="text-red-500 p-6">Error: {error}</div>;
+  }
+
   return (
     <div className="space-y-6 md:space-y-8">
       {/* Header */}
@@ -47,14 +64,14 @@ const AdminOverview = () => {
       {/* Key stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { label: "Total Patients",   value: stats.totalPatients.toLocaleString("en-IN"), icon: Users,         color: "text-[#171717] dark:text-white" },
-          { label: "Doctors on Staff", value: stats.totalDoctors,                           icon: Stethoscope,   color: "text-[#171717] dark:text-white" },
-          { label: "Today's Revenue",  value: `₹${stats.todayRevenue.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-[#0070f3]" },
-          { label: "Registered Today", value: stats.todayRegistered,                        icon: CalendarDays,  color: "text-[#171717] dark:text-white" },
+          { label: "Total Patients", value: stats.totalPatients.toLocaleString("en-IN"), icon: Users, color: "text-[#171717] dark:text-white" },
+          { label: "Doctors on Staff", value: stats.totalDoctors, icon: Stethoscope, color: "text-[#171717] dark:text-white" },
+          { label: "Today's Revenue", value: `₹${stats.todayRevenue.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-[#0070f3]" },
+          { label: "Registered Today", value: stats.todayRegistered, icon: CalendarDays, color: "text-[#171717] dark:text-white" },
         ].map(stat => (
           <div
             key={stat.label}
-            className="flex flex-col gap-2 md:gap-3 rounded-[12px] border border-[#ebebeb] bg-white p-4 md:p-5 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]"
+            className="flex flex-col gap-2 md:gap-3 rounded-xl border border-[#ebebeb] bg-white p-4 md:p-5 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]"
           >
             <stat.icon size={16} className={stat.color} />
             <div>
@@ -70,14 +87,14 @@ const AdminOverview = () => {
       {/* Secondary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { label: "Avg. Consult Time",  value: `${stats.avgConsultTime}m`,  icon: Clock,        trend: "up",     note: "+2m vs last week" },
-          { label: "No-show Rate",       value: `${stats.noShowRate}%`,       icon: XCircle,      trend: "down",   note: "Within range (< 10%)" },
-          { label: "Online Bookings",    value: `${stats.onlineSplit}%`,      icon: TrendingUp,   trend: "stable", note: "Cap: 70%" },
-          { label: "Walk-in Split",      value: `${stats.walkInSplit}%`,      icon: Users,        trend: "stable", note: "Walk-in protected" },
+          { label: "Avg. Wait Time", value: `${stats.avgWaitTime}m`, icon: Clock, trend: "up", note: "" },
+          { label: "No-show Rate", value: `${stats.noShowRate}%`, icon: XCircle, trend: "down", note: "Within range (< 10%)" },
+          { label: "Online Bookings", value: `${stats.onlineSplit}%`, icon: TrendingUp, trend: "stable", note: "Cap: 70%" },
+          { label: "Walk-in Split", value: `${stats.walkInSplit}%`, icon: Users, trend: "stable", note: "Walk-in protected" },
         ].map(stat => (
           <div
             key={stat.label}
-            className="flex flex-col gap-2 md:gap-3 rounded-[12px] border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]"
+            className="flex flex-col gap-2 md:gap-3 rounded-xl border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]"
           >
             <stat.icon size={15} className="text-[#888888]" />
             <div>
@@ -92,7 +109,7 @@ const AdminOverview = () => {
       </div>
 
       {/* Weekly bar chart */}
-      <div className="flex flex-col rounded-[12px] border border-[#ebebeb] bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
+      <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
           <div className="flex items-center gap-2">
             <BarChart3 size={16} className="text-[#888888]" />
@@ -105,7 +122,7 @@ const AdminOverview = () => {
             <div key={d.day} className="flex flex-col items-center gap-2 flex-1">
               <div className="w-full flex items-end justify-center" style={{ height: "100%" }}>
                 <div
-                  className="w-full max-w-[40px] rounded-t-[4px] bg-[#171717] dark:bg-white transition-all duration-500"
+                  className="w-full max-w-10 rounded-t-sm bg-[#171717] dark:bg-white transition-all duration-500"
                   style={{ height: `${(d.patients / maxPatients) * 100}%`, minHeight: "4px" }}
                   title={`${d.day}: ${d.patients} patients · ₹${d.revenue.toLocaleString("en-IN")}`}
                 />
@@ -122,20 +139,18 @@ const AdminOverview = () => {
         {recentAlerts.map((alert, idx) => (
           <div
             key={idx}
-            className={`flex items-start gap-3 rounded-[12px] border px-4 md:px-5 py-3.5 ${
-              alert.type === "warning" ? "border-[#ffefcf] bg-[#ffefcf]/50 dark:border-[#f5a623]/20 dark:bg-[#f5a623]/10"
-              : alert.type === "success" ? "border-[#d3e5ff] bg-[#d3e5ff]/30 dark:border-[#0070f3]/20 dark:bg-[#0070f3]/10"
-              : "border-[#ebebeb] bg-[#fafafa] dark:border-white/10 dark:bg-[#171717]"
-            }`}
+            className={`flex items-start gap-3 rounded-xl border px-4 md:px-5 py-3.5 ${alert.type === "warning" ? "border-[#ffefcf] bg-[#ffefcf]/50 dark:border-[#f5a623]/20 dark:bg-[#f5a623]/10"
+                : alert.type === "success" ? "border-[#d3e5ff] bg-[#d3e5ff]/30 dark:border-[#0070f3]/20 dark:bg-[#0070f3]/10"
+                  : "border-[#ebebeb] bg-[#fafafa] dark:border-white/10 dark:bg-[#171717]"
+              }`}
           >
-            {alert.type === "warning"  && <TrendingUp  size={14} className="shrink-0 mt-0.5 text-[#ab570a] dark:text-[#f5a623]" />}
-            {alert.type === "success"  && <CheckCircle2 size={14} className="shrink-0 mt-0.5 text-[#0070f3]" />}
-            {alert.type === "info"     && <TrendingDown size={14} className="shrink-0 mt-0.5 text-[#888888]" />}
-            <p className={`text-[12px] md:text-[13px] ${
-              alert.type === "warning" ? "text-[#ab570a] dark:text-[#f5a623]"
-              : alert.type === "success" ? "text-[#0761d1] dark:text-[#50e3c2]"
-              : "text-[#4d4d4d] dark:text-[#888888]"
-            }`}>{alert.message}</p>
+            {alert.type === "warning" && <TrendingUp size={14} className="shrink-0 mt-0.5 text-[#ab570a] dark:text-[#f5a623]" />}
+            {alert.type === "success" && <CheckCircle2 size={14} className="shrink-0 mt-0.5 text-[#0070f3]" />}
+            {alert.type === "info" && <TrendingDown size={14} className="shrink-0 mt-0.5 text-[#888888]" />}
+            <p className={`text-[12px] md:text-[13px] ${alert.type === "warning" ? "text-[#ab570a] dark:text-[#f5a623]"
+                : alert.type === "success" ? "text-[#0761d1] dark:text-[#50e3c2]"
+                  : "text-[#4d4d4d] dark:text-[#888888]"
+              }`}>{alert.message}</p>
           </div>
         ))}
       </div>
