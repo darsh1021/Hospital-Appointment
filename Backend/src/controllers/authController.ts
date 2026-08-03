@@ -1,50 +1,46 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
-import { pool } from "../config/db.js";
+import { prisma } from "../config/db.js";
 import { generateToken } from "../utils/jwt.js";
 import { createAndSendOtp, verifyOtpValue } from "../utils/otp.js";
 import { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 
-// Strong password regex check
 const isStrongPassword = (password: string): boolean => {
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     return strongPasswordRegex.test(password);
 };
 
-// Set token in Cookie and return response
-const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
+const sendTokenResponse = (
+    user: { id: number; name: string; email: string | null; phoneNumber: string | null; role: string; createdAt: Date },
+    statusCode: number,
+    res: Response
+) => {
     const token = generateToken({ id: user.id, role: user.role });
 
-    const cookieOptions = {
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    res.cookie("token", token, {
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production"
-    };
-
-    res.cookie("token", token, cookieOptions);
+        secure: process.env.NODE_ENV === "production",
+    });
 
     res.status(statusCode).json({
         success: true,
         token,
         user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            phone_number: user.phone_number,
-            role: user.role,
-            created_at: user.created_at
-        }
+            id:           user.id,
+            name:         user.name,
+            email:        user.email,
+            phone_number: user.phoneNumber,
+            role:         user.role,
+            created_at:   user.createdAt,
+        },
     });
 };
 
-/**
- * Register user (Email/Password or Phone OTP setup)
- */
 export const signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { name, email, phone_number, password, role } = req.body;
 
-        // Basic validations
         if (!name || !role) {
             res.status(400).json({ success: false, error: "Please provide your name and role." });
             return;
@@ -56,61 +52,50 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
             return;
         }
 
-        // DUAL FLOW: If phone_number is supplied (OTP Flow)
+        // OTP flow
         if (phone_number) {
-            // Check if phone number is already registered
-            const phoneCheck = await pool.query("SELECT * FROM users WHERE phone_number = $1", [phone_number]);
-            if (phoneCheck.rows.length > 0) {
+            const existing = await prisma.user.findUnique({ where: { phoneNumber: phone_number } });
+            if (existing) {
                 res.status(400).json({ success: false, error: "Phone number already registered. Please log in." });
                 return;
             }
-
-            // Generate and send OTP (logged to console)
             await createAndSendOtp(phone_number);
-
             res.status(200).json({
                 success: true,
                 message: "OTP sent successfully to your phone number.",
                 phone_number,
                 name,
-                role: normalizedRole
+                role: normalizedRole,
             });
             return;
         }
 
-        // DUAL FLOW: If email is supplied (Password Flow)
+        // Password flow
         if (email) {
             if (!password) {
                 res.status(400).json({ success: false, error: "Please provide a password for email registration." });
                 return;
             }
-
-            // Validate strong password
             if (!isStrongPassword(password)) {
                 res.status(400).json({
                     success: false,
-                    error: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+                    error: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
                 });
                 return;
             }
 
-            // Check if email already registered
-            const emailCheck = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-            if (emailCheck.rows.length > 0) {
+            const existing = await prisma.user.findUnique({ where: { email } });
+            if (existing) {
                 res.status(400).json({ success: false, error: "Email already registered. Please log in." });
                 return;
             }
 
-            // Hash password and save user
             const hashedPassword = await bcrypt.hash(password, 10);
-            const newUserRes = await pool.query(
-                `INSERT INTO users (name, email, password, role) 
-                 VALUES ($1, $2, $3, $4) 
-                 RETURNING id, name, email, phone_number, role, created_at`,
-                [name, email, hashedPassword, normalizedRole]
-            );
+            const newUser = await prisma.user.create({
+                data: { name, email, password: hashedPassword, role: normalizedRole },
+            });
 
-            sendTokenResponse(newUserRes.rows[0], 201, res);
+            sendTokenResponse(newUser, 201, res);
             return;
         }
 
@@ -120,62 +105,43 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
     }
 };
 
-/**
- * Login user (Email/Password or Phone OTP request)
- */
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { email, password, phone_number } = req.body;
-        
-        console.log("Email: ", email)
-        console.log("Password: ", password)
-        console.log("Number: ", phone_number)
 
-        // DUAL FLOW: If phone_number is supplied
+        // OTP flow
         if (phone_number) {
-            // Check if phone number exists
-            const userRes = await pool.query("SELECT * FROM users WHERE phone_number = $1", [phone_number]);
-
-            if (!userRes) {
-                res.status(500).json({ success: false, error: "Database error while checking phone number." });
-                return;
-            }
-
-            const isNewUser = userRes.rows.length === 0;
-
-            // Generate and send OTP (same procedure for both existing and auto-registering new patients)
+            const existing = await prisma.user.findUnique({ where: { phoneNumber: phone_number } });
             await createAndSendOtp(phone_number);
-
             res.status(200).json({
                 success: true,
-                message: isNewUser
-                    ? "OTP sent successfully for auto-registration."
-                    : "OTP sent successfully to your registered phone number.",
+                message: existing
+                    ? "OTP sent successfully to your registered phone number."
+                    : "OTP sent successfully for auto-registration.",
                 phone_number,
-                isNewUser
+                isNewUser: !existing,
             });
             return;
         }
 
-        // DUAL FLOW: If email is supplied
+        // Password flow
         if (email) {
             if (!password) {
                 res.status(400).json({ success: false, error: "Please provide your password." });
                 return;
             }
 
-            // Fetch user
-            const userRes = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-            if (userRes.rows.length === 0) {
+            const user = await prisma.user.findUnique({ where: { email } });
+            if (!user) {
                 res.status(401).json({ success: false, error: "Invalid email or password." });
                 return;
             }
 
-            const user = userRes.rows[0];
-
-            // Verify password
             if (!user.password) {
-                res.status(400).json({ success: false, error: "This account was registered using phone authentication. Please log in using your phone number." });
+                res.status(400).json({
+                    success: false,
+                    error: "This account was registered using phone authentication. Please log in using your phone number.",
+                });
                 return;
             }
 
@@ -195,20 +161,6 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     }
 };
 
-
-export const getCurrentUser = (
-    req: AuthenticatedRequest,
-    res: Response
-): void => {
-    res.status(200).json({
-        success: true,
-        user: req.user,
-    });
-};
-    
-/**
- * Verify OTP (completes login or signup)
- */
 export const verifyOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { phone_number, otp, name } = req.body;
@@ -218,43 +170,32 @@ export const verifyOtp = async (req: Request, res: Response, next: NextFunction)
             return;
         }
 
-        // Verify OTP
         const isValid = await verifyOtpValue(phone_number, otp);
         if (!isValid) {
             res.status(400).json({ success: false, error: "Invalid or expired OTP." });
             return;
         }
 
-        // Check if user already exists
-        let userRes = await pool.query("SELECT * FROM users WHERE phone_number = $1", [phone_number]);
+        let user = await prisma.user.findUnique({ where: { phoneNumber: phone_number } });
 
-        // If user doesn't exist, this is an auto-registration
-        if (userRes.rows.length === 0) {
-            // Auto-signup: default name to provided name or dynamic generic name, role is always patient
+        if (!user) {
             const defaultName = name || `Patient-${phone_number.slice(-4)}`;
-            const newUserRes = await pool.query(
-                `INSERT INTO users (name, phone_number, role) 
-                 VALUES ($1, $2, 'patient') 
-                 RETURNING id, name, email, phone_number, role, created_at`,
-                [defaultName, phone_number]
-            );
-            userRes = newUserRes;
+            user = await prisma.user.create({
+                data: { name: defaultName, phoneNumber: phone_number, role: "patient" },
+            });
         }
 
-        sendTokenResponse(userRes.rows[0], 200, res);
+        sendTokenResponse(user, 200, res);
     } catch (error) {
         next(error);
     }
 };
 
-/**
- * Logout user
- */
 export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         res.cookie("token", "none", {
-            expires: new Date(Date.now() + 10 * 1000), // expires in 10 seconds
-            httpOnly: true
+            expires: new Date(Date.now() + 10 * 1000),
+            httpOnly: true,
         });
         res.status(200).json({ success: true, message: "Logged out successfully." });
     } catch (error) {
@@ -262,75 +203,14 @@ export const logout = async (req: Request, res: Response, next: NextFunction): P
     }
 };
 
-/**
- * Get profile of currently logged in user
- */
 export const getProfile = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         if (!req.user) {
             res.status(401).json({ success: false, error: "Not authorized." });
             return;
         }
-
-        res.status(200).json({
-            success: true,
-            user: req.user
-        });
+        res.status(200).json({ success: true, user: req.user });
     } catch (error) {
-        next(error);
-    }
-};
-
-/**
- * Direct login or auto-register patient by Phone Number and Name
- */
-export const patientLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { name, phone_number, number, phone } = req.body;
-        const inputPhone = phone_number || number || phone;
-
-        if (!inputPhone) {
-            res.status(400).json({ success: false, error: "Please provide your phone number." });
-            return;
-        }
-
-        // Check if patient user already exists
-        let userRes = await pool.query("SELECT * FROM users WHERE phone_number = $1", [inputPhone]);
-
-        // let user: any;
-        // if (userRes.rows.length === 0) {
-        //     // Auto-register new patient
-        //     const patientName = name || `Patient-${inputPhone.slice(-4)}`;
-        //     const newUserRes = await pool.query(
-        //         `INSERT INTO users (name, phone_number, role) 
-        //          VALUES ($1, $2, 'patient') 
-        //          RETURNING id, name, email, phone_number, role, created_at`,
-        //         [patientName, inputPhone]
-        //     );
-        //     user = newUserRes.rows[0];
-        // } else {
-        //     user = userRes.rows[0];
-        //     // If patient provided name, update user name if needed
-        //     if (name && user.name !== name) {
-        //         const updateRes = await pool.query(
-        //             `UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, phone_number, role, created_at`,
-        //             [name, user.id]
-        //         );
-        //         user = updateRes.rows[0];
-        //     }
-        // }
-
-        if (userRes.rows.length === 0) {
-            // Patient not found, inform front-end to show Book Token button
-            res.status(404).json({ success: false, error: "User not found.", showBookToken: true });
-            return;
-        }
-        console.log("userRes", userRes.rows[0]);
-        if (userRes.rows.length !== 0) {
-            sendTokenResponse(userRes.rows[0], 200, res);
-        }
-
-        } catch (error) {
         next(error);
     }
 };

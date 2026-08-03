@@ -1,23 +1,20 @@
-import { createTable } from "./schema.js";
+import { prisma } from "../config/db.js";
 import { seedData } from "./seed.js";
-import { verifyDatabaseConnection } from "../config/db.js";
 
 export const initDb = async () => {
     try {
-        console.log("Starting database initialization...");
+        console.log("Verifying database connection...");
 
-        // Fail fast with a clearer message before schema setup starts.
-        await verifyDatabaseConnection();
-        
-        // 1. Create tables if they do not exist
-        await createTable();
-        
-        // 2. Seed initial testing data
+        // Verify Prisma can connect (schema is managed via migrations)
+        await prisma.$connect();
+        console.log("Database connection established.");
+
+        // Seed initial data if needed
         await seedData();
-        
+
         console.log("Database initialized and ready.");
     } catch (error) {
         console.error("Database initialization failed critically:", error);
-        throw error; // Let the main server crash if database initialization fails
+        throw error;
     }
 };
