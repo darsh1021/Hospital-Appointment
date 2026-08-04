@@ -11,7 +11,7 @@ const isStrongPassword = (password: string): boolean => {
 };
 
 const sendTokenResponse = (
-    user: { id: number; name: string; email: string | null; phoneNumber: string | null; role: string; createdAt: Date },
+    user: { id: number; name: string; email: string | null; phone_number: string | null; role: string; createdAt: Date },
     statusCode: number,
     res: Response
 ) => {
@@ -30,7 +30,7 @@ const sendTokenResponse = (
             id:           user.id,
             name:         user.name,
             email:        user.email,
-            phone_number: user.phoneNumber,
+            phone_number: user.phone_number,
             role:         user.role,
             created_at:   user.createdAt,
         },
@@ -54,7 +54,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
 
         // OTP flow
         if (phone_number) {
-            const existing = await prisma.user.findUnique({ where: { phoneNumber: phone_number } });
+            const existing = await prisma.user.findUnique({ where: { phone_number } });
             if (existing) {
                 res.status(400).json({ success: false, error: "Phone number already registered. Please log in." });
                 return;
@@ -111,7 +111,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
         // OTP flow
         if (phone_number) {
-            const existing = await prisma.user.findUnique({ where: { phoneNumber: phone_number } });
+            const existing = await prisma.user.findUnique({ where: { phone_number } });
             await createAndSendOtp(phone_number);
             res.status(200).json({
                 success: true,
@@ -176,12 +176,12 @@ export const verifyOtp = async (req: Request, res: Response, next: NextFunction)
             return;
         }
 
-        let user = await prisma.user.findUnique({ where: { phoneNumber: phone_number } });
+        let user = await prisma.user.findUnique({ where: { phone_number } });
 
         if (!user) {
             const defaultName = name || `Patient-${phone_number.slice(-4)}`;
             user = await prisma.user.create({
-                data: { name: defaultName, phoneNumber: phone_number, role: "patient" },
+                data: { name: defaultName, phone_number, role: "patient" },
             });
         }
 
