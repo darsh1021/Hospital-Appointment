@@ -9,19 +9,19 @@ export const bookToken = async (req: Request, res: Response, next: NextFunction)
         if (!name || !phone || !doctor_id) {
             res.status(400).json({
                 success: false,
-                error: "Please provide patient name, phone, and doctor_id.",
+                error:   "Please provide patient name, phone, and doctor_id.",
             });
             return;
         }
 
-        // Resolve hospital_id
-        let resolvedHospitalId = hospital_id ? Number(hospital_id) : null;
+        // Resolve hospital_id (staff.id is a String cuid)
+        let resolvedHospitalId = hospital_id as string | undefined;
         if (!resolvedHospitalId) {
-            const doc = await prisma.doctor.findUnique({
-                where:  { id: Number(doctor_id) },
+            const doc = await prisma.staff.findUnique({
+                where:  { id: String(doctor_id) },
                 select: { hospitalId: true },
             });
-            resolvedHospitalId = doc?.hospitalId ?? null;
+            resolvedHospitalId = doc?.hospitalId ?? undefined;
 
             if (!resolvedHospitalId) {
                 const fallback = await prisma.hospital.findFirst({ select: { id: true } });
@@ -30,7 +30,7 @@ export const bookToken = async (req: Request, res: Response, next: NextFunction)
                 } else {
                     res.status(400).json({
                         success: false,
-                        error: "Hospital ID could not be auto-resolved (no hospitals exist in the system).",
+                        error:   "Hospital ID could not be auto-resolved (no hospitals exist in the system).",
                     });
                     return;
                 }
@@ -41,30 +41,40 @@ export const bookToken = async (req: Request, res: Response, next: NextFunction)
             ? new Date(appointment_date)
             : (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
 
+        const appointmentTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
         // Find or create patient
-        let patient = await prisma.user.findUnique({ where: { phoneNumber: phone } });
+        let patient = await prisma.patient.findUnique({ where: { phone } });
         if (!patient) {
-            patient = await prisma.user.create({
-                data: { name, phoneNumber: phone, role: "patient" },
+            patient = await prisma.patient.create({
+                data: {
+                    name,
+                    phone,
+                    gender:     "OTHER",
+                    hospitalId: resolvedHospitalId,
+                },
             });
         }
 
-        const estimatedWaitTime = await calculateEstimatedWaitTime(Number(doctor_id), targetDate);
+        const doctorId = String(doctor_id);
+        const estimatedWaitTime = await calculateEstimatedWaitTime(doctorId, targetDate);
 
         // Next token number
         const maxToken = await prisma.appointment.aggregate({
-            where:   { doctorId: Number(doctor_id), appointmentDate: targetDate },
-            _max:    { tokenNumber: true },
+            where: { doctorId, appointmentDate: targetDate },
+            _max:  { tokenNumber: true },
         });
         const tokenNumber = (maxToken._max.tokenNumber ?? 0) + 1;
 
         const newAppointment = await prisma.appointment.create({
             data: {
                 patientId:       patient.id,
-                doctorId:        Number(doctor_id),
+                doctorId,
                 hospitalId:      resolvedHospitalId,
                 appointmentDate: targetDate,
+                appointmentTime,
                 tokenNumber,
+                bookingSource:   "ONLINE",
                 status:          "scheduled",
                 symptoms:        symptoms ?? null,
             },

@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import { prisma } from "../config/db.js";
 import { AuthenticatedRequest } from "../middleware/authMiddleware.js";
+import { AppointmentStatus } from "../../generated/prisma/client.js";
 
 export const getPatientAppointments = async (
     req: AuthenticatedRequest,
@@ -14,7 +15,7 @@ export const getPatientAppointments = async (
         const appointments = await prisma.appointment.findMany({
             where:   { patientId },
             include: {
-                doctor:   { include: { user: { select: { name: true } } } },
+                doctor:   { select: { name: true, specialization: true } },
                 hospital: { select: { name: true, address: true } },
             },
             orderBy: [{ appointmentDate: "desc" }, { tokenNumber: "asc" }],
@@ -28,7 +29,7 @@ export const getPatientAppointments = async (
             symptoms:              a.symptoms,
             prescription:          a.prescription,
             created_at:            a.createdAt,
-            doctor_name:           a.doctor.user.name,
+            doctor_name:           a.doctor.name,
             doctor_specialization: a.doctor.specialization,
             hospital_name:         a.hospital.name,
             hospital_address:      a.hospital.address,
@@ -50,8 +51,8 @@ export const getPatientPrescriptions = async (
         if (!patientId) { res.status(401).json({ success: false, error: "Unauthorized access." }); return; }
 
         const prescriptions = await prisma.appointment.findMany({
-            where:  { patientId, status: "completed", NOT: { prescription: null } },
-            include: { doctor: { include: { user: { select: { name: true } } } } },
+            where:   { patientId, status: AppointmentStatus.completed, NOT: { prescription: null } },
+            include: { doctor: { select: { name: true, specialization: true } } },
             orderBy: { appointmentDate: "desc" },
         });
 
@@ -60,7 +61,7 @@ export const getPatientPrescriptions = async (
             appointment_date:      a.appointmentDate,
             prescription:          a.prescription,
             symptoms:              a.symptoms,
-            doctor_name:           a.doctor.user.name,
+            doctor_name:           a.doctor.name,
             doctor_specialization: a.doctor.specialization,
         }));
 
@@ -77,23 +78,13 @@ export const updatePatientProfile = async (
 ): Promise<void> => {
     try {
         const patientId = req.user?.id;
-        const { name, email, phone_number } = req.body;
+        const { name, phone, address } = req.body;
 
         if (!patientId) { res.status(401).json({ success: false, error: "Unauthorized access." }); return; }
 
-        if (email) {
-            const conflict = await prisma.user.findFirst({
-                where: { email, NOT: { id: patientId } },
-            });
-            if (conflict) {
-                res.status(400).json({ success: false, error: "Email is already registered to another account." });
-                return;
-            }
-        }
-
-        if (phone_number) {
-            const conflict = await prisma.user.findFirst({
-                where: { phoneNumber: phone_number, NOT: { id: patientId } },
+        if (phone) {
+            const conflict = await prisma.patient.findFirst({
+                where: { phone, NOT: { id: patientId } },
             });
             if (conflict) {
                 res.status(400).json({ success: false, error: "Phone number is already registered to another account." });
@@ -101,26 +92,26 @@ export const updatePatientProfile = async (
             }
         }
 
-        const updated = await prisma.user.update({
+        const updated = await prisma.patient.update({
             where: { id: patientId },
             data: {
-                ...(name         ? { name }                    : {}),
-                ...(email        ? { email }                   : {}),
-                ...(phone_number ? { phoneNumber: phone_number } : {}),
+                ...(name    ? { name }    : {}),
+                ...(phone   ? { phone }   : {}),
+                ...(address ? { address } : {}),
             },
-            select: { id: true, name: true, email: true, phoneNumber: true, role: true, createdAt: true },
+            select: { id: true, name: true, phone: true, address: true, hospitalId: true, createdAt: true },
         });
 
         res.status(200).json({
             success: true,
             message: "Profile updated successfully.",
             user: {
-                id:           updated.id,
-                name:         updated.name,
-                email:        updated.email,
-                phone_number: updated.phoneNumber,
-                role:         updated.role,
-                created_at:   updated.createdAt,
+                id:          updated.id,
+                name:        updated.name,
+                phone:       updated.phone,
+                address:     updated.address,
+                hospital_id: updated.hospitalId,
+                created_at:  updated.createdAt,
             },
         });
     } catch (error) {

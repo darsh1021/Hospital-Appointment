@@ -163,6 +163,7 @@ exports.Prisma.PatientScalarFieldEnum = {
   phone: 'phone',
   gender: 'gender',
   address: 'address',
+  role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -177,9 +178,15 @@ exports.Prisma.AppointmentScalarFieldEnum = {
   appointmentTime: 'appointmentTime',
   followupDate: 'followupDate',
   bookingSource: 'bookingSource',
+  status: 'status',
   treatmentSummary: 'treatmentSummary',
+  symptoms: 'symptoms',
+  prescription: 'prescription',
   priority: 'priority',
   notes: 'notes',
+  checkedInAt: 'checkedInAt',
+  consultationStartedAt: 'consultationStartedAt',
+  completedAt: 'completedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -256,6 +263,14 @@ exports.StaffStatus = exports.$Enums.StaffStatus = {
 exports.BookingSource = exports.$Enums.BookingSource = {
   ONLINE: 'ONLINE',
   WALK_IN: 'WALK_IN'
+};
+
+exports.AppointmentStatus = exports.$Enums.AppointmentStatus = {
+  scheduled: 'scheduled',
+  waiting: 'waiting',
+  in_consultation: 'in_consultation',
+  completed: 'completed',
+  cancelled: 'cancelled'
 };
 
 exports.AppointmentPriority = exports.$Enums.AppointmentPriority = {

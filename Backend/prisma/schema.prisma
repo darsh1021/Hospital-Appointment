@@ -8,116 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model User {
-//   id           Int      @id @default(autoincrement())
-//   name         String   @db.VarChar(255)
-//   email        String?  @unique @db.VarChar(255)
-//   phoneNumber  String?  @unique @map("phone_number") @db.VarChar(50)
-//   password     String?  @db.VarChar(255)
-//   role         Role
-//   createdAt    DateTime @default(now()) @map("created_at")
-
-//   doctor       Doctor?
-//   appointments Appointment[] @relation("PatientAppointments")
-
-//   @@map("users")
-// }
-
-// model Otp {
-//   id          Int      @id @default(autoincrement())
-//   phoneNumber String   @map("phone_number") @db.VarChar(50)
-//   otp         String   @db.VarChar(6)
-//   expiresAt   DateTime @map("expires_at")
-//   createdAt   DateTime @default(now()) @map("created_at")
-
-//   @@map("otps")
-// }
-
-// model Hospital {
-//   id        Int      @id @default(autoincrement())
-//   name      String   @db.VarChar(255)
-//   address   String?  @db.Text
-//   phone     String?  @db.VarChar(50)
-//   createdAt DateTime @default(now()) @map("created_at")
-
-//   doctors      Doctor[]
-//   appointments Appointment[]
-
-//   @@map("hospitals")
-// }
-
-// model Doctor {
-//   id              Int      @id @default(autoincrement())
-//   userId          Int      @unique @map("user_id")
-//   hospitalId      Int?     @map("hospital_id")
-//   specialization  String   @db.VarChar(255)
-//   consultationFee Decimal  @default(0.00) @map("consultation_fee") @db.Decimal(10, 2)
-//   isAvailable     Boolean  @default(true) @map("is_available")
-//   createdAt       DateTime @default(now()) @map("created_at")
-
-//   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   hospital     Hospital?     @relation(fields: [hospitalId], references: [id], onDelete: SetNull)
-//   appointments Appointment[]
-
-//   @@map("doctors")
-// }
-
-// model Appointment {
-//   id                    Int               @id @default(autoincrement())
-//   patientId             Int               @map("patient_id")
-//   doctorId              Int               @map("doctor_id")
-//   hospitalId            Int               @map("hospital_id")
-//   appointmentDate       DateTime          @map("appointment_date") @db.Date
-//   tokenNumber           Int               @map("token_number")
-//   status                AppointmentStatus @default(scheduled)
-//   symptoms              String?           @db.Text
-//   prescription          String?           @db.Text
-//   checkedInAt           DateTime?         @map("checked_in_at")
-//   consultationStartedAt DateTime?         @map("consultation_started_at")
-//   completedAt           DateTime?         @map("completed_at")
-//   createdAt             DateTime          @default(now()) @map("created_at")
-
-//   patient  User      @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
-//   doctor   Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-//   hospital Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
-//   payments Payment[]
-
-//   @@map("appointments")
-// }
-
-// model Payment {
-//   id            Int           @id @default(autoincrement())
-//   appointmentId Int           @map("appointment_id")
-//   amount        Decimal       @db.Decimal(10, 2)
-//   method        PaymentMethod
-//   createdAt     DateTime      @default(now()) @map("created_at")
-
-//   appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
-
-//   @@map("payments")
-// }
-
-// enum Role {
-//   admin
-//   doctor
-//   reception
-//   patient
-// }
-
-// enum AppointmentStatus {
-//   scheduled
-//   waiting
-//   in_consultation @map("in-consultation")
-//   completed
-//   cancelled
-// }
-
-// enum PaymentMethod {
-//   cash
-//   card
-//   upi
-// }
-
 
 // =======================
 // ENUMS
@@ -144,6 +34,14 @@ enum StaffStatus {
 enum AppointmentPriority {
   NORMAL
   CRITICAL
+}
+
+enum AppointmentStatus {
+  scheduled
+  waiting
+  in_consultation @map("in-consultation")
+  completed
+  cancelled
 }
 
 enum BookingSource {
@@ -240,6 +138,7 @@ model Patient {
   phone String @unique
   gender Gender
   address String?
+  role String @default("PATIENT")
   appointments Appointment[]
   payments Payment[]
   otp OTP[]
@@ -249,7 +148,7 @@ model Patient {
 
   @@index([hospitalId])
 }
-
+ 
 // =======================
 // APPOINTMENT
 // =======================
@@ -271,9 +170,15 @@ model Appointment {
   appointmentTime String
   followupDate DateTime?
   bookingSource BookingSource
+  status AppointmentStatus @default(waiting)
   treatmentSummary String?
+  symptoms String?
+  prescription String?
   priority AppointmentPriority @default(NORMAL)
   notes String?
+  checkedInAt DateTime?
+  consultationStartedAt DateTime?
+  completedAt DateTime?
   payment Payment?
 
   createdAt DateTime @default(now())

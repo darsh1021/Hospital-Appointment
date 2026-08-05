@@ -4,12 +4,13 @@ import { prisma } from "../config/db.js";
 
 export interface AuthenticatedRequest extends Request {
     user?: {
-        id: number;
+        id: string;
         name: string;
         email: string | null;
-        phone_number: string | null;
+        phone: string | null;
         role: string;
-        created_at: Date;
+        hospitalId: string | null;
+        createdAt: Date;
     };
 }
 
@@ -38,7 +39,7 @@ export const protect = async (
             token = req.headers.authorization.split(" ")[1];
         } else if (req.headers.cookie) {
             const cookies = parseCookies(req.headers.cookie);
-            token = cookies["token"];
+            token = cookies["token"] as string;
         }
 
         if (!token) {
@@ -48,40 +49,84 @@ export const protect = async (
         }
 
         let decoded: any;
+
         try {
             decoded = verifyToken(token);
+            console.log("Decoded:", decoded)
         } catch {
             const error: any = new Error("Invalid or expired authentication token. Please log in again.");
             error.statusCode = 401;
             return next(error);
         }
 
-        const user = await prisma.user.findUnique({
-            where: { id: decoded.id },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                phoneNumber: true,
-                role: true,
-                createdAt: true,
-            },
-        });
+        // Patient tokens carry role: "patient"
+        if (decoded.role === "patient") {
+            const patient = await prisma.patient.findUnique({
+                where: { id: decoded.id },
+                select: {
+                    id:         true,
+                    name:       true,
+                    phone:      true,
+                    hospitalId: true,
+                    createdAt:  true,
+                    updatedAt:  true,
+                },
+            });
 
-        if (!user) {
-            const error: any = new Error("The user belonging to this token no longer exists.");
-            error.statusCode = 401;
-            return next(error);
+            if (!patient) {
+                const error: any = new Error("Token is Invalid or Expired. Please Login.");
+                error.statusCode = 401;
+                return next(error);
+            }
+
+            req.user = {
+                id:         patient.id,
+                name:       patient.name,
+                email:      null,
+                phone:      patient.phone,
+                role:       "patient",
+                hospitalId: patient.hospitalId,
+                createdAt:  patient.createdAt,
+            };
+        } else {
+            // Staff tokens (ADMIN, DOCTOR, RECEPTIONIST)
+            const staff = await prisma.staff.findUnique({
+                where: { id: decoded.id },
+                select: {
+                    id:         true,
+                    name:       true,
+                    email:      true,
+                    phone:      true,
+                    role:       true,
+                    hospitalId: true,
+                    createdAt:  true,
+                },
+            });
+
+            if (!staff) {
+                const error: any = new Error("The user belonging to this token no longer exists.");
+                error.statusCode = 401;
+                return next(error);
+            }
+
+            // Map StaffRole enum values to lowercase role strings used in restrictTo()
+            const roleMap: Record<string, string> = {
+                ADMIN:        "admin",
+                DOCTOR:       "doctor",
+                RECEPTIONIST: "reception",
+            };
+
+            req.user = {
+                id:         staff.id,
+                name:       staff.name,
+                email:      staff.email,
+                phone:      staff.phone,
+                role:       roleMap[staff.role] ?? staff.role.toLowerCase(),
+                hospitalId: staff.hospitalId,
+                createdAt:  staff.createdAt,
+            };
         }
 
-        req.user = {
-            id:           user.id,
-            name:         user.name,
-            email:        user.email,
-            phone_number: user.phoneNumber,
-            role:         user.role,
-            created_at:   user.createdAt,
-        };
         next();
     } catch (error) {
         next(error);

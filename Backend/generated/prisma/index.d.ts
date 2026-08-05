@@ -88,6 +88,17 @@ export const AppointmentPriority: {
 export type AppointmentPriority = (typeof AppointmentPriority)[keyof typeof AppointmentPriority]
 
 
+export const AppointmentStatus: {
+  scheduled: 'scheduled',
+  waiting: 'waiting',
+  in_consultation: 'in_consultation',
+  completed: 'completed',
+  cancelled: 'cancelled'
+};
+
+export type AppointmentStatus = (typeof AppointmentStatus)[keyof typeof AppointmentStatus]
+
+
 export const BookingSource: {
   ONLINE: 'ONLINE',
   WALK_IN: 'WALK_IN'
@@ -140,6 +151,10 @@ export const StaffStatus: typeof $Enums.StaffStatus
 export type AppointmentPriority = $Enums.AppointmentPriority
 
 export const AppointmentPriority: typeof $Enums.AppointmentPriority
+
+export type AppointmentStatus = $Enums.AppointmentStatus
+
+export const AppointmentStatus: typeof $Enums.AppointmentStatus
 
 export type BookingSource = $Enums.BookingSource
 
@@ -4229,6 +4244,7 @@ export namespace Prisma {
     phone: string | null
     gender: $Enums.Gender | null
     address: string | null
+    role: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4240,6 +4256,7 @@ export namespace Prisma {
     phone: string | null
     gender: $Enums.Gender | null
     address: string | null
+    role: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4251,6 +4268,7 @@ export namespace Prisma {
     phone: number
     gender: number
     address: number
+    role: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4264,6 +4282,7 @@ export namespace Prisma {
     phone?: true
     gender?: true
     address?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4275,6 +4294,7 @@ export namespace Prisma {
     phone?: true
     gender?: true
     address?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4286,6 +4306,7 @@ export namespace Prisma {
     phone?: true
     gender?: true
     address?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -4370,6 +4391,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address: string | null
+    role: string
     createdAt: Date
     updatedAt: Date
     _count: PatientCountAggregateOutputType | null
@@ -4398,6 +4420,7 @@ export namespace Prisma {
     phone?: boolean
     gender?: boolean
     address?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     hospital?: boolean | HospitalDefaultArgs<ExtArgs>
@@ -4414,6 +4437,7 @@ export namespace Prisma {
     phone?: boolean
     gender?: boolean
     address?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     hospital?: boolean | HospitalDefaultArgs<ExtArgs>
@@ -4426,6 +4450,7 @@ export namespace Prisma {
     phone?: boolean
     gender?: boolean
     address?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     hospital?: boolean | HospitalDefaultArgs<ExtArgs>
@@ -4438,11 +4463,12 @@ export namespace Prisma {
     phone?: boolean
     gender?: boolean
     address?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PatientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "hospitalId" | "name" | "phone" | "gender" | "address" | "createdAt" | "updatedAt", ExtArgs["result"]["patient"]>
+  export type PatientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "hospitalId" | "name" | "phone" | "gender" | "address" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["patient"]>
   export type PatientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     hospital?: boolean | HospitalDefaultArgs<ExtArgs>
     appointments?: boolean | Patient$appointmentsArgs<ExtArgs>
@@ -4472,6 +4498,7 @@ export namespace Prisma {
       phone: string
       gender: $Enums.Gender
       address: string | null
+      role: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["patient"]>
@@ -4907,6 +4934,7 @@ export namespace Prisma {
     readonly phone: FieldRef<"Patient", 'String'>
     readonly gender: FieldRef<"Patient", 'Gender'>
     readonly address: FieldRef<"Patient", 'String'>
+    readonly role: FieldRef<"Patient", 'String'>
     readonly createdAt: FieldRef<"Patient", 'DateTime'>
     readonly updatedAt: FieldRef<"Patient", 'DateTime'>
   }
@@ -5425,9 +5453,15 @@ export namespace Prisma {
     appointmentTime: string | null
     followupDate: Date | null
     bookingSource: $Enums.BookingSource | null
+    status: $Enums.AppointmentStatus | null
     treatmentSummary: string | null
+    symptoms: string | null
+    prescription: string | null
     priority: $Enums.AppointmentPriority | null
     notes: string | null
+    checkedInAt: Date | null
+    consultationStartedAt: Date | null
+    completedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5442,9 +5476,15 @@ export namespace Prisma {
     appointmentTime: string | null
     followupDate: Date | null
     bookingSource: $Enums.BookingSource | null
+    status: $Enums.AppointmentStatus | null
     treatmentSummary: string | null
+    symptoms: string | null
+    prescription: string | null
     priority: $Enums.AppointmentPriority | null
     notes: string | null
+    checkedInAt: Date | null
+    consultationStartedAt: Date | null
+    completedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5459,9 +5499,15 @@ export namespace Prisma {
     appointmentTime: number
     followupDate: number
     bookingSource: number
+    status: number
     treatmentSummary: number
+    symptoms: number
+    prescription: number
     priority: number
     notes: number
+    checkedInAt: number
+    consultationStartedAt: number
+    completedAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -5486,9 +5532,15 @@ export namespace Prisma {
     appointmentTime?: true
     followupDate?: true
     bookingSource?: true
+    status?: true
     treatmentSummary?: true
+    symptoms?: true
+    prescription?: true
     priority?: true
     notes?: true
+    checkedInAt?: true
+    consultationStartedAt?: true
+    completedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5503,9 +5555,15 @@ export namespace Prisma {
     appointmentTime?: true
     followupDate?: true
     bookingSource?: true
+    status?: true
     treatmentSummary?: true
+    symptoms?: true
+    prescription?: true
     priority?: true
     notes?: true
+    checkedInAt?: true
+    consultationStartedAt?: true
+    completedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5520,9 +5578,15 @@ export namespace Prisma {
     appointmentTime?: true
     followupDate?: true
     bookingSource?: true
+    status?: true
     treatmentSummary?: true
+    symptoms?: true
+    prescription?: true
     priority?: true
     notes?: true
+    checkedInAt?: true
+    consultationStartedAt?: true
+    completedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -5624,9 +5688,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate: Date | null
     bookingSource: $Enums.BookingSource
+    status: $Enums.AppointmentStatus
     treatmentSummary: string | null
+    symptoms: string | null
+    prescription: string | null
     priority: $Enums.AppointmentPriority
     notes: string | null
+    checkedInAt: Date | null
+    consultationStartedAt: Date | null
+    completedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: AppointmentCountAggregateOutputType | null
@@ -5660,9 +5730,15 @@ export namespace Prisma {
     appointmentTime?: boolean
     followupDate?: boolean
     bookingSource?: boolean
+    status?: boolean
     treatmentSummary?: boolean
+    symptoms?: boolean
+    prescription?: boolean
     priority?: boolean
     notes?: boolean
+    checkedInAt?: boolean
+    consultationStartedAt?: boolean
+    completedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     hospital?: boolean | HospitalDefaultArgs<ExtArgs>
@@ -5681,9 +5757,15 @@ export namespace Prisma {
     appointmentTime?: boolean
     followupDate?: boolean
     bookingSource?: boolean
+    status?: boolean
     treatmentSummary?: boolean
+    symptoms?: boolean
+    prescription?: boolean
     priority?: boolean
     notes?: boolean
+    checkedInAt?: boolean
+    consultationStartedAt?: boolean
+    completedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     hospital?: boolean | HospitalDefaultArgs<ExtArgs>
@@ -5701,9 +5783,15 @@ export namespace Prisma {
     appointmentTime?: boolean
     followupDate?: boolean
     bookingSource?: boolean
+    status?: boolean
     treatmentSummary?: boolean
+    symptoms?: boolean
+    prescription?: boolean
     priority?: boolean
     notes?: boolean
+    checkedInAt?: boolean
+    consultationStartedAt?: boolean
+    completedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     hospital?: boolean | HospitalDefaultArgs<ExtArgs>
@@ -5721,14 +5809,20 @@ export namespace Prisma {
     appointmentTime?: boolean
     followupDate?: boolean
     bookingSource?: boolean
+    status?: boolean
     treatmentSummary?: boolean
+    symptoms?: boolean
+    prescription?: boolean
     priority?: boolean
     notes?: boolean
+    checkedInAt?: boolean
+    consultationStartedAt?: boolean
+    completedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AppointmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "hospitalId" | "patientId" | "doctorId" | "tokenNumber" | "appointmentDate" | "appointmentTime" | "followupDate" | "bookingSource" | "treatmentSummary" | "priority" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["appointment"]>
+  export type AppointmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "hospitalId" | "patientId" | "doctorId" | "tokenNumber" | "appointmentDate" | "appointmentTime" | "followupDate" | "bookingSource" | "status" | "treatmentSummary" | "symptoms" | "prescription" | "priority" | "notes" | "checkedInAt" | "consultationStartedAt" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["appointment"]>
   export type AppointmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     hospital?: boolean | HospitalDefaultArgs<ExtArgs>
     patient?: boolean | PatientDefaultArgs<ExtArgs>
@@ -5764,9 +5858,15 @@ export namespace Prisma {
       appointmentTime: string
       followupDate: Date | null
       bookingSource: $Enums.BookingSource
+      status: $Enums.AppointmentStatus
       treatmentSummary: string | null
+      symptoms: string | null
+      prescription: string | null
       priority: $Enums.AppointmentPriority
       notes: string | null
+      checkedInAt: Date | null
+      consultationStartedAt: Date | null
+      completedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["appointment"]>
@@ -6205,9 +6305,15 @@ export namespace Prisma {
     readonly appointmentTime: FieldRef<"Appointment", 'String'>
     readonly followupDate: FieldRef<"Appointment", 'DateTime'>
     readonly bookingSource: FieldRef<"Appointment", 'BookingSource'>
+    readonly status: FieldRef<"Appointment", 'AppointmentStatus'>
     readonly treatmentSummary: FieldRef<"Appointment", 'String'>
+    readonly symptoms: FieldRef<"Appointment", 'String'>
+    readonly prescription: FieldRef<"Appointment", 'String'>
     readonly priority: FieldRef<"Appointment", 'AppointmentPriority'>
     readonly notes: FieldRef<"Appointment", 'String'>
+    readonly checkedInAt: FieldRef<"Appointment", 'DateTime'>
+    readonly consultationStartedAt: FieldRef<"Appointment", 'DateTime'>
+    readonly completedAt: FieldRef<"Appointment", 'DateTime'>
     readonly createdAt: FieldRef<"Appointment", 'DateTime'>
     readonly updatedAt: FieldRef<"Appointment", 'DateTime'>
   }
@@ -10110,6 +10216,7 @@ export namespace Prisma {
     phone: 'phone',
     gender: 'gender',
     address: 'address',
+    role: 'role',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -10127,9 +10234,15 @@ export namespace Prisma {
     appointmentTime: 'appointmentTime',
     followupDate: 'followupDate',
     bookingSource: 'bookingSource',
+    status: 'status',
     treatmentSummary: 'treatmentSummary',
+    symptoms: 'symptoms',
+    prescription: 'prescription',
     priority: 'priority',
     notes: 'notes',
+    checkedInAt: 'checkedInAt',
+    consultationStartedAt: 'consultationStartedAt',
+    completedAt: 'completedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -10314,6 +10427,20 @@ export namespace Prisma {
    * Reference to a field of type 'BookingSource[]'
    */
   export type ListEnumBookingSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingSource[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'AppointmentStatus'
+   */
+  export type EnumAppointmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AppointmentStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'AppointmentStatus[]'
+   */
+  export type ListEnumAppointmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AppointmentStatus[]'>
     
 
 
@@ -10636,6 +10763,7 @@ export namespace Prisma {
     phone?: StringFilter<"Patient"> | string
     gender?: EnumGenderFilter<"Patient"> | $Enums.Gender
     address?: StringNullableFilter<"Patient"> | string | null
+    role?: StringFilter<"Patient"> | string
     createdAt?: DateTimeFilter<"Patient"> | Date | string
     updatedAt?: DateTimeFilter<"Patient"> | Date | string
     hospital?: XOR<HospitalScalarRelationFilter, HospitalWhereInput>
@@ -10651,6 +10779,7 @@ export namespace Prisma {
     phone?: SortOrder
     gender?: SortOrder
     address?: SortOrderInput | SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     hospital?: HospitalOrderByWithRelationInput
@@ -10669,6 +10798,7 @@ export namespace Prisma {
     name?: StringFilter<"Patient"> | string
     gender?: EnumGenderFilter<"Patient"> | $Enums.Gender
     address?: StringNullableFilter<"Patient"> | string | null
+    role?: StringFilter<"Patient"> | string
     createdAt?: DateTimeFilter<"Patient"> | Date | string
     updatedAt?: DateTimeFilter<"Patient"> | Date | string
     hospital?: XOR<HospitalScalarRelationFilter, HospitalWhereInput>
@@ -10684,6 +10814,7 @@ export namespace Prisma {
     phone?: SortOrder
     gender?: SortOrder
     address?: SortOrderInput | SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PatientCountOrderByAggregateInput
@@ -10701,6 +10832,7 @@ export namespace Prisma {
     phone?: StringWithAggregatesFilter<"Patient"> | string
     gender?: EnumGenderWithAggregatesFilter<"Patient"> | $Enums.Gender
     address?: StringNullableWithAggregatesFilter<"Patient"> | string | null
+    role?: StringWithAggregatesFilter<"Patient"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Patient"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Patient"> | Date | string
   }
@@ -10718,9 +10850,15 @@ export namespace Prisma {
     appointmentTime?: StringFilter<"Appointment"> | string
     followupDate?: DateTimeNullableFilter<"Appointment"> | Date | string | null
     bookingSource?: EnumBookingSourceFilter<"Appointment"> | $Enums.BookingSource
+    status?: EnumAppointmentStatusFilter<"Appointment"> | $Enums.AppointmentStatus
     treatmentSummary?: StringNullableFilter<"Appointment"> | string | null
+    symptoms?: StringNullableFilter<"Appointment"> | string | null
+    prescription?: StringNullableFilter<"Appointment"> | string | null
     priority?: EnumAppointmentPriorityFilter<"Appointment"> | $Enums.AppointmentPriority
     notes?: StringNullableFilter<"Appointment"> | string | null
+    checkedInAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
+    consultationStartedAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
     createdAt?: DateTimeFilter<"Appointment"> | Date | string
     updatedAt?: DateTimeFilter<"Appointment"> | Date | string
     hospital?: XOR<HospitalScalarRelationFilter, HospitalWhereInput>
@@ -10739,9 +10877,15 @@ export namespace Prisma {
     appointmentTime?: SortOrder
     followupDate?: SortOrderInput | SortOrder
     bookingSource?: SortOrder
+    status?: SortOrder
     treatmentSummary?: SortOrderInput | SortOrder
+    symptoms?: SortOrderInput | SortOrder
+    prescription?: SortOrderInput | SortOrder
     priority?: SortOrder
     notes?: SortOrderInput | SortOrder
+    checkedInAt?: SortOrderInput | SortOrder
+    consultationStartedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     hospital?: HospitalOrderByWithRelationInput
@@ -10763,9 +10907,15 @@ export namespace Prisma {
     appointmentTime?: StringFilter<"Appointment"> | string
     followupDate?: DateTimeNullableFilter<"Appointment"> | Date | string | null
     bookingSource?: EnumBookingSourceFilter<"Appointment"> | $Enums.BookingSource
+    status?: EnumAppointmentStatusFilter<"Appointment"> | $Enums.AppointmentStatus
     treatmentSummary?: StringNullableFilter<"Appointment"> | string | null
+    symptoms?: StringNullableFilter<"Appointment"> | string | null
+    prescription?: StringNullableFilter<"Appointment"> | string | null
     priority?: EnumAppointmentPriorityFilter<"Appointment"> | $Enums.AppointmentPriority
     notes?: StringNullableFilter<"Appointment"> | string | null
+    checkedInAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
+    consultationStartedAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
     createdAt?: DateTimeFilter<"Appointment"> | Date | string
     updatedAt?: DateTimeFilter<"Appointment"> | Date | string
     hospital?: XOR<HospitalScalarRelationFilter, HospitalWhereInput>
@@ -10784,9 +10934,15 @@ export namespace Prisma {
     appointmentTime?: SortOrder
     followupDate?: SortOrderInput | SortOrder
     bookingSource?: SortOrder
+    status?: SortOrder
     treatmentSummary?: SortOrderInput | SortOrder
+    symptoms?: SortOrderInput | SortOrder
+    prescription?: SortOrderInput | SortOrder
     priority?: SortOrder
     notes?: SortOrderInput | SortOrder
+    checkedInAt?: SortOrderInput | SortOrder
+    consultationStartedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: AppointmentCountOrderByAggregateInput
@@ -10809,9 +10965,15 @@ export namespace Prisma {
     appointmentTime?: StringWithAggregatesFilter<"Appointment"> | string
     followupDate?: DateTimeNullableWithAggregatesFilter<"Appointment"> | Date | string | null
     bookingSource?: EnumBookingSourceWithAggregatesFilter<"Appointment"> | $Enums.BookingSource
+    status?: EnumAppointmentStatusWithAggregatesFilter<"Appointment"> | $Enums.AppointmentStatus
     treatmentSummary?: StringNullableWithAggregatesFilter<"Appointment"> | string | null
+    symptoms?: StringNullableWithAggregatesFilter<"Appointment"> | string | null
+    prescription?: StringNullableWithAggregatesFilter<"Appointment"> | string | null
     priority?: EnumAppointmentPriorityWithAggregatesFilter<"Appointment"> | $Enums.AppointmentPriority
     notes?: StringNullableWithAggregatesFilter<"Appointment"> | string | null
+    checkedInAt?: DateTimeNullableWithAggregatesFilter<"Appointment"> | Date | string | null
+    consultationStartedAt?: DateTimeNullableWithAggregatesFilter<"Appointment"> | Date | string | null
+    completedAt?: DateTimeNullableWithAggregatesFilter<"Appointment"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Appointment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Appointment"> | Date | string
   }
@@ -11328,6 +11490,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     hospital: HospitalCreateNestedOneWithoutPatientsInput
@@ -11343,6 +11506,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutPatientInput
@@ -11356,6 +11520,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hospital?: HospitalUpdateOneRequiredWithoutPatientsNestedInput
@@ -11371,6 +11536,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     appointments?: AppointmentUncheckedUpdateManyWithoutPatientNestedInput
@@ -11385,6 +11551,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11395,6 +11562,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11406,6 +11574,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11417,9 +11586,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     hospital: HospitalCreateNestedOneWithoutAppointmentsInput
@@ -11438,9 +11613,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payment?: PaymentUncheckedCreateNestedOneWithoutAppointmentInput
@@ -11453,9 +11634,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hospital?: HospitalUpdateOneRequiredWithoutAppointmentsNestedInput
@@ -11474,9 +11661,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payment?: PaymentUncheckedUpdateOneWithoutAppointmentNestedInput
@@ -11492,9 +11685,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11506,9 +11705,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11523,9 +11728,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -12181,6 +12392,7 @@ export namespace Prisma {
     phone?: SortOrder
     gender?: SortOrder
     address?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -12192,6 +12404,7 @@ export namespace Prisma {
     phone?: SortOrder
     gender?: SortOrder
     address?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -12203,6 +12416,7 @@ export namespace Prisma {
     phone?: SortOrder
     gender?: SortOrder
     address?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -12223,6 +12437,13 @@ export namespace Prisma {
     in?: $Enums.BookingSource[] | ListEnumBookingSourceFieldRefInput<$PrismaModel>
     notIn?: $Enums.BookingSource[] | ListEnumBookingSourceFieldRefInput<$PrismaModel>
     not?: NestedEnumBookingSourceFilter<$PrismaModel> | $Enums.BookingSource
+  }
+
+  export type EnumAppointmentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.AppointmentStatus | EnumAppointmentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.AppointmentStatus[] | ListEnumAppointmentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AppointmentStatus[] | ListEnumAppointmentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumAppointmentStatusFilter<$PrismaModel> | $Enums.AppointmentStatus
   }
 
   export type EnumAppointmentPriorityFilter<$PrismaModel = never> = {
@@ -12257,9 +12478,15 @@ export namespace Prisma {
     appointmentTime?: SortOrder
     followupDate?: SortOrder
     bookingSource?: SortOrder
+    status?: SortOrder
     treatmentSummary?: SortOrder
+    symptoms?: SortOrder
+    prescription?: SortOrder
     priority?: SortOrder
     notes?: SortOrder
+    checkedInAt?: SortOrder
+    consultationStartedAt?: SortOrder
+    completedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -12278,9 +12505,15 @@ export namespace Prisma {
     appointmentTime?: SortOrder
     followupDate?: SortOrder
     bookingSource?: SortOrder
+    status?: SortOrder
     treatmentSummary?: SortOrder
+    symptoms?: SortOrder
+    prescription?: SortOrder
     priority?: SortOrder
     notes?: SortOrder
+    checkedInAt?: SortOrder
+    consultationStartedAt?: SortOrder
+    completedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -12295,9 +12528,15 @@ export namespace Prisma {
     appointmentTime?: SortOrder
     followupDate?: SortOrder
     bookingSource?: SortOrder
+    status?: SortOrder
     treatmentSummary?: SortOrder
+    symptoms?: SortOrder
+    prescription?: SortOrder
     priority?: SortOrder
     notes?: SortOrder
+    checkedInAt?: SortOrder
+    consultationStartedAt?: SortOrder
+    completedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -12330,6 +12569,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBookingSourceFilter<$PrismaModel>
     _max?: NestedEnumBookingSourceFilter<$PrismaModel>
+  }
+
+  export type EnumAppointmentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AppointmentStatus | EnumAppointmentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.AppointmentStatus[] | ListEnumAppointmentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AppointmentStatus[] | ListEnumAppointmentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumAppointmentStatusWithAggregatesFilter<$PrismaModel> | $Enums.AppointmentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAppointmentStatusFilter<$PrismaModel>
+    _max?: NestedEnumAppointmentStatusFilter<$PrismaModel>
   }
 
   export type EnumAppointmentPriorityWithAggregatesFilter<$PrismaModel = never> = {
@@ -13065,6 +13314,10 @@ export namespace Prisma {
     set?: $Enums.BookingSource
   }
 
+  export type EnumAppointmentStatusFieldUpdateOperationsInput = {
+    set?: $Enums.AppointmentStatus
+  }
+
   export type EnumAppointmentPriorityFieldUpdateOperationsInput = {
     set?: $Enums.AppointmentPriority
   }
@@ -13443,6 +13696,13 @@ export namespace Prisma {
     not?: NestedEnumBookingSourceFilter<$PrismaModel> | $Enums.BookingSource
   }
 
+  export type NestedEnumAppointmentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.AppointmentStatus | EnumAppointmentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.AppointmentStatus[] | ListEnumAppointmentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AppointmentStatus[] | ListEnumAppointmentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumAppointmentStatusFilter<$PrismaModel> | $Enums.AppointmentStatus
+  }
+
   export type NestedEnumAppointmentPriorityFilter<$PrismaModel = never> = {
     equals?: $Enums.AppointmentPriority | EnumAppointmentPriorityFieldRefInput<$PrismaModel>
     in?: $Enums.AppointmentPriority[] | ListEnumAppointmentPriorityFieldRefInput<$PrismaModel>
@@ -13485,6 +13745,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBookingSourceFilter<$PrismaModel>
     _max?: NestedEnumBookingSourceFilter<$PrismaModel>
+  }
+
+  export type NestedEnumAppointmentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AppointmentStatus | EnumAppointmentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.AppointmentStatus[] | ListEnumAppointmentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AppointmentStatus[] | ListEnumAppointmentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumAppointmentStatusWithAggregatesFilter<$PrismaModel> | $Enums.AppointmentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAppointmentStatusFilter<$PrismaModel>
+    _max?: NestedEnumAppointmentStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumAppointmentPriorityWithAggregatesFilter<$PrismaModel = never> = {
@@ -13660,6 +13930,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     appointments?: AppointmentCreateNestedManyWithoutPatientInput
@@ -13673,6 +13944,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutPatientInput
@@ -13697,9 +13969,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     patient: PatientCreateNestedOneWithoutAppointmentsInput
@@ -13716,9 +13994,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payment?: PaymentUncheckedCreateNestedOneWithoutAppointmentInput
@@ -13843,6 +14127,7 @@ export namespace Prisma {
     phone?: StringFilter<"Patient"> | string
     gender?: EnumGenderFilter<"Patient"> | $Enums.Gender
     address?: StringNullableFilter<"Patient"> | string | null
+    role?: StringFilter<"Patient"> | string
     createdAt?: DateTimeFilter<"Patient"> | Date | string
     updatedAt?: DateTimeFilter<"Patient"> | Date | string
   }
@@ -13876,9 +14161,15 @@ export namespace Prisma {
     appointmentTime?: StringFilter<"Appointment"> | string
     followupDate?: DateTimeNullableFilter<"Appointment"> | Date | string | null
     bookingSource?: EnumBookingSourceFilter<"Appointment"> | $Enums.BookingSource
+    status?: EnumAppointmentStatusFilter<"Appointment"> | $Enums.AppointmentStatus
     treatmentSummary?: StringNullableFilter<"Appointment"> | string | null
+    symptoms?: StringNullableFilter<"Appointment"> | string | null
+    prescription?: StringNullableFilter<"Appointment"> | string | null
     priority?: EnumAppointmentPriorityFilter<"Appointment"> | $Enums.AppointmentPriority
     notes?: StringNullableFilter<"Appointment"> | string | null
+    checkedInAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
+    consultationStartedAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"Appointment"> | Date | string | null
     createdAt?: DateTimeFilter<"Appointment"> | Date | string
     updatedAt?: DateTimeFilter<"Appointment"> | Date | string
   }
@@ -13968,9 +14259,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     hospital: HospitalCreateNestedOneWithoutAppointmentsInput
@@ -13987,9 +14284,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payment?: PaymentUncheckedCreateNestedOneWithoutAppointmentInput
@@ -14173,9 +14476,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     hospital: HospitalCreateNestedOneWithoutAppointmentsInput
@@ -14192,9 +14501,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payment?: PaymentUncheckedCreateNestedOneWithoutAppointmentInput
@@ -14434,6 +14749,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     hospital: HospitalCreateNestedOneWithoutPatientsInput
@@ -14448,6 +14764,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutPatientInput
@@ -14609,6 +14926,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hospital?: HospitalUpdateOneRequiredWithoutPatientsNestedInput
@@ -14623,6 +14941,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutPatientNestedInput
@@ -14774,6 +15093,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     hospital: HospitalCreateNestedOneWithoutPatientsInput
@@ -14788,6 +15108,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutPatientInput
@@ -14806,9 +15127,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     hospital: HospitalCreateNestedOneWithoutAppointmentsInput
@@ -14826,9 +15153,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14902,6 +15235,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hospital?: HospitalUpdateOneRequiredWithoutPatientsNestedInput
@@ -14916,6 +15250,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     appointments?: AppointmentUncheckedUpdateManyWithoutPatientNestedInput
@@ -14940,9 +15275,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hospital?: HospitalUpdateOneRequiredWithoutAppointmentsNestedInput
@@ -14960,9 +15301,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14973,6 +15320,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     hospital: HospitalCreateNestedOneWithoutPatientsInput
@@ -14987,6 +15335,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutPatientInput
@@ -15015,6 +15364,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hospital?: HospitalUpdateOneRequiredWithoutPatientsNestedInput
@@ -15029,6 +15379,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     appointments?: AppointmentUncheckedUpdateManyWithoutPatientNestedInput
@@ -15160,6 +15511,7 @@ export namespace Prisma {
     phone: string
     gender: $Enums.Gender
     address?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15173,9 +15525,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15264,6 +15622,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     appointments?: AppointmentUpdateManyWithoutPatientNestedInput
@@ -15277,6 +15636,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     appointments?: AppointmentUncheckedUpdateManyWithoutPatientNestedInput
@@ -15290,6 +15650,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15301,9 +15662,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     patient?: PatientUpdateOneRequiredWithoutAppointmentsNestedInput
@@ -15320,9 +15687,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payment?: PaymentUncheckedUpdateOneWithoutAppointmentNestedInput
@@ -15337,9 +15710,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15404,9 +15783,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15427,9 +15812,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hospital?: HospitalUpdateOneRequiredWithoutAppointmentsNestedInput
@@ -15446,9 +15837,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payment?: PaymentUncheckedUpdateOneWithoutAppointmentNestedInput
@@ -15463,9 +15860,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15506,9 +15909,15 @@ export namespace Prisma {
     appointmentTime: string
     followupDate?: Date | string | null
     bookingSource: $Enums.BookingSource
+    status?: $Enums.AppointmentStatus
     treatmentSummary?: string | null
+    symptoms?: string | null
+    prescription?: string | null
     priority?: $Enums.AppointmentPriority
     notes?: string | null
+    checkedInAt?: Date | string | null
+    consultationStartedAt?: Date | string | null
+    completedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15545,9 +15954,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hospital?: HospitalUpdateOneRequiredWithoutAppointmentsNestedInput
@@ -15564,9 +15979,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payment?: PaymentUncheckedUpdateOneWithoutAppointmentNestedInput
@@ -15581,9 +16002,15 @@ export namespace Prisma {
     appointmentTime?: StringFieldUpdateOperationsInput | string
     followupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingSource?: EnumBookingSourceFieldUpdateOperationsInput | $Enums.BookingSource
+    status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
     treatmentSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    symptoms?: NullableStringFieldUpdateOperationsInput | string | null
+    prescription?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: EnumAppointmentPriorityFieldUpdateOperationsInput | $Enums.AppointmentPriority
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    consultationStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

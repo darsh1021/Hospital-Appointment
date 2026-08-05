@@ -3,7 +3,7 @@ import { prisma } from "../config/db.js";
 import { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 import { emitQueueUpdate } from "../socket/socketManager.js";
 import { calculateEstimatedWaitTime } from "../utils/queueEstimator.js";
-import { AppointmentStatus } from "@prisma/client";
+import { AppointmentStatus } from "../../generated/prisma/client.js";
 
 export const registerPatient = async (
     req: AuthenticatedRequest,
@@ -11,46 +11,44 @@ export const registerPatient = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { name, email, phone_number } = req.body;
+        const { name, phone } = req.body;
 
-        if (!name || !phone_number) {
+        if (!name || !phone) {
             res.status(400).json({ success: false, error: "Please provide patient name and phone number." });
             return;
         }
 
-        const conflict = await prisma.user.findFirst({
-            where: {
-                OR: [
-                    { phoneNumber: phone_number },
-                    ...(email ? [{ email }] : []),
-                ],
-            },
-        });
-
+        const conflict = await prisma.patient.findUnique({ where: { phone } });
         if (conflict) {
             res.status(400).json({
                 success: false,
-                error: "Patient with this phone number or email is already registered.",
+                error:   "Patient with this phone number is already registered.",
             });
             return;
         }
 
-        const newUser = await prisma.user.create({
-            data: { name, email: email ?? null, phoneNumber: phone_number, role: "patient" },
-            select: { id: true, name: true, email: true, phoneNumber: true, role: true, createdAt: true },
+        // Use the receptionist's hospital or fallback
+        const hospitalId = req.user?.hospitalId ?? (await prisma.hospital.findFirst({ select: { id: true } }))?.id;
+        if (!hospitalId) {
+            res.status(400).json({ success: false, error: "No hospital found." });
+            return;
+        }
+
+        const newPatient = await prisma.patient.create({
+            data: {
+                name,
+                phone,
+                gender:     req.body.gender ?? "OTHER",
+                address:    req.body.address ?? null,
+                hospitalId,
+            },
+            select: { id: true, name: true, phone: true, createdAt: true },
         });
 
         res.status(201).json({
             success: true,
             message: "Patient registered successfully.",
-            patient: {
-                id:           newUser.id,
-                name:         newUser.name,
-                email:        newUser.email,
-                phone_number: newUser.phoneNumber,
-                role:         newUser.role,
-                created_at:   newUser.createdAt,
-            },
+            patient: newPatient,
         });
     } catch (error) {
         next(error);
@@ -70,13 +68,14 @@ export const walkIn = async (
             return;
         }
 
-        const patient = await prisma.user.findFirst({
-            where: { id: Number(patient_id), role: "patient" },
-        });
-        if (!patient) { res.status(404).json({ success: false, error: "Patient profile not found." }); return; }
+        const patientId = String(patient_id);
+        const doctorId  = String(doctor_id);
 
-        const doctor = await prisma.doctor.findFirst({
-            where: { id: Number(doctor_id), isAvailable: true },
+        const patient = await prisma.patient.findUnique({ where: { id: patientId } });
+        if (!patient) { res.status(404).json({ success: false, error: "Patient not found." }); return; }
+
+        const doctor = await prisma.staff.findFirst({
+            where:  { id: doctorId, role: "DOCTOR", status: "ACTIVE" },
             select: { id: true, hospitalId: true },
         });
         if (!doctor) {
@@ -84,44 +83,42 @@ export const walkIn = async (
             return;
         }
 
-        let resolvedHospitalId = doctor.hospitalId;
+        const resolvedHospitalId = doctor.hospitalId
+            ?? (await prisma.hospital.findFirst({ select: { id: true } }))?.id;
         if (!resolvedHospitalId) {
-            const fallback = await prisma.hospital.findFirst({ select: { id: true } });
-            if (!fallback) {
-                res.status(400).json({
-                    success: false,
-                    error: "Hospital ID could not be auto-resolved (no hospitals exist in the system).",
-                });
-                return;
-            }
-            resolvedHospitalId = fallback.id;
+            res.status(400).json({ success: false, error: "Hospital ID could not be auto-resolved." });
+            return;
         }
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const estimatedWaitTime = await calculateEstimatedWaitTime(Number(doctor_id), today);
+        const estimatedWaitTime = await calculateEstimatedWaitTime(doctorId, today);
 
         const maxToken = await prisma.appointment.aggregate({
-            where:  { doctorId: Number(doctor_id), appointmentDate: today },
-            _max:   { tokenNumber: true },
+            where: { doctorId, appointmentDate: today },
+            _max:  { tokenNumber: true },
         });
         const tokenNumber = (maxToken._max.tokenNumber ?? 0) + 1;
 
+        const appointmentTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
         const newAppointment = await prisma.appointment.create({
             data: {
-                patientId:       Number(patient_id),
-                doctorId:        Number(doctor_id),
+                patientId:       patientId,
+                doctorId:        doctorId,
                 hospitalId:      resolvedHospitalId,
                 appointmentDate: today,
+                appointmentTime,
                 tokenNumber,
-                status:          "waiting",
+                bookingSource:   "WALK_IN",
+                status:          AppointmentStatus.waiting,
                 symptoms:        symptoms ?? null,
                 checkedInAt:     new Date(),
             },
         });
 
-        emitQueueUpdate(Number(doctor_id), {
+        emitQueueUpdate(doctorId, {
             action:         "appointment_booked",
             appointment_id: newAppointment.id,
             status:         "waiting",
@@ -148,32 +145,38 @@ export const getLiveQueue = async (
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const doctors = await prisma.doctor.findMany({
+        const doctors = await prisma.staff.findMany({
+            where: { role: "DOCTOR" },
             include: {
-                user:         { select: { name: true } },
                 appointments: {
                     where: {
                         appointmentDate: today,
-                        status: { in: ["scheduled", "waiting", "in_consultation"] },
+                        status: {
+                            in: [
+                                AppointmentStatus.scheduled,
+                                AppointmentStatus.waiting,
+                                AppointmentStatus.in_consultation,
+                            ],
+                        },
                     },
-                    include: { patient: { select: { name: true, phoneNumber: true } } },
+                    include: { patient: { select: { name: true, phone: true } } },
                     orderBy: { tokenNumber: "asc" },
                 },
             },
-            orderBy: { user: { name: "asc" } },
+            orderBy: { name: "asc" },
         });
 
         const result = doctors.map((d) => ({
             doctor_id:      d.id,
-            doctor_name:    d.user.name,
+            doctor_name:    d.name,
             specialization: d.specialization,
-            is_available:   d.isAvailable,
+            is_available:   d.status === "ACTIVE",
             queue:          d.appointments.map((a) => ({
                 appointment_id: a.id,
                 token_number:   a.tokenNumber,
                 status:         a.status,
                 patient_name:   a.patient.name,
-                patient_phone:  a.patient.phoneNumber,
+                patient_phone:  a.patient.phone,
             })),
         }));
 
@@ -189,8 +192,8 @@ export const updateAppointmentStatusByReception = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const appointmentId = Number(req.params.id);
-        const { status } = req.body;
+        const appointmentId = String(req.params.id);
+        const { status }    = req.body;
 
         const validStatuses = ["scheduled", "waiting", "in_consultation", "completed", "cancelled"];
         if (!status || !validStatuses.includes(status)) {
@@ -201,7 +204,7 @@ export const updateAppointmentStatusByReception = async (
         const existing = await prisma.appointment.findUnique({ where: { id: appointmentId } });
         if (!existing) { res.status(404).json({ success: false, error: "Appointment not found." }); return; }
 
-        const now = new Date();
+        const now     = new Date();
         const updated = await prisma.appointment.update({
             where: { id: appointmentId },
             data: {
@@ -221,8 +224,8 @@ export const updateAppointmentStatusByReception = async (
         });
 
         res.status(200).json({
-            success: true,
-            message: `Appointment status updated to ${status}.`,
+            success:     true,
+            message:     `Appointment status updated to ${status}.`,
             appointment: updated,
         });
     } catch (error) {
@@ -236,12 +239,12 @@ export const createPayment = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { appointment_id, amount, method } = req.body;
+        const { appointment_id, amount, discount, tax, method } = req.body;
 
         if (!appointment_id || amount === undefined || !method) {
             res.status(400).json({
                 success: false,
-                error: "Please provide appointment_id, amount, and payment method.",
+                error:   "Please provide appointment_id, amount, and payment method.",
             });
             return;
         }
@@ -252,25 +255,38 @@ export const createPayment = async (
             return;
         }
 
-        const validMethods = ["cash", "card", "upi"];
-        if (!validMethods.includes(method.toLowerCase())) {
+        const validMethods = ["CASH", "ONLINE"];
+        const normalizedMethod = String(method).toUpperCase();
+        if (!validMethods.includes(normalizedMethod)) {
             res.status(400).json({
                 success: false,
-                error: "Invalid payment method. Choose from: cash, card, upi.",
+                error:   "Invalid payment method. Choose from: CASH, ONLINE.",
             });
             return;
         }
 
         const appointment = await prisma.appointment.findUnique({
-            where: { id: Number(appointment_id) },
+            where:  { id: String(appointment_id) },
+            select: { id: true, patientId: true, hospitalId: true },
         });
         if (!appointment) { res.status(404).json({ success: false, error: "Appointment not found." }); return; }
 
+        const numDiscount   = discount   ? Number(discount)   : 0;
+        const numTax        = tax        ? Number(tax)        : 0;
+        const totalAmount   = numericAmount - numDiscount + numTax;
+
         const payment = await prisma.payment.create({
             data: {
-                appointmentId: Number(appointment_id),
-                amount:        numericAmount,
-                method:        method.toLowerCase() as "cash" | "card" | "upi",
+                appointmentId:  appointment.id,
+                patientId:      appointment.patientId,
+                hospitalId:     appointment.hospitalId,
+                amount:         numericAmount,
+                discount:       numDiscount,
+                tax:            numTax,
+                totalAmount,
+                paymentMethod:  normalizedMethod as "CASH" | "ONLINE",
+                paymentStatus:  "PAID",
+                paymentDate:    new Date(),
             },
         });
 

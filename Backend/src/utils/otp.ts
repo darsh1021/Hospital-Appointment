@@ -8,9 +8,15 @@ export const createAndSendOtp = async (phoneNumber: string): Promise<string> => 
     const otp       = generateOtpValue();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    // Replace any existing OTP for this phone number
-    await prisma.otp.deleteMany({ where: { phoneNumber } });
-    await prisma.otp.create({ data: { phoneNumber, otp, expiresAt } });
+    // Look up the patient by phone number
+    const patient = await prisma.patient.findUnique({ where: { phone: phoneNumber } });
+    if (!patient) {
+        throw new Error(`No patient found with phone number: ${phoneNumber}`);
+    }
+
+    // Replace any existing OTPs for this patient
+    await prisma.oTP.deleteMany({ where: { patientId: patient.id } });
+    await prisma.oTP.create({ data: { patientId: patient.id, otp, expiresAt } });
 
     console.log(`\n==================================================`);
     console.log(`[DEVELOPMENT OTP SERVICE]`);
@@ -23,16 +29,22 @@ export const createAndSendOtp = async (phoneNumber: string): Promise<string> => 
 };
 
 export const verifyOtpValue = async (phoneNumber: string, inputOtp: string): Promise<boolean> => {
-    const record = await prisma.otp.findFirst({
+    // Look up the patient by phone number
+    const patient = await prisma.patient.findUnique({ where: { phone: phoneNumber } });
+    if (!patient) {
+        return false;
+    }
+
+    const record = await prisma.oTP.findFirst({
         where: {
-            phoneNumber,
+            patientId: patient.id,
             otp:       inputOtp,
             expiresAt: { gt: new Date() },
         },
     });
 
     if (record) {
-        await prisma.otp.deleteMany({ where: { phoneNumber } });
+        await prisma.oTP.deleteMany({ where: { patientId: patient.id } });
         return true;
     }
 

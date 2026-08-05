@@ -10,148 +10,182 @@ const isStrongPassword = (password: string): boolean => {
     return strongPasswordRegex.test(password);
 };
 
-const sendTokenResponse = (
-    user: { id: number; name: string; email: string | null; phone_number: string | null; role: string; createdAt: Date },
+// ─── Staff (email+password) login helper ──────────────────────────────────────
+const sendStaffTokenResponse = (
+    staff: { id: string; name: string; email: string; phone: string; role: string; hospitalId: string; createdAt: Date },
     statusCode: number,
     res: Response
 ) => {
-    const token = generateToken({ id: user.id, role: user.role });
+    const roleMap: Record<string, string> = {
+        ADMIN:        "admin",
+        DOCTOR:       "doctor",
+        RECEPTIONIST: "reception",
+    };
+    const mappedRole = roleMap[staff.role] ?? staff.role.toLowerCase();
+
+    const token = generateToken({ id: staff.id, role: mappedRole });
 
     res.cookie("token", token, {
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure:   process.env.NODE_ENV === "production",
     });
 
     res.status(statusCode).json({
         success: true,
         token,
         user: {
-            id:           user.id,
-            name:         user.name,
-            email:        user.email,
-            phone_number: user.phone_number,
-            role:         user.role,
-            created_at:   user.createdAt,
+            id:          staff.id,
+            name:        staff.name,
+            email:       staff.email,
+            phone:       staff.phone,
+            role:        mappedRole,
+            hospital_id: staff.hospitalId,
+            created_at:  staff.createdAt,
         },
     });
 };
 
+// ─── Patient (phone+OTP) token helper ─────────────────────────────────────────
+const sendPatientTokenResponse = (
+    patient: { id: string; name: string; phone: string; hospitalId: string; createdAt: Date },
+    statusCode: number,
+    res: Response
+) => {
+    const token = generateToken({ id: patient.id, role: "patient" });
+
+    res.cookie("token", token, {
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        httpOnly: true,
+        secure:   process.env.NODE_ENV === "production",
+    });
+
+    res.status(statusCode).json({
+        success: true,
+        token,
+        user: {
+            id:          patient.id,
+            name:        patient.name,
+            phone:       patient.phone,
+            role:        "patient",
+            hospital_id: patient.hospitalId,
+            created_at:  patient.createdAt,
+        },
+    });
+};
+
+// ─── signup (staff only — patients are created via OTP flow) ──────────────────
 export const signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { name, email, phone_number, password, role } = req.body;
+        const { name, email, phone, password, role, hospital_id } = req.body;
 
-        if (!name || !role) {
-            res.status(400).json({ success: false, error: "Please provide your name and role." });
+        if (!name || !email || !phone || !password || !role) {
+            res.status(400).json({ success: false, error: "Please provide name, email, phone, password, and role." });
             return;
         }
 
-        const normalizedRole = role.toLowerCase();
-        if (!["admin", "doctor", "reception", "patient"].includes(normalizedRole)) {
-            res.status(400).json({ success: false, error: "Invalid role specified." });
+        const normalizedRole = String(role).toUpperCase();
+        if (!["ADMIN", "DOCTOR", "RECEPTIONIST"].includes(normalizedRole)) {
+            res.status(400).json({ success: false, error: "Invalid role. Use ADMIN, DOCTOR, or RECEPTIONIST." });
             return;
         }
 
-        // OTP flow
-        if (phone_number) {
-            const existing = await prisma.user.findUnique({ where: { phone_number } });
-            if (existing) {
-                res.status(400).json({ success: false, error: "Phone number already registered. Please log in." });
+        if (!isStrongPassword(password)) {
+            res.status(400).json({
+                success: false,
+                error:   "Password must be at least 8 characters with uppercase, lowercase, number and special character.",
+            });
+            return;
+        }
+
+        const existing = await prisma.staff.findFirst({
+            where: { OR: [{ email }, { phone }] },
+        });
+        if (existing) {
+            res.status(400).json({ success: false, error: "Email or phone number already registered." });
+            return;
+        }
+
+        // Resolve hospital
+        let resolvedHospitalId = hospital_id as string | undefined;
+        if (!resolvedHospitalId) {
+            const hospital = await prisma.hospital.findFirst({ select: { id: true } });
+            if (!hospital) {
+                res.status(400).json({ success: false, error: "No hospital found. Please create a hospital first." });
                 return;
             }
-            await createAndSendOtp(phone_number);
-            res.status(200).json({
-                success: true,
-                message: "OTP sent successfully to your phone number.",
-                phone_number,
+            resolvedHospitalId = hospital.id;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newStaff = await prisma.staff.create({
+            data: {
                 name,
-                role: normalizedRole,
-            });
-            return;
-        }
+                email,
+                phone,
+                password:   hashedPassword,
+                role:       normalizedRole as "ADMIN" | "DOCTOR" | "RECEPTIONIST",
+                gender:     req.body.gender ?? "OTHER",
+                hospitalId: resolvedHospitalId,
+            },
+        });
 
-        // Password flow
-        if (email) {
-            if (!password) {
-                res.status(400).json({ success: false, error: "Please provide a password for email registration." });
-                return;
-            }
-            if (!isStrongPassword(password)) {
-                res.status(400).json({
-                    success: false,
-                    error: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
-                });
-                return;
-            }
-
-            const existing = await prisma.user.findUnique({ where: { email } });
-            if (existing) {
-                res.status(400).json({ success: false, error: "Email already registered. Please log in." });
-                return;
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const newUser = await prisma.user.create({
-                data: { name, email, password: hashedPassword, role: normalizedRole },
-            });
-
-            sendTokenResponse(newUser, 201, res);
-            return;
-        }
-
-        res.status(400).json({ success: false, error: "Please provide either an email or a phone number to register." });
+        sendStaffTokenResponse(newStaff, 201, res);
     } catch (error) {
         next(error);
     }
 };
 
+// ─── login (staff email+password  OR  patient phone→OTP step 1) ───────────────
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { email, password, phone_number } = req.body;
+        const { email, password, phone } = req.body;
 
-        // OTP flow
-        if (phone_number) {
-            const existing = await prisma.user.findUnique({ where: { phone_number } });
-            await createAndSendOtp(phone_number);
+        // OTP flow: patient login via phone
+        if (phone) {
+            // Check if patient exists; if not, the OTP will be sent after patient is auto-created at verifyOtp
+            const existing = await prisma.patient.findUnique({ where: { phone } });
+            if (!existing) {
+                // Return early telling frontend the patient doesn't exist yet – they should register
+                res.status(200).json({
+                    success:   true,
+                    message:   "OTP will be sent once patient is registered.",
+                    phone,
+                    isNewUser: true,
+                });
+                return;
+            }
+
+            await createAndSendOtp(phone);
             res.status(200).json({
-                success: true,
-                message: existing
-                    ? "OTP sent successfully to your registered phone number."
-                    : "OTP sent successfully for auto-registration.",
-                phone_number,
-                isNewUser: !existing,
+                success:   true,
+                message:   "OTP sent successfully to your registered phone number.",
+                phone,
+                isNewUser: false,
             });
             return;
         }
 
-        // Password flow
+        // Password flow: staff login via email
         if (email) {
             if (!password) {
                 res.status(400).json({ success: false, error: "Please provide your password." });
                 return;
             }
 
-            const user = await prisma.user.findUnique({ where: { email } });
-            if (!user) {
+            const staff = await prisma.staff.findUnique({ where: { email } });
+            if (!staff) {
                 res.status(401).json({ success: false, error: "Invalid email or password." });
                 return;
             }
 
-            if (!user.password) {
-                res.status(400).json({
-                    success: false,
-                    error: "This account was registered using phone authentication. Please log in using your phone number.",
-                });
-                return;
-            }
-
-            const isMatch = await bcrypt.compare(password, user.password);
+            const isMatch = await bcrypt.compare(password, staff.password);
             if (!isMatch) {
                 res.status(401).json({ success: false, error: "Invalid email or password." });
                 return;
             }
 
-            sendTokenResponse(user, 200, res);
+            sendStaffTokenResponse(staff, 200, res);
             return;
         }
 
@@ -161,40 +195,58 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     }
 };
 
+// ─── verifyOtp (patient phone+OTP step 2) ────────────────────────────────────
 export const verifyOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { phone_number, otp, name } = req.body;
+        const { phone, otp, name, hospital_id } = req.body;
 
-        if (!phone_number || !otp) {
+        if (!phone || !otp) {
             res.status(400).json({ success: false, error: "Please provide your phone number and OTP code." });
             return;
         }
 
-        const isValid = await verifyOtpValue(phone_number, otp);
+        const isValid = await verifyOtpValue(phone, otp);
         if (!isValid) {
             res.status(400).json({ success: false, error: "Invalid or expired OTP." });
             return;
         }
 
-        let user = await prisma.user.findUnique({ where: { phone_number } });
+        let patient = await prisma.patient.findUnique({ where: { phone } });
 
-        if (!user) {
-            const defaultName = name || `Patient-${phone_number.slice(-4)}`;
-            user = await prisma.user.create({
-                data: { name: defaultName, phone_number, role: "patient" },
+        if (!patient) {
+            // Auto-register patient
+            let resolvedHospitalId = hospital_id as string | undefined;
+            if (!resolvedHospitalId) {
+                const hospital = await prisma.hospital.findFirst({ select: { id: true } });
+                resolvedHospitalId = hospital?.id;
+            }
+            if (!resolvedHospitalId) {
+                res.status(400).json({ success: false, error: "No hospital found to register patient." });
+                return;
+            }
+
+            const defaultName = name || `Patient-${phone.slice(-4)}`;
+            patient = await prisma.patient.create({
+                data: {
+                    name:       defaultName,
+                    phone,
+                    gender:     "OTHER",
+                    hospitalId: resolvedHospitalId,
+                },
             });
         }
 
-        sendTokenResponse(user, 200, res);
+        sendPatientTokenResponse(patient, 200, res);
     } catch (error) {
         next(error);
     }
 };
 
-export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// ─── logout ───────────────────────────────────────────────────────────────────
+export const logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         res.cookie("token", "none", {
-            expires: new Date(Date.now() + 10 * 1000),
+            expires:  new Date(Date.now() + 10 * 1000),
             httpOnly: true,
         });
         res.status(200).json({ success: true, message: "Logged out successfully." });
@@ -203,6 +255,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction): P
     }
 };
 
+// ─── getProfile ───────────────────────────────────────────────────────────────
 export const getProfile = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         if (!req.user) {
