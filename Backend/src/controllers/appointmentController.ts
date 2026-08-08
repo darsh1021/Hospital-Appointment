@@ -2,89 +2,311 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db.js";
 import { calculateEstimatedWaitTime } from "../utils/queueEstimator.js";
 
-export const bookToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { name, phone, doctor_id, hospital_id, appointment_date, symptoms } = req.body;
+// ─── Helper: today's date range (midnight → midnight) ─────────────────────────
+const getTodayRange = () => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0); // start of today 00:00:00
+    const end = new Date();
+    end.setHours(23, 59, 59, 999); // end of today 23:59:59
+    return { start, end };
+};
 
-        if (!name || !phone || !doctor_id) {
+// ─── GET /appointments/doctors?category=Dermatology ──────────────────────────
+// Public — no auth required
+// Returns list of active doctors filtered by specialization (case-insensitive)
+export const getDoctorsByCategory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { category } = req.query;
+
+        if (!category || typeof category !== "string") {
             res.status(400).json({
                 success: false,
-                error:   "Please provide patient name, phone, and doctor_id.",
+                error: "Please provide a category (e.g. ?category=Dermatology).",
             });
             return;
         }
 
-        // Resolve hospital_id (staff.id is a String cuid)
-        let resolvedHospitalId = hospital_id as string | undefined;
-        if (!resolvedHospitalId) {
-            const doc = await prisma.staff.findUnique({
-                where:  { id: String(doctor_id) },
-                select: { hospitalId: true },
-            });
-            resolvedHospitalId = doc?.hospitalId ?? undefined;
+        const doctors = await prisma.staff.findMany({
+            where: {
+                role:   "DOCTOR",
+                status: "ACTIVE",
+                specialization: {
+                    contains: category,
+                    mode:     "insensitive",
+                },
+            },
+            select: {
+                id:             true,
+                name:           true,
+                specialization: true,
+                experience:     true,
+                qualification:  true,
+                hospital: {
+                    select: {
+                        id:      true,
+                        name:    true,
+                        address: true,
+                        city:    true,
+                        state:   true,
+                    },
+                },
+            },
+        });
 
-            if (!resolvedHospitalId) {
-                const fallback = await prisma.hospital.findFirst({ select: { id: true } });
-                if (fallback) {
-                    resolvedHospitalId = fallback.id;
-                } else {
-                    res.status(400).json({
-                        success: false,
-                        error:   "Hospital ID could not be auto-resolved (no hospitals exist in the system).",
-                    });
-                    return;
-                }
-            }
+        if (doctors.length === 0) {
+            res.status(404).json({
+                success: false,
+                error:   `No active doctors found for category: "${category}".`,
+            });
+            return;
         }
 
-        const targetDate = appointment_date
-            ? new Date(appointment_date)
-            : (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+        res.status(200).json({
+            success: true,
+            count:   doctors.length,
+            doctors,
+        });
+        
+    } catch (error) {
+        next(error);
+    }
+};
 
-        const appointmentTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+// ─── POST /appointments/book-token ────────────────────────────────────────────
+// Public — no auth required
+// Body: { name, phone, gender, category, symptoms?, address?, payment_method? }
+// Rules:
+//   1. `category` (specialization) is used to auto-select the first active matching doctor
+//   2. Only today's date is allowed — future dates are rejected
+//   3. If phone already exists AND patient has a token today → return that token (alreadyBooked)
+//   4. If phone exists but no token today → book a new token
+//   5. If phone is new → auto-register patient + book token
+//   6. If payment_method is provided → create a Payment record
 
-        // Find or create patient
+export const bookToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const {
+            name,
+            phone,
+            gender,
+            category,
+            symptoms,
+            address,
+            payment_method,
+        } = req.body;
+
+        // ── 1. Validate required fields ──────────────────────────────────────
+        if (!name || !phone || !gender || !category) {
+            res.status(400).json({
+                success: false,
+                error:   "Please provide name, phone, gender, and category.",
+            });
+            return;
+        }
+
+        const normalizedGender = String(gender).toUpperCase();
+        if (!["MALE", "FEMALE", "OTHER"].includes(normalizedGender)) {
+            res.status(400).json({
+                success: false,
+                error:   "Invalid gender. Use MALE, FEMALE, or OTHER.",
+            });
+            return;
+        }
+
+        // ── 2. Validate payment_method if provided ───────────────────────────
+        if (payment_method && !["CASH", "ONLINE"].includes(String(payment_method).toUpperCase())) {
+            res.status(400).json({
+                success: false,
+                error:   "Invalid payment_method. Use CASH or ONLINE.",
+            });
+            return;
+        }
+
+        // ── 3. Enforce today-only rule ───────────────────────────────────────
+        const { start: todayStart, end: todayEnd } = getTodayRange();
+        const appointmentDate = todayStart; // always book for today
+
+        // ── 4. Find active doctor by category (specialization) ───────────────
+        const doctor = await prisma.staff.findFirst({
+            where: {
+                role:   "DOCTOR",
+                status: "ACTIVE",
+                specialization: {
+                    contains: String(category),
+                    mode:     "insensitive",
+                },
+            },
+            select: { id: true, name: true, specialization: true, hospitalId: true },
+        });
+
+        if (!doctor) {
+            res.status(404).json({
+                success: false,
+                error:   `No active doctor found for category: "${category}". Please try a different category.`,
+            });
+            return;
+        }
+
+        const resolvedHospitalId = doctor.hospitalId;
+
+        // Fetch full hospital details for the response
+        const hospital = await prisma.hospital.findUnique({
+            where:  { id: resolvedHospitalId },
+            select: { id: true, name: true, address: true, city: true, state: true, pinCode: true },
+        });
+
+        // ── 5. Check if phone already exists ────────────────────────────────
         let patient = await prisma.patient.findUnique({ where: { phone } });
-        if (!patient) {
+        let isExistingPatient = !!patient;
+
+        if (patient) {
+            // ── 5a. Existing patient — check if they already have a token today ──
+            const existingTodayAppointment = await prisma.appointment.findFirst({
+                where: {
+                    patientId:       patient.id,
+                    doctorId:        doctor.id,
+                    appointmentDate: { gte: todayStart, lte: todayEnd },
+                },
+                include: {
+                    doctor:   { select: { name: true, specialization: true } },
+                    hospital: { select: { name: true, address: true, city: true } },
+                },
+            });
+
+            if (existingTodayAppointment) {
+                // Patient already has a token with this doctor today → return it
+                res.status(200).json({
+                    success:             true,
+                    alreadyBooked:       true,
+                    redirectToDashboard: true,
+                    message:             "You already have a token booked for today with this doctor.",
+                    token_number:        existingTodayAppointment.tokenNumber,
+                    appointment: {
+                        id:              existingTodayAppointment.id,
+                        token_number:    existingTodayAppointment.tokenNumber,
+                        status:          existingTodayAppointment.status,
+                        appointment_date: existingTodayAppointment.appointmentDate,
+                        doctor_name:     existingTodayAppointment.doctor.name,
+                        doctor_specialization: existingTodayAppointment.doctor.specialization,
+                        hospital_name:   existingTodayAppointment.hospital.name,
+                        hospital_address: existingTodayAppointment.hospital.address,
+                    },
+                    patient: {
+                        id:    patient.id,
+                        name:  patient.name,
+                        phone: patient.phone,
+                        role:  patient.role,
+                    },
+                });
+                return;
+            }
+            // Existing patient, no token today → fall through to book a new token
+
+        } else {
+            // ── 5b. New patient — auto-register ──────────────────────────────
             patient = await prisma.patient.create({
                 data: {
                     name,
                     phone,
-                    gender:     "OTHER",
+                    gender:     normalizedGender as "MALE" | "FEMALE" | "OTHER",
+                    address:    address ?? null,
+                    role:       "PATIENT",
                     hospitalId: resolvedHospitalId,
                 },
             });
         }
 
-        const doctorId = String(doctor_id);
-        const estimatedWaitTime = await calculateEstimatedWaitTime(doctorId, targetDate);
-
-        // Next token number
+        // ── 6. Calculate next token number ───────────────────────────────────
+        const doctorId = doctor.id;
         const maxToken = await prisma.appointment.aggregate({
-            where: { doctorId, appointmentDate: targetDate },
-            _max:  { tokenNumber: true },
+            where: {
+                doctorId,
+                appointmentDate: { gte: todayStart, lte: todayEnd },
+            },
+            _max: { tokenNumber: true },
         });
         const tokenNumber = (maxToken._max.tokenNumber ?? 0) + 1;
 
+        const appointmentTime = new Date().toLocaleTimeString("en-IN", {
+            hour:   "2-digit",
+            minute: "2-digit",
+        });
+
+        const estimatedWaitTime = await calculateEstimatedWaitTime(doctorId, appointmentDate);
+
+        // ── 7. Create the appointment ────────────────────────────────────────
         const newAppointment = await prisma.appointment.create({
             data: {
                 patientId:       patient.id,
                 doctorId,
                 hospitalId:      resolvedHospitalId,
-                appointmentDate: targetDate,
+                appointmentDate,
                 appointmentTime,
                 tokenNumber,
                 bookingSource:   "ONLINE",
-                status:          "scheduled",
+                status:          "waiting",
                 symptoms:        symptoms ?? null,
             },
         });
 
+        // ── 8. Optionally create Payment record ──────────────────────────────
+        let paymentRecord = null;
+        if (payment_method) {
+            const method = String(payment_method).toUpperCase() as "CASH" | "ONLINE";
+            paymentRecord = await prisma.payment.create({
+                data: {
+                    hospitalId:    resolvedHospitalId,
+                    patientId:     patient.id,
+                    appointmentId: newAppointment.id,
+                    amount:        0,
+                    totalAmount:   0,
+                    paymentMethod: method,
+                    paymentStatus: "PENDING",
+                    paymentDate:   new Date(),
+                },
+            });
+        }
+
+        // ── 9. Respond ───────────────────────────────────────────────────────
         res.status(201).json({
-            success: true,
-            message: "Appointment token successfully booked.",
+            success:                    true,
+            alreadyBooked:              false,
+            isExistingPatient,
+            redirectToDashboard:        true,
+            message:                    isExistingPatient
+                ? "New token booked successfully for your existing account."
+                : "Appointment token successfully booked.",
             estimated_wait_time_minutes: estimatedWaitTime,
-            appointment: newAppointment,
+            token_number:               tokenNumber,
+            appointment: {
+                id:               newAppointment.id,
+                token_number:     newAppointment.tokenNumber,
+                status:           newAppointment.status,
+                appointment_date: newAppointment.appointmentDate,
+                appointment_time: newAppointment.appointmentTime,
+            },
+            patient: {
+                id:    patient.id,
+                name:  patient.name,
+                phone: patient.phone,
+                role:  patient.role,
+            },
+            hospital,
+            payment: paymentRecord
+                ? {
+                    id:             paymentRecord.id,
+                    payment_method: paymentRecord.paymentMethod,
+                    payment_status: paymentRecord.paymentStatus,
+                }
+                : null,
         });
     } catch (error) {
         next(error);

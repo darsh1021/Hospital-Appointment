@@ -1,0 +1,177 @@
+Hospital Appointment - Frontend File Structure
+===========================================
+
+Frontend/
+├── public
+│   ├── favicon.svg
+│   └── icons.svg
+├── src
+│   ├── api
+│   │   ├── axios.ts
+│   │   └── interceptors.ts
+│   ├── app
+│   │   ├── AuthInit.tsx
+│   │   ├── routes.tsx
+│   │   ├── store.ts
+│   │   └── theme-provider.tsx
+│   ├── assets
+│   │   ├── hero.png
+│   │   ├── react.svg
+│   │   └── vite.svg
+│   ├── components
+│   │   ├── auth
+│   │   │   ├── PatientLoginForm.tsx
+│   │   │   └── StaffLoginForm.tsx
+│   │   ├── bookToken
+│   │   │   ├── AppointmentSummaryCard.tsx
+│   │   │   ├── BookFormSection.tsx
+│   │   │   ├── BookHeroSection.tsx
+│   │   │   ├── BookHowItWorks.tsx
+│   │   │   └── bookTokenData.ts
+│   │   ├── common
+│   │   │   ├── sidebar
+│   │   │   │   ├── CollapsibleGroup.tsx
+│   │   │   │   ├── Sidebar.tsx
+│   │   │   │   └── SidebarLink.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   └── ThemeToggle.tsx
+│   │   ├── dashboard
+│   │   │   ├── admin
+│   │   │   │   ├── AdminDoctors.tsx
+│   │   │   │   ├── AdminOverview.tsx
+│   │   │   │   ├── AdminPatients.tsx
+│   │   │   │   ├── AdminReception.tsx
+│   │   │   │   ├── AdminReports.tsx
+│   │   │   │   └── AdminSettings.tsx
+│   │   │   ├── doctor
+│   │   │   │   ├── DoctorCurrentPatient.tsx
+│   │   │   │   ├── DoctorFollowUps.tsx
+│   │   │   │   ├── DoctorOverview.tsx
+│   │   │   │   ├── DoctorPrescription.tsx
+│   │   │   │   ├── DoctorProfile.tsx
+│   │   │   │   └── DoctorQueue.tsx
+│   │   │   ├── patient
+│   │   │   │   ├── PatientAppointments.tsx
+│   │   │   │   ├── PatientMedicalRecord.tsx
+│   │   │   │   ├── PatientOverview.tsx
+│   │   │   │   ├── PatientPrescriptions.tsx
+│   │   │   │   └── PatientProfile.tsx
+│   │   │   └── reception
+│   │   │       ├── ReceptionFollowUp.tsx
+│   │   │       ├── ReceptionLiveQueue.tsx
+│   │   │       ├── ReceptionOverview.tsx
+│   │   │       ├── ReceptionPayments.tsx
+│   │   │       ├── ReceptionRegisterPatient.tsx
+│   │   │       └── ReceptionWalkIn.tsx
+│   │   ├── feedback
+│   │   │   └── index.ts
+│   │   ├── home
+│   │   │   ├── CtaBandSection.tsx
+│   │   │   ├── Display.tsx
+│   │   │   ├── FeatureCardsSection.tsx
+│   │   │   ├── FontLink.tsx
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── homeData.ts
+│   │   │   ├── index.ts
+│   │   │   ├── InkPill.tsx
+│   │   │   ├── OrbCardsSection.tsx
+│   │   │   ├── SectionLabel.tsx
+│   │   │   ├── StatsStrip.tsx
+│   │   │   ├── TestimonialsSection.tsx
+│   │   │   └── TokenShowcaseSection.tsx
+│   │   └── ui
+│   │       ├── button.tsx
+│   │       └── input.tsx
+│   ├── Features
+│   │   ├── admin
+│   │   │   ├── adminAPI.ts
+│   │   │   ├── adminSlice.ts
+│   │   │   └── adminType.ts
+│   │   ├── appointment
+│   │   │   ├── appointmentApi.ts
+│   │   │   ├── appointmentSlice.ts
+│   │   │   └── appointmentType.ts
+│   │   ├── auth
+│   │   │   ├── authApi.ts
+│   │   │   ├── authSlice.ts
+│   │   │   └── authType.ts
+│   │   ├── doctor
+│   │   │   ├── doctorAPI.ts
+│   │   │   ├── doctorSlice.ts
+│   │   │   └── doctorType.ts
+│   │   ├── patient
+│   │   │   ├── patientAPI.ts
+│   │   │   ├── patientSlice.ts
+│   │   │   └── patientType.ts
+│   │   └── reception
+│   │       ├── receptionAPI.ts
+│   │       ├── receptionSlice.ts
+│   │       └── receptionType.ts
+│   ├── layouts
+│   │   ├── AuthLayout.tsx
+│   │   ├── DashboardLayout.tsx
+│   │   ├── ProtectedRoute.tsx
+│   │   └── RootLayout.tsx
+│   ├── lib
+│   │   └── utils.ts
+│   ├── pages
+│   │   ├── auth
+│   │   │   ├── ForgotPasswordPage.tsx
+│   │   │   ├── LoginPage.tsx
+│   │   │   └── ResetPasswordPage.tsx
+│   │   ├── dashboard
+│   │   │   ├── admin
+│   │   │   │   ├── AdminDoctorsPage.tsx
+│   │   │   │   ├── AdminPatientsPage.tsx
+│   │   │   │   ├── AdminReceptionPage.tsx
+│   │   │   │   ├── AdminReportsPage.tsx
+│   │   │   │   └── AdminSettingsPage.tsx
+│   │   │   ├── doctor
+│   │   │   │   ├── DoctorCurrentPatientPage.tsx
+│   │   │   │   ├── DoctorFollowUpsPage.tsx
+│   │   │   │   ├── DoctorPrescriptionPage.tsx
+│   │   │   │   ├── DoctorProfilePage.tsx
+│   │   │   │   └── DoctorQueuePage.tsx
+│   │   │   ├── patient
+│   │   │   │   ├── PatientAppointmentsPage.tsx
+│   │   │   │   ├── PatientPrescriptionsPage.tsx
+│   │   │   │   ├── PatientProfilePage.tsx
+│   │   │   │   └── PatientRecordPage.tsx
+│   │   │   ├── reception
+│   │   │   │   ├── ReceptionFollowUpPage.tsx
+│   │   │   │   ├── ReceptionLiveQueuePage.tsx
+│   │   │   │   ├── ReceptionPaymentsPage.tsx
+│   │   │   │   ├── ReceptionRegisterPatientPage.tsx
+│   │   │   │   └── ReceptionWalkInPage.tsx
+│   │   │   ├── AdminDashboardPage.tsx
+│   │   │   ├── DoctorDashboardPage.tsx
+│   │   │   ├── PatientDashboardPage.tsx
+│   │   │   └── ReceptionDashboardPage.tsx
+│   │   ├── public
+│   │   │   ├── AboutPage.tsx
+│   │   │   ├── BookTokenPage.tsx
+│   │   │   ├── ContactPage.tsx
+│   │   │   ├── DoctorsPage.tsx
+│   │   │   ├── HomePage.tsx
+│   │   │   └── TreatmentsPage.tsx
+│   │   └── NotFoundPage.tsx
+│   ├── App.tsx
+│   ├── components.json
+│   ├── index.css
+│   └── main.tsx
+├── .gitignore
+├── .oxlintrc.json
+├── ABOUT_PROJECT.md
+├── DESIGN.md
+├── index.html
+├── package-lock.json
+├── package.json
+├── projectStructure.md
+├── README.md
+├── skills-lock.json
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts

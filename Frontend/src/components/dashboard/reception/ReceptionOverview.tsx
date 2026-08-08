@@ -1,5 +1,5 @@
 import {
-  Users, Ticket, CheckCircle2, XCircle, Clock, TrendingUp, UserPlus,
+  Users, Ticket,  XCircle, Clock, TrendingUp, UserPlus,
   ListOrdered, ChevronRight, AlertCircle,
 } from "lucide-react"
 

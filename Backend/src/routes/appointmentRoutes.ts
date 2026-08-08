@@ -1,6 +1,8 @@
 import { Router } from "express";
-import { bookToken } from "../controllers/appointmentController.js";
+import { bookToken, getDoctorsByCategory } from "../controllers/appointmentController.js";
 
 export const router = Router();
 
-router.post("/book-token", bookToken);
+// Public routes — no authentication required
+router.get("/doctors", getDoctorsByCategory);   // GET  /appointments/doctors?category=Dermatology
+router.post("/book-token", bookToken);           // POST /appointments/book-token

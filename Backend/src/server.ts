@@ -27,7 +27,7 @@ initDb()
 
         app.use("/api/auth",         authRouter);
         app.use("/api",              doctorRouter);
-        app.use("/api/appointments", appointmentRouter);
+        app.use("/api/appointment", appointmentRouter);
         app.use("/api/patient",      patientRouter);
         app.use("/api/reception",    receptionRouter);
         app.use("/api/admin",        adminRouter);

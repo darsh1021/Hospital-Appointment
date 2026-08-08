@@ -14,7 +14,7 @@ export const router = Router();
 router.use(protect);
 
 // Restrict all routes under this router to receptionists only
-router.use(restrictTo("reception"));
+router.use(restrictTo("reception","admin"));
 
 router.post("/register-patient", registerPatient);
 router.post("/walk-in", walkIn);

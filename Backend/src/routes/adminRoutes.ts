@@ -12,7 +12,7 @@ import { protect, restrictTo } from "../middleware/authMiddleware.js";
 export const router = Router();
 
 // Protect all routes under this router
-router.use(protect);
+router.use(protect); 
 
 // Restrict all routes under this router to admin only
 router.use(restrictTo("admin"));

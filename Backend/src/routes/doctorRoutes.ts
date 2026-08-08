@@ -17,10 +17,16 @@ export const router = Router();
 router.get("/doctors", getDoctors);
 router.get("/hospitals", getHospitals);
 
-// Doctor Dashboard routes (Protected & Restricted to role 'doctor')
-router.get("/doctor/queue", protect, restrictTo("doctor"), getDoctorQueue);
-router.get("/doctor/current-patient", protect, restrictTo("doctor"), getCurrentPatient);
-router.put("/doctor/appointments/:id/status", protect, restrictTo("doctor"), updateAppointmentStatus);
-router.put("/doctor/appointments/:id/consult", protect, restrictTo("doctor"), completeConsultation);
-router.get("/doctor/follow-ups", protect, restrictTo("doctor"), getDoctorFollowups);
-router.put("/doctor/profile", protect, restrictTo("doctor"), updateDoctorProfile);
+// Protect all routes below this point
+router.use(protect);
+
+// Restrict all routes below this point to doctors only
+router.use(restrictTo("doctor"));
+
+// Doctor Dashboard routes
+router.get("/doctor/queue", getDoctorQueue);
+router.get("/doctor/current-patient", getCurrentPatient);
+router.put("/doctor/appointments/:id/status", updateAppointmentStatus);
+router.put("/doctor/appointments/:id/consult", completeConsultation);
+router.get("/doctor/follow-ups", getDoctorFollowups);
+router.put("/doctor/profile", updateDoctorProfile);

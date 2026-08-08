@@ -129,6 +129,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
                 hospitalId: resolvedHospitalId,
             },
         });
+        console.log("New Staff:", newStaff)
 
         sendStaffTokenResponse(newStaff, 201, res);
     } catch (error) {
@@ -149,7 +150,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
                 // Return early telling frontend the patient doesn't exist yet – they should register
                 res.status(200).json({
                     success:   true,
-                    message:   "OTP will be sent once patient is registered.",
+                    message:   "Patient is not registered. Please Register first.",
                     phone,
                     isNewUser: true,
                 });
@@ -246,7 +247,7 @@ export const verifyOtp = async (req: Request, res: Response, next: NextFunction)
 export const logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         res.cookie("token", "none", {
-            expires:  new Date(Date.now() + 10 * 1000),
+            expires:  new Date(Date.now() + 5 * 1000), // expire in 5 seconds so that it is cleared immediately
             httpOnly: true,
         });
         res.status(200).json({ success: true, message: "Logged out successfully." });
