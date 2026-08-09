@@ -21,12 +21,10 @@ export interface Appointment {
 // Booking token payload interface
 export interface BookTokenPayload {
   name: string;
-  phone?: string;
-  phone_number?: string;
-  department?: string;
-  doctor_id?: number | string;
-  appointment_date?: string;
-  symptoms?: string;
+  phone: string;
+  category: string;
+  gender: string;
+  dob: string;
 }
 
 // Booking token response interface

@@ -28,14 +28,12 @@ export const steps = [
 ]
 
 export const departments = [
-  "Cardiology",
-  "Neurology",
-  "Orthopaedics",
-  "Ophthalmology",
-  "Paediatrics",
-  "General Medicine",
-  "Dermatology",
-  "Radiology",
+    "General Medicine",
+    "Dermatology",
+    "Cardiology",
+    "Orthopedics",
+    "Pediatrics",
+    "ENT"
 ]
 
 export const queuePatients = [

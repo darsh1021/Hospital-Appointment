@@ -1,15 +1,11 @@
 import axios from "axios";
-// import { setupInterceptors } from './interceptors'
 
 const axiosInstance = axios.create({
     baseURL: "http://localhost:5000",
-    withCredentials: true,
+    withCredentials: true,   // required — sends the JWT cookie on every request
     headers: {
         "Content-Type": "application/json"
     },
 })
-
-
-// setupInterceptors(axiosInstance)
 
 export default axiosInstance

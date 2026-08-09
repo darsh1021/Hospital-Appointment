@@ -4,17 +4,47 @@ import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
 import { departments } from "./bookTokenData"
 import { useAppDispatch, useAppSelector } from "../../app/store"
 import { bookAppointmentUser } from "../../Features/appointment/appointmentSlice"
+// import { SelectGroup } from "@base-ui/react/select"
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select"
+
 
 const BookFormSection = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { loading: appointmentLoading, error: appointmentError } = useAppSelector((state) => state.appointment)
 
-  const [formData, setFormData] = useState({
+  interface FormDataInterface {
+    name: string;
+    phone: string;
+    category: string;
+    gender: string;
+    address?: string;
+    dob: string;
+  }
+
+  const [formData, setFormData] = useState<FormDataInterface>({
     name: "",
     phone: "",
-    department: "",
+    category: "",
+    gender: "",
+    address: "",
+    dob: ""
   })
+
+  const items = [
+    { label: "Male", value: "male" },
+    { label: "Female", value: "female" },
+    { label: "Other", value: "other" },
+  ]
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,13 +55,27 @@ const BookFormSection = () => {
       setErrorMessage("Please enter both your name and phone number.")
       return
     }
+    if (!formData.category) {
+      setErrorMessage("Please select a department.")
+      return
+    }
+    if (!formData.gender) {
+      setErrorMessage("Please select a gender.")
+      return
+    }
+    if (!formData.dob) {
+      setErrorMessage("Please enter your date of birth.")
+      return
+    }
 
     try {
       const result = await dispatch(
         bookAppointmentUser({
           name: formData.name.trim(),
           phone: formData.phone.trim(),
-          department: formData.department || undefined,
+          category: formData.category,
+          gender: formData.gender,
+          dob: formData.dob,
         })
       ).unwrap()
 
@@ -126,30 +170,6 @@ const BookFormSection = () => {
             )}
 
             <form className="relative flex flex-col gap-5" onSubmit={handleSubmit}>
-              {/* Department */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="dept-select"
-                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
-                >
-                  Department
-                </label>
-                <select
-                  id="dept-select"
-                  name="department"
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  disabled={appointmentLoading}
-                  className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">Select a department…</option>
-                  {departments.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
               {/* Patient name */}
               <div className="flex flex-col gap-1.5">
@@ -157,7 +177,7 @@ const BookFormSection = () => {
                   htmlFor="patient-name"
                   className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
                 >
-                  Patient name
+                  Patient name <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="patient-name"
@@ -179,7 +199,7 @@ const BookFormSection = () => {
                   htmlFor="patient-phone"
                   className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
                 >
-                  Phone number
+                  Phone number <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="patient-phone"
@@ -192,6 +212,130 @@ const BookFormSection = () => {
                   placeholder="e.g. 9876543210"
                   disabled={appointmentLoading}
                   className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+
+              {/* Gender */}
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="gender"
+                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                >
+                  Gender <span className="text-red-500">*</span>
+                </label>
+                {/* <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                  disabled={appointmentLoading}
+                  className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select gender...</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select> */}
+
+
+                <Select
+                  selectedKey={formData.gender || null}
+                  onSelectionChange={(key) =>
+                    setFormData({ ...formData, gender: key as string })
+                  }
+                  isDisabled={appointmentLoading}
+                >
+                  <SelectTrigger className="w-full h-11 rounded-[8px] border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)]">
+                    <SelectValue>
+                      {({ selectedText }) => selectedText || <span className="text-[#aaa] dark:text-[#475569]">Select gender…</span>}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#fafafa] text-[#1f2937] dark:bg-[#18181b] dark:text-[#f9fafb]">
+                    <SelectGroup>
+                      {items.map((item) => (
+                        <SelectItem key={item.value} id={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
+              </div>
+
+              {/* Birth Date*/}
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="dob"
+                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                >
+                  Birth Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="dob"
+                  type="date"
+                  name="dob"
+                  value={formData.dob}
+                  onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                  required
+                  disabled={appointmentLoading}
+                  className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+
+              {/* Category */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]">
+                  Department <span className="text-red-500">*</span>
+                </label>
+                <Select
+                  selectedKey={formData.category || null}
+                  onSelectionChange={(key) =>
+                    setFormData({ ...formData, category: key as string })
+                  }
+                  isDisabled={appointmentLoading}
+                >
+                  <SelectTrigger className="w-full h-11 rounded-[8px] border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)]">
+                    <SelectValue>
+                      {({ selectedText }) =>
+                        selectedText || (
+                          <span className="text-[#aaa] dark:text-[#475569]">
+                            Select a department…
+                          </span>
+                        )
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#fafafa] text-[#1f2937] dark:bg-[#18181b] dark:text-[#f9fafb]">
+                    <SelectGroup>
+                      {departments.map((d) => (
+                        <SelectItem key={d} id={d}>
+                          {d}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Address */}
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="address"
+                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                >
+                  Address
+                </label>
+                <textarea
+                  id="address"
+                  name="address"
+                  rows={3}
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  autoComplete="address"
+                  placeholder="Enter your address"
+                  disabled={appointmentLoading}
+                  className="min-h-16 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 py-2 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 

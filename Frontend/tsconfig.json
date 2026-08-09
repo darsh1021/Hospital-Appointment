@@ -4,13 +4,13 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
-    "compilerOptions": {
+  "compilerOptions": {
+    "module": "preserve", 
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
     "paths": {
       "@/*": ["./src/*"]
     },
-     "moduleResolution": "bundler",
+    "moduleResolution": "bundler",
     "resolvePackageJsonImports": true
   }
 }

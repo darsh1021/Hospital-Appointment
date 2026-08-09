@@ -1,6 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db.js";
 import { calculateEstimatedWaitTime } from "../utils/queueEstimator.js";
+import { generateToken } from "../utils/jwt.js";
+
+// ─── List of allowed medical specialization categories ────────────────────────
+export const ALLOWED_CATEGORIES = [
+    "General Medicine",
+    "Dermatology",
+    "Cardiology",
+    "Orthopedics",
+    "Pediatrics",
+    "ENT"
+];
 
 // ─── Helper: today's date range (midnight → midnight) ─────────────────────────
 const getTodayRange = () => {
@@ -9,6 +20,24 @@ const getTodayRange = () => {
     const end = new Date();
     end.setHours(23, 59, 59, 999); // end of today 23:59:59
     return { start, end };
+};
+
+// ─── GET /appointments/categories ───────────────────────────────────────────
+// Public — no auth required
+// Returns a list of all allowed medical specialization categories
+export const getCategories = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        res.status(200).json({
+            success: true,
+            categories: ALLOWED_CATEGORIES,
+        });
+    } catch (error) {
+        next(error);
+    }
 };
 
 // ─── GET /appointments/doctors?category=Dermatology ──────────────────────────
@@ -30,28 +59,40 @@ export const getDoctorsByCategory = async (
             return;
         }
 
+        const matchedCategory = ALLOWED_CATEGORIES.find(
+            c => c.toLowerCase() === category.trim().toLowerCase()
+        );
+
+        if (!matchedCategory) {
+            res.status(400).json({
+                success: false,
+                error: `Invalid category. Allowed categories are: ${ALLOWED_CATEGORIES.join(", ")}`,
+            });
+            return;
+        }
+
         const doctors = await prisma.staff.findMany({
             where: {
-                role:   "DOCTOR",
+                role: "DOCTOR",
                 status: "ACTIVE",
                 specialization: {
-                    contains: category,
-                    mode:     "insensitive",
+                    equals: matchedCategory,
+                    mode: "insensitive",
                 },
             },
             select: {
-                id:             true,
-                name:           true,
+                id: true,
+                name: true,
                 specialization: true,
-                experience:     true,
-                qualification:  true,
+                experience: true,
+                qualification: true,
                 hospital: {
                     select: {
-                        id:      true,
-                        name:    true,
+                        id: true,
+                        name: true,
                         address: true,
-                        city:    true,
-                        state:   true,
+                        city: true,
+                        state: true,
                     },
                 },
             },
@@ -60,17 +101,17 @@ export const getDoctorsByCategory = async (
         if (doctors.length === 0) {
             res.status(404).json({
                 success: false,
-                error:   `No active doctors found for category: "${category}".`,
+                error: `No active doctors found for category: "${matchedCategory}".`,
             });
             return;
         }
 
         res.status(200).json({
             success: true,
-            count:   doctors.length,
+            count: doctors.length,
             doctors,
         });
-        
+
     } catch (error) {
         next(error);
     }
@@ -98,16 +139,31 @@ export const bookToken = async (
             phone,
             gender,
             category,
+            dob,
             symptoms,
             address,
             payment_method,
         } = req.body;
 
+        console.log(req.body)
+
         // ── 1. Validate required fields ──────────────────────────────────────
-        if (!name || !phone || !gender || !category) {
+        if (!name || !phone || !gender || !category || !dob) {
             res.status(400).json({
                 success: false,
-                error:   "Please provide name, phone, gender, and category.",
+                error: "Please provide name, phone, gender, category, and date of birth (dob).",
+            });
+            return;
+        }
+
+        const matchedCategory = ALLOWED_CATEGORIES.find(
+            c => c.toLowerCase() === String(category).trim().toLowerCase()
+        );
+
+        if (!matchedCategory) {
+            res.status(400).json({
+                success: false,
+                error: `Invalid category. Allowed categories are: ${ALLOWED_CATEGORIES.join(", ")}`,
             });
             return;
         }
@@ -116,16 +172,53 @@ export const bookToken = async (
         if (!["MALE", "FEMALE", "OTHER"].includes(normalizedGender)) {
             res.status(400).json({
                 success: false,
-                error:   "Invalid gender. Use MALE, FEMALE, or OTHER.",
+                error: "Invalid gender. Use MALE, FEMALE, or OTHER.",
             });
             return;
+        }
+
+        // Valid Date DD/MM/YYYY format
+        // if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) {
+        //     res.status(400).json({
+        //         success: false,
+        //         error: "Invalid date format for dob. Expected DD/MM/YYYY.",
+        //     });
+        //     return;
+        // }
+
+        const [yearStr, monthStr, dayStr] = dob.split("-");
+        const day = parseInt(dayStr, 10);
+        const month = parseInt(monthStr, 10);
+        const year = parseInt(yearStr, 10);
+
+        const parsedDob = new Date(year, month - 1, day);
+
+        if (
+            isNaN(parsedDob.getTime()) ||
+            parsedDob.getFullYear() !== year ||
+            parsedDob.getMonth() !== month - 1 ||
+            parsedDob.getDate() !== day
+        ) {
+            res.status(400).json({
+                success: false,
+                error: "Invalid date for dob.",
+            });
+            return;
+        }
+
+        // Calculate age from dob
+        const today = new Date();
+        let age = today.getFullYear() - parsedDob.getFullYear();
+        const m = today.getMonth() - parsedDob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < parsedDob.getDate())) {
+            age--;
         }
 
         // ── 2. Validate payment_method if provided ───────────────────────────
         if (payment_method && !["CASH", "ONLINE"].includes(String(payment_method).toUpperCase())) {
             res.status(400).json({
                 success: false,
-                error:   "Invalid payment_method. Use CASH or ONLINE.",
+                error: "Invalid payment_method. Use CASH or ONLINE.",
             });
             return;
         }
@@ -137,11 +230,11 @@ export const bookToken = async (
         // ── 4. Find active doctor by category (specialization) ───────────────
         const doctor = await prisma.staff.findFirst({
             where: {
-                role:   "DOCTOR",
+                role: "DOCTOR",
                 status: "ACTIVE",
                 specialization: {
-                    contains: String(category),
-                    mode:     "insensitive",
+                    equals: matchedCategory,
+                    mode: "insensitive",
                 },
             },
             select: { id: true, name: true, specialization: true, hospitalId: true },
@@ -150,7 +243,7 @@ export const bookToken = async (
         if (!doctor) {
             res.status(404).json({
                 success: false,
-                error:   `No active doctor found for category: "${category}". Please try a different category.`,
+                error: `No active doctor found for category: "${matchedCategory}". Please try a different category.`,
             });
             return;
         }
@@ -159,7 +252,7 @@ export const bookToken = async (
 
         // Fetch full hospital details for the response
         const hospital = await prisma.hospital.findUnique({
-            where:  { id: resolvedHospitalId },
+            where: { id: resolvedHospitalId },
             select: { id: true, name: true, address: true, city: true, state: true, pinCode: true },
         });
 
@@ -171,39 +264,50 @@ export const bookToken = async (
             // ── 5a. Existing patient — check if they already have a token today ──
             const existingTodayAppointment = await prisma.appointment.findFirst({
                 where: {
-                    patientId:       patient.id,
-                    doctorId:        doctor.id,
+                    patientId: patient.id,
+                    doctorId: doctor.id,
                     appointmentDate: { gte: todayStart, lte: todayEnd },
                 },
                 include: {
-                    doctor:   { select: { name: true, specialization: true } },
+                    doctor: { select: { name: true, specialization: true } },
                     hospital: { select: { name: true, address: true, city: true } },
                 },
             });
 
             if (existingTodayAppointment) {
+                // Generate JWT token for the patient to automatically sign them in
+                const token = generateToken({ id: patient.id, role: "patient" });
+
+                res.cookie("token", token, {
+                    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                });
+
                 // Patient already has a token with this doctor today → return it
                 res.status(200).json({
-                    success:             true,
-                    alreadyBooked:       true,
+                    success: true,
+                    alreadyBooked: true,
                     redirectToDashboard: true,
-                    message:             "You already have a token booked for today with this doctor.",
-                    token_number:        existingTodayAppointment.tokenNumber,
+                    token, // return token in JSON body too
+                    message: "You already have a token booked for today with this doctor.",
+                    token_number: existingTodayAppointment.tokenNumber,
                     appointment: {
-                        id:              existingTodayAppointment.id,
-                        token_number:    existingTodayAppointment.tokenNumber,
-                        status:          existingTodayAppointment.status,
+                        id: existingTodayAppointment.id,
+                        token_number: existingTodayAppointment.tokenNumber,
+                        status: existingTodayAppointment.status,
                         appointment_date: existingTodayAppointment.appointmentDate,
-                        doctor_name:     existingTodayAppointment.doctor.name,
+                        doctor_name: existingTodayAppointment.doctor.name,
                         doctor_specialization: existingTodayAppointment.doctor.specialization,
-                        hospital_name:   existingTodayAppointment.hospital.name,
+                        hospital_name: existingTodayAppointment.hospital.name,
                         hospital_address: existingTodayAppointment.hospital.address,
                     },
                     patient: {
-                        id:    patient.id,
-                        name:  patient.name,
+                        id: patient.id,
+                        name: patient.name,
                         phone: patient.phone,
-                        role:  patient.role,
+                        role: patient.role,
+                        age: patient.age,
                     },
                 });
                 return;
@@ -216,9 +320,10 @@ export const bookToken = async (
                 data: {
                     name,
                     phone,
-                    gender:     normalizedGender as "MALE" | "FEMALE" | "OTHER",
-                    address:    address ?? null,
-                    role:       "PATIENT",
+                    gender: normalizedGender as "MALE" | "FEMALE" | "OTHER",
+                    age,
+                    address: address ?? null,
+                    role: "PATIENT",
                     hospitalId: resolvedHospitalId,
                 },
             });
@@ -236,7 +341,7 @@ export const bookToken = async (
         const tokenNumber = (maxToken._max.tokenNumber ?? 0) + 1;
 
         const appointmentTime = new Date().toLocaleTimeString("en-IN", {
-            hour:   "2-digit",
+            hour: "2-digit",
             minute: "2-digit",
         });
 
@@ -245,15 +350,15 @@ export const bookToken = async (
         // ── 7. Create the appointment ────────────────────────────────────────
         const newAppointment = await prisma.appointment.create({
             data: {
-                patientId:       patient.id,
+                patientId: patient.id,
                 doctorId,
-                hospitalId:      resolvedHospitalId,
+                hospitalId: resolvedHospitalId,
                 appointmentDate,
                 appointmentTime,
                 tokenNumber,
-                bookingSource:   "ONLINE",
-                status:          "waiting",
-                symptoms:        symptoms ?? null,
+                bookingSource: "ONLINE",
+                status: "waiting",
+                symptoms: symptoms ?? null,
             },
         });
 
@@ -263,46 +368,57 @@ export const bookToken = async (
             const method = String(payment_method).toUpperCase() as "CASH" | "ONLINE";
             paymentRecord = await prisma.payment.create({
                 data: {
-                    hospitalId:    resolvedHospitalId,
-                    patientId:     patient.id,
+                    hospitalId: resolvedHospitalId,
+                    patientId: patient.id,
                     appointmentId: newAppointment.id,
-                    amount:        0,
-                    totalAmount:   0,
+                    amount: 0,
+                    totalAmount: 0,
                     paymentMethod: method,
                     paymentStatus: "PENDING",
-                    paymentDate:   new Date(),
+                    paymentDate: new Date(),
                 },
             });
         }
 
+        // Generate JWT token for the patient to automatically sign them in
+        const token = generateToken({ id: patient.id, role: "patient" });
+
+        res.cookie("token", token, {
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+        });
+
         // ── 9. Respond ───────────────────────────────────────────────────────
         res.status(201).json({
-            success:                    true,
-            alreadyBooked:              false,
+            success: true,
+            alreadyBooked: false,
             isExistingPatient,
-            redirectToDashboard:        true,
-            message:                    isExistingPatient
+            redirectToDashboard: true,
+            token, // return token in JSON body too
+            message: isExistingPatient
                 ? "New token booked successfully for your existing account."
                 : "Appointment token successfully booked.",
             estimated_wait_time_minutes: estimatedWaitTime,
-            token_number:               tokenNumber,
+            token_number: tokenNumber,
             appointment: {
-                id:               newAppointment.id,
-                token_number:     newAppointment.tokenNumber,
-                status:           newAppointment.status,
+                id: newAppointment.id,
+                token_number: newAppointment.tokenNumber,
+                status: newAppointment.status,
                 appointment_date: newAppointment.appointmentDate,
                 appointment_time: newAppointment.appointmentTime,
             },
             patient: {
-                id:    patient.id,
-                name:  patient.name,
+                id: patient.id,
+                name: patient.name,
                 phone: patient.phone,
-                role:  patient.role,
+                role: patient.role,
+                age: patient.age,
             },
             hospital,
             payment: paymentRecord
                 ? {
-                    id:             paymentRecord.id,
+                    id: paymentRecord.id,
                     payment_method: paymentRecord.paymentMethod,
                     payment_status: paymentRecord.paymentStatus,
                 }

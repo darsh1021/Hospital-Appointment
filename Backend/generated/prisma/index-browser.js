@@ -162,6 +162,7 @@ exports.Prisma.PatientScalarFieldEnum = {
   name: 'name',
   phone: 'phone',
   gender: 'gender',
+  age: 'age',
   address: 'address',
   role: 'role',
   createdAt: 'createdAt',

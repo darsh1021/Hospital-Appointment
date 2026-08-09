@@ -12,8 +12,8 @@ const BookTokenPage = () => {
       />
 
       <BookHeroSection />
-      <BookHowItWorks />
       <BookFormSection />
+      <BookHowItWorks />
     </>
   )
 }

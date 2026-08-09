@@ -11,22 +11,21 @@ import {
 } from "../controllers/doctorController.js";
 import { protect, restrictTo } from "../middleware/authMiddleware.js";
 
+// Public Router (mounted at /api)
+export const publicRouter = Router();
+publicRouter.get("/doctors", getDoctors);
+publicRouter.get("/hospitals", getHospitals);
+
+// Doctor Dashboard Router (mounted at /api/doctor)
 export const router = Router();
 
-// Public routes
-router.get("/doctors", getDoctors);
-router.get("/hospitals", getHospitals);
-
-// Protect all routes below this point
+// Protect all dashboard routes
 router.use(protect);
-
-// Restrict all routes below this point to doctors only
 router.use(restrictTo("doctor"));
 
-// Doctor Dashboard routes
-router.get("/doctor/queue", getDoctorQueue);
-router.get("/doctor/current-patient", getCurrentPatient);
-router.put("/doctor/appointments/:id/status", updateAppointmentStatus);
-router.put("/doctor/appointments/:id/consult", completeConsultation);
-router.get("/doctor/follow-ups", getDoctorFollowups);
-router.put("/doctor/profile", updateDoctorProfile);
+router.get("/queue", getDoctorQueue);
+router.get("/current-patient", getCurrentPatient);
+router.put("/appointments/:id/status", updateAppointmentStatus);
+router.put("/appointments/:id/consult", completeConsultation);
+router.get("/follow-ups", getDoctorFollowups);
+router.put("/profile", updateDoctorProfile);

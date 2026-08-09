@@ -8,7 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // =======================
 // ENUMS
 // =======================
@@ -73,16 +72,16 @@ enum NotificationType {
 // =======================
 
 model Hospital {
-  id          String   @id @default(cuid())
-  name        String
-  email       String?  @unique
-  phoneNumber String?  @unique
-  city        String
-  state       String
-  pinCode     String
-  country     String
-  address     String
-  isActive Boolean @default(true)
+  id           String        @id @default(cuid())
+  name         String
+  email        String?       @unique
+  phoneNumber  String?       @unique
+  city         String
+  state        String
+  pinCode      String
+  country      String
+  address      String
+  isActive     Boolean       @default(true)
   staff        Staff[]
   patients     Patient[]
   appointments Appointment[]
@@ -102,21 +101,21 @@ model Staff {
   hospitalId String
   hospital   Hospital @relation(fields: [hospitalId], references: [id])
 
-  name     String
-  email    String @unique
-  phone    String @unique
-  password String
-  role StaffRole
-  avatar String?
-  gender Gender
-  dob DateTime?
-  address String?
-  qualification String?
+  name           String
+  email          String         @unique
+  phone          String         @unique
+  password       String
+  role           StaffRole
+  avatar         String?
+  gender         Gender
+  dob            DateTime?
+  address        String?
+  qualification  String?
   specialization String?
-  experience Int?
-  status StaffStatus @default(ACTIVE)
-  appointments Appointment[]
-  notifications Notification[]
+  experience     Int?
+  status         StaffStatus    @default(ACTIVE)
+  appointments   Appointment[]
+  notifications  Notification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -134,22 +133,22 @@ model Patient {
   hospitalId String
   hospital   Hospital @relation(fields: [hospitalId], references: [id])
 
-  name String
-  phone String @unique
-  gender Gender
-  age Int?
-  address String?
-  role String @default("PATIENT")
+  name         String
+  phone        String        @unique
+  gender       Gender
+  age          Int?
+  address      String?
+  role         String        @default("PATIENT")
   appointments Appointment[]
-  payments Payment[]
-  otp OTP[]
+  payments     Payment[]
+  otp          OTP[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([hospitalId])
 }
- 
+
 // =======================
 // APPOINTMENT
 // =======================
@@ -164,23 +163,23 @@ model Appointment {
   patient   Patient @relation(fields: [patientId], references: [id])
 
   doctorId String
-  doctor   Staff @relation(fields: [doctorId], references: [id])
+  doctor   Staff  @relation(fields: [doctorId], references: [id])
 
-  tokenNumber Int
-  appointmentDate DateTime
-  appointmentTime String
-  followupDate DateTime?
-  bookingSource BookingSource
-  status AppointmentStatus @default(waiting)
-  treatmentSummary String?
-  symptoms String?
-  prescription String?
-  priority AppointmentPriority @default(NORMAL)
-  notes String?
-  checkedInAt DateTime?
+  tokenNumber           Int
+  appointmentDate       DateTime
+  appointmentTime       String
+  followupDate          DateTime?
+  bookingSource         BookingSource
+  status                AppointmentStatus   @default(waiting)
+  treatmentSummary      String?
+  symptoms              String?
+  prescription          String?
+  priority              AppointmentPriority @default(NORMAL)
+  notes                 String?
+  checkedInAt           DateTime?
   consultationStartedAt DateTime?
-  completedAt DateTime?
-  payment Payment?
+  completedAt           DateTime?
+  payment               Payment?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -203,18 +202,18 @@ model Payment {
   patientId String
   patient   Patient @relation(fields: [patientId], references: [id])
 
-  appointmentId String @unique
-  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
 
-  amount Decimal @db.Decimal(10, 2)
-  discount Decimal? @db.Decimal(10, 2)
-  tax Decimal? @db.Decimal(10, 2)
-  totalAmount Decimal @db.Decimal(10, 2)
+  amount        Decimal       @db.Decimal(10, 2)
+  discount      Decimal?      @db.Decimal(10, 2)
+  tax           Decimal?      @db.Decimal(10, 2)
+  totalAmount   Decimal       @db.Decimal(10, 2)
   paymentMethod PaymentMethod
   paymentStatus PaymentStatus
   transactionId String?
-  remarks String?
-  paymentDate DateTime
+  remarks       String?
+  paymentDate   DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -231,12 +230,12 @@ model OTP {
   id String @id @default(cuid())
 
   patientId String
-  patient Patient @relation(fields: [patientId], references: [id])
+  patient   Patient @relation(fields: [patientId], references: [id])
 
-  otp String
+  otp       String
   expiresAt DateTime
-  usedAt DateTime?
-  createdAt DateTime @default(now())
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([patientId])
 }
@@ -248,13 +247,13 @@ model OTP {
 model Notification {
   id String @id @default(cuid())
 
-  userId String
-  user Staff @relation(fields: [userId], references: [id])
-  title String
-  message String
-  type NotificationType
-  isRead Boolean @default(false)
-  createdAt DateTime @default(now())
+  userId    String
+  user      Staff            @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
 
   @@index([userId])
 }

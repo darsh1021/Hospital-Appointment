@@ -7,6 +7,11 @@ import { store } from './app/store'
 import { ThemeProvider } from './app/theme-provider'
 import { AuthInit } from './app/AuthInit'
 import './index.css'
+import axiosInstance from './api/axios'
+import { setupInterceptors } from './api/interceptors'
+
+// Configure Axios Interceptors with the Redux store
+setupInterceptors(axiosInstance, store);
 
 
 createRoot(document.getElementById('root')!).render(

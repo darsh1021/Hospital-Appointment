@@ -6,7 +6,7 @@ export const bookPatientToken = async (
     data: BookTokenPayload
 ): Promise<BookTokenResponse> => {
     const response = await axiosInstance.post<BookTokenResponse>(
-        "/api/appointments/book-token",
+        "/api/appointment/book-token",
         data
     );
 
