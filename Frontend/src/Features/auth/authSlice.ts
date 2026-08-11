@@ -147,7 +147,19 @@ const authSlice = createSlice({
                 state.error = null;
             })
             .addCase(bookAppointmentUser.fulfilled, (state, action) => {
-                state.user = action.payload.user;
+                // The backend returns a `patient` object (not `user`) on book-token.
+                // Build the auth user from it so the patient sidebar/role resolves correctly.
+                const resp: any = action.payload;
+                const user = resp?.user ?? (resp?.patient
+                    ? {
+                        id: resp.patient.id,
+                        name: resp.patient.name,
+                        phone_number: resp.patient.phone,
+                        role: "patient" as const,
+                    }
+                    : null);
+
+                state.user = user;
                 state.isAuthenticated = true;
                 state.loading = false;
                 state.error = null;
