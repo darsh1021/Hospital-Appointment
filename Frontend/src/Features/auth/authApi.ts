@@ -16,7 +16,7 @@ export const login = async (
 
 // Login a patient using name or phone number.
 export const patientLoginApi = async (
-    data: { name?: string; number?: string; phone_number?: string }
+    data: { name: string; phone: string }
 ): Promise<LoginResponse> => {
     const response = await axiosInstance.post<LoginResponse>(
         "/api/auth/patient-login",

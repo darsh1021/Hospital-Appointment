@@ -19,8 +19,8 @@ export const bookAppointmentUser = createAsyncThunk(
             return response;
         } catch (error: any) {
             return rejectWithValue(
-                error?.response?.data?.error || 
-                error?.response?.data?.message || 
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
                 "Token booking failed"
             );
         }
@@ -36,8 +36,8 @@ export const fetchPatientAppointments = createAsyncThunk(
             return response.appointments;
         } catch (error: any) {
             return rejectWithValue(
-                error?.response?.data?.error || 
-                error?.response?.data?.message || 
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
                 "Failed to fetch appointments"
             );
         }

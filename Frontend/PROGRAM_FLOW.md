@@ -1,6 +1,6 @@
 # Frontend Program Flow & Architecture Documentation
 
-Welcome to the frontend documentation for the **Clearskin Clinic - Digital Queue Management System**. This document serves as a guide for new developers to quickly understand the execution flow, state management, route protection, and design decisions of the frontend application.
+Welcome to the frontend documentation for the **hospital queue managegment system**. This document serves as a guide for new developers to quickly understand the execution flow, state management, route protection, and design decisions of the frontend application.
 
 ---
 

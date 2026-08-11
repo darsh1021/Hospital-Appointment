@@ -39,7 +39,7 @@ export const loginUser = createAsyncThunk(
 // Login a patient
 export const loginPatientUser = createAsyncThunk(
     "auth/patientLogin",
-    async (data: { name?: string; number?: string; phone_number?: string }, { rejectWithValue }) => {
+    async (data: { name: string; phone: string }, { rejectWithValue }) => {
         try {
             const response = await patientLoginApi(data);
             return response;
@@ -168,7 +168,7 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = (action.payload as string) || "Token booking failed";
             })
-            
+
             // logoutUser
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;

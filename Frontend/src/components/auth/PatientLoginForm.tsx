@@ -10,20 +10,19 @@ export const PatientLoginForm = () => {
 
   const [formData, setFormData] = useState({
     name: "",
-    number: "",
+    phone: "",
   })
 
   const handlePatientLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.number.trim()) {
+    if (formData.phone.trim()) {
       try {
         const response = await dispatch(
           loginPatientUser({
-            name: formData.name.trim() || undefined,
-            number: formData.number.trim(),
+            name: formData.name.trim() || "",
+            phone: formData.phone.trim(),
           })
         ).unwrap()
-        console.log(response)
         if (response?.user) {
           navigate("/dashboard/patient")
         }
@@ -68,8 +67,8 @@ export const PatientLoginForm = () => {
             id="patient-number"
             type="tel"
             name="number"
-            value={formData.number}
-            onChange={(e) => setFormData({ ...formData, number: e.target.value })}
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             placeholder="e.g. 9876543210"
             required
             className="h-10 w-full rounded-[6px] border border-[#ebebeb] bg-white px-3 text-[14px] text-[#171717] placeholder:text-[#888888] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] dark:border-white/10 dark:bg-[#0a0a0a] dark:text-white dark:placeholder:text-[#555] dark:focus-visible:ring-white"
