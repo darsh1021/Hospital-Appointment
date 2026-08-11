@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db.js";
 import { calculateEstimatedWaitTime } from "../utils/queueEstimator.js";
 import { generateToken } from "../utils/jwt.js";
+import { createPendingBookingOtp, verifyPendingBookingOtp } from "../utils/pendingBookingOtp.js";
 
 // ─── List of allowed medical specialization categories ────────────────────────
 export const ALLOWED_CATEGORIES = [
@@ -13,13 +14,42 @@ export const ALLOWED_CATEGORIES = [
     "ENT"
 ];
 
-// ─── Helper: today's date range (midnight → midnight) ─────────────────────────
-const getTodayRange = () => {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0); // start of today 00:00:00
-    const end = new Date();
-    end.setHours(23, 59, 59, 999); // end of today 23:59:59
-    return { start, end };
+// ─── Token-day window configuration ──────────────────────────────────────────
+// Tokens are issued only between TOKEN_DAY_START_HOUR and TOKEN_DAY_END_HOUR.
+// Once the clock passes TOKEN_DAY_END_HOUR, the "active booking day" rolls over
+// to the NEXT calendar day, so token numbering resets at midnight and new tokens
+// start from 1 again when the next window opens.
+// Modify these two values to change the daily token-issuing window:
+export const TOKEN_DAY_START_HOUR = 0;  // 00:00 — window opens
+export const TOKEN_DAY_END_HOUR = 21; // 21:00 — window closes
+
+/**
+ * Returns the start and end Date boundaries for the currently-active booking day.
+ *
+ * If current time is BEFORE TOKEN_DAY_END_HOUR  → active day = today.
+ * If current time is AT/AFTER TOKEN_DAY_END_HOUR → active day = tomorrow
+ *   (tokens booked now will appear under the next calendar day and token
+ *    numbers will restart from 1 once that day's window opens).
+ */
+const getTokenDayRange = () => {
+    const now = new Date();
+
+    // Determine which calendar date the active booking window belongs to
+    const activeDate = new Date(now);
+    if (now.getHours() >= TOKEN_DAY_END_HOUR) {
+        // Past today's window — advance to tomorrow
+        activeDate.setDate(activeDate.getDate() + 1);
+    }
+
+    // Window start: TOKEN_DAY_START_HOUR on the active date
+    const start = new Date(activeDate);
+    start.setHours(TOKEN_DAY_START_HOUR, 0, 0, 0);
+
+    // Window end: TOKEN_DAY_END_HOUR on the active date (exclusive upper bound)
+    const end = new Date(activeDate);
+    end.setHours(TOKEN_DAY_END_HOUR, 59, 59, 999);
+
+    return { start, end, activeDate };
 };
 
 // ─── GET /appointments/categories ───────────────────────────────────────────
@@ -117,16 +147,17 @@ export const getDoctorsByCategory = async (
     }
 };
 
-// ─── POST /appointments/book-token ────────────────────────────────────────────
-// Public — no auth required
-// Body: { name, phone, gender, category, symptoms?, address?, payment_method? }
-// Rules:
-//   1. `category` (specialization) is used to auto-select the first active matching doctor
-//   2. Only today's date is allowed — future dates are rejected
-//   3. If phone already exists AND patient has a token today → return that token (alreadyBooked)
-//   4. If phone exists but no token today → book a new token
-//   5. If phone is new → auto-register patient + book token
-//   6. If payment_method is provided → create a Payment record
+// ─── POST /appointments/book-token  (STEP 1 — validate + send OTP) ────────────
+// Public — no auth required.
+// Body: { name, phone, gender, category, dob, symptoms?, address?, payment_method? }
+//
+// Validates all form fields and finds the matching doctor, then stores the
+// pending booking data in PendingBooking and sends a 6-digit OTP to the phone.
+// Both new AND existing patients must complete OTP verification before the
+// appointment is actually created.
+//
+// Response: { success: true, otpSent: true, phone }
+// After this, the frontend should show an OTP input and call /verify-booking-otp.
 
 export const bookToken = async (
     req: Request,
@@ -144,8 +175,6 @@ export const bookToken = async (
             address,
             payment_method,
         } = req.body;
-
-        console.log(req.body)
 
         // ── 1. Validate required fields ──────────────────────────────────────
         if (!name || !phone || !gender || !category || !dob) {
@@ -177,20 +206,10 @@ export const bookToken = async (
             return;
         }
 
-        // Valid Date DD/MM/YYYY format
-        // if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) {
-        //     res.status(400).json({
-        //         success: false,
-        //         error: "Invalid date format for dob. Expected DD/MM/YYYY.",
-        //     });
-        //     return;
-        // }
-
         const [yearStr, monthStr, dayStr] = dob.split("-");
         const day = parseInt(dayStr, 10);
         const month = parseInt(monthStr, 10);
         const year = parseInt(yearStr, 10);
-
         const parsedDob = new Date(year, month - 1, day);
 
         if (
@@ -199,43 +218,28 @@ export const bookToken = async (
             parsedDob.getMonth() !== month - 1 ||
             parsedDob.getDate() !== day
         ) {
-            res.status(400).json({
-                success: false,
-                error: "Invalid date for dob.",
-            });
+            res.status(400).json({ success: false, error: "Invalid date for dob." });
             return;
         }
 
         // Calculate age from dob
         const today = new Date();
         let age = today.getFullYear() - parsedDob.getFullYear();
-        const m = today.getMonth() - parsedDob.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < parsedDob.getDate())) {
-            age--;
-        }
+        const mDiff = today.getMonth() - parsedDob.getMonth();
+        if (mDiff < 0 || (mDiff === 0 && today.getDate() < parsedDob.getDate())) age--;
 
         // ── 2. Validate payment_method if provided ───────────────────────────
         if (payment_method && !["CASH", "ONLINE"].includes(String(payment_method).toUpperCase())) {
-            res.status(400).json({
-                success: false,
-                error: "Invalid payment_method. Use CASH or ONLINE.",
-            });
+            res.status(400).json({ success: false, error: "Invalid payment_method. Use CASH or ONLINE." });
             return;
         }
 
-        // ── 3. Enforce today-only rule ───────────────────────────────────────
-        const { start: todayStart, end: todayEnd } = getTodayRange();
-        const appointmentDate = todayStart; // always book for today
-
-        // ── 4. Find active doctor by category (specialization) ───────────────
+        // ── 3. Find active doctor by category ───────────────────────────────
         const doctor = await prisma.staff.findFirst({
             where: {
                 role: "DOCTOR",
                 status: "ACTIVE",
-                specialization: {
-                    equals: matchedCategory,
-                    mode: "insensitive",
-                },
+                specialization: { equals: matchedCategory, mode: "insensitive" },
             },
             select: { id: true, name: true, specialization: true, hospitalId: true },
         });
@@ -248,89 +252,159 @@ export const bookToken = async (
             return;
         }
 
-        const resolvedHospitalId = doctor.hospitalId;
+        // ── 4. Store pending booking data and send OTP ───────────────────────
+        // We save ALL validated data here so Step 2 can complete the booking
+        // without the frontend needing to resend the full form.
+        await createPendingBookingOtp(phone, {
+            name,
+            phone,
+            gender: normalizedGender,
+            age,
+            category: matchedCategory,
+            dob,
+            symptoms: symptoms ?? null,
+            address: address ?? null,
+            payment_method: payment_method ?? null,
+            doctorId: doctor.id,
+            hospitalId: doctor.hospitalId,
+        });
 
-        // Fetch full hospital details for the response
+        res.status(200).json({
+            success: true,
+            otpSent: true,
+            phone,
+            message: "OTP sent to your phone number. Please verify to confirm your booking.",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ─── POST /appointments/verify-booking-otp  (STEP 2 — verify OTP + finalize) ──
+// Public — no auth required.
+// Body: { phone, otp }
+//
+// Verifies the OTP, then:
+//   • Creates the patient if they don't exist yet  (new patient flow)
+//   • Or reuses the existing patient record       (returning patient flow)
+// Then checks for an existing token today and either returns it (alreadyBooked)
+// or creates a fresh appointment + issues a JWT cookie.
+
+export const verifyBookingOtp = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { phone, otp } = req.body;
+
+        if (!phone || !otp) {
+            res.status(400).json({ success: false, error: "Please provide phone and otp." });
+            return;
+        }
+
+        // ── 1. Verify OTP and retrieve stored booking data ───────────────────
+        const bookingData = await verifyPendingBookingOtp(phone, String(otp)) as {
+            name: string;
+            phone: string;
+            gender: "MALE" | "FEMALE" | "OTHER";
+            age: number;
+            category: string;
+            dob: string;
+            symptoms: string | null;
+            address: string | null;
+            payment_method: string | null;
+            doctorId: string;
+            hospitalId: string;
+        } | null;
+
+        if (!bookingData) {
+            res.status(400).json({ success: false, error: "Invalid or expired OTP. Please try again." });
+            return;
+        }
+
+        const { name, gender, age, symptoms, address, payment_method, doctorId, hospitalId } = bookingData;
+
+        // ── 2. Resolve active booking day ────────────────────────────────────
+        const { start: todayStart, end: todayEnd, activeDate } = getTokenDayRange();
+        const appointmentDate = activeDate;
+
+        // Fetch hospital details for the response
         const hospital = await prisma.hospital.findUnique({
-            where: { id: resolvedHospitalId },
+            where: { id: hospitalId },
             select: { id: true, name: true, address: true, city: true, state: true, pinCode: true },
         });
 
-        // ── 5. Check if phone already exists ────────────────────────────────
+        // ── 3. Create patient if new, or reuse existing ──────────────────────
         let patient = await prisma.patient.findUnique({ where: { phone } });
-        let isExistingPatient = !!patient;
+        const isExistingPatient = !!patient;
 
         if (patient) {
-            // ── 5a. Existing patient — check if they already have a token today ──
+            // ── 3a. Existing patient — check if already has a token today ────
             const existingTodayAppointment = await prisma.appointment.findFirst({
                 where: {
                     patientId: patient.id,
-                    doctorId: doctor.id,
+                    doctorId,
                     appointmentDate: { gte: todayStart, lte: todayEnd },
                 },
                 include: {
-                    doctor: { select: { name: true, specialization: true } },
+                    doctor:   { select: { name: true, specialization: true } },
                     hospital: { select: { name: true, address: true, city: true } },
                 },
             });
 
             if (existingTodayAppointment) {
-                // Generate JWT token for the patient to automatically sign them in
-                const token = generateToken({ id: patient.id, role: "patient" });
-
-                res.cookie("token", token, {
+                const jwtToken = generateToken({ id: patient.id, role: "patient" });
+                res.cookie("token", jwtToken, {
                     expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
                 });
-
-                // Patient already has a token with this doctor today → return it
                 res.status(200).json({
                     success: true,
                     alreadyBooked: true,
                     redirectToDashboard: true,
-                    token, // return token in JSON body too
+                    token: jwtToken,
                     message: "You already have a token booked for today with this doctor.",
                     token_number: existingTodayAppointment.tokenNumber,
                     appointment: {
-                        id: existingTodayAppointment.id,
-                        token_number: existingTodayAppointment.tokenNumber,
-                        status: existingTodayAppointment.status,
-                        appointment_date: existingTodayAppointment.appointmentDate,
-                        doctor_name: existingTodayAppointment.doctor.name,
+                        id:                   existingTodayAppointment.id,
+                        token_number:         existingTodayAppointment.tokenNumber,
+                        status:               existingTodayAppointment.status,
+                        appointment_date:     existingTodayAppointment.appointmentDate,
+                        doctor_name:          existingTodayAppointment.doctor.name,
                         doctor_specialization: existingTodayAppointment.doctor.specialization,
-                        hospital_name: existingTodayAppointment.hospital.name,
-                        hospital_address: existingTodayAppointment.hospital.address,
+                        hospital_name:        existingTodayAppointment.hospital.name,
+                        hospital_address:     existingTodayAppointment.hospital.address,
                     },
                     patient: {
-                        id: patient.id,
-                        name: patient.name,
+                        id:    patient.id,
+                        name:  patient.name,
                         phone: patient.phone,
-                        role: patient.role,
-                        age: patient.age,
+                        role:  patient.role,
+                        age:   patient.age,
                     },
                 });
                 return;
             }
-            // Existing patient, no token today → fall through to book a new token
+            // Existing patient, no token today → fall through to book a new one
 
         } else {
-            // ── 5b. New patient — auto-register ──────────────────────────────
+            // ── 3b. New patient — register now (OTP already verified) ────────
             patient = await prisma.patient.create({
                 data: {
                     name,
                     phone,
-                    gender: normalizedGender as "MALE" | "FEMALE" | "OTHER",
+                    gender: gender as "MALE" | "FEMALE" | "OTHER",
                     age,
                     address: address ?? null,
                     role: "PATIENT",
-                    hospitalId: resolvedHospitalId,
+                    hospitalId,
                 },
             });
         }
 
-        // ── 6. Calculate next token number ───────────────────────────────────
-        const doctorId = doctor.id;
+        // ── 4. Calculate next token number ───────────────────────────────────
         const maxToken = await prisma.appointment.aggregate({
             where: {
                 doctorId,
@@ -347,12 +421,12 @@ export const bookToken = async (
 
         const estimatedWaitTime = await calculateEstimatedWaitTime(doctorId, appointmentDate);
 
-        // ── 7. Create the appointment ────────────────────────────────────────
+        // ── 5. Create the appointment ────────────────────────────────────────
         const newAppointment = await prisma.appointment.create({
             data: {
                 patientId: patient.id,
                 doctorId,
-                hospitalId: resolvedHospitalId,
+                hospitalId,
                 appointmentDate,
                 appointmentTime,
                 tokenNumber,
@@ -362,13 +436,13 @@ export const bookToken = async (
             },
         });
 
-        // ── 8. Optionally create Payment record ──────────────────────────────
+        // ── 6. Optionally create Payment record ──────────────────────────────
         let paymentRecord = null;
         if (payment_method) {
             const method = String(payment_method).toUpperCase() as "CASH" | "ONLINE";
             paymentRecord = await prisma.payment.create({
                 data: {
-                    hospitalId: resolvedHospitalId,
+                    hospitalId,
                     patientId: patient.id,
                     appointmentId: newAppointment.id,
                     amount: 0,
@@ -380,45 +454,43 @@ export const bookToken = async (
             });
         }
 
-        // Generate JWT token for the patient to automatically sign them in
-        const token = generateToken({ id: patient.id, role: "patient" });
-
-        res.cookie("token", token, {
+        // ── 7. Issue JWT and respond ─────────────────────────────────────────
+        const jwtToken = generateToken({ id: patient.id, role: "patient" });
+        res.cookie("token", jwtToken, {
             expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
         });
 
-        // ── 9. Respond ───────────────────────────────────────────────────────
         res.status(201).json({
             success: true,
             alreadyBooked: false,
             isExistingPatient,
             redirectToDashboard: true,
-            token, // return token in JSON body too
+            token: jwtToken,
             message: isExistingPatient
                 ? "New token booked successfully for your existing account."
                 : "Appointment token successfully booked.",
             estimated_wait_time_minutes: estimatedWaitTime,
             token_number: tokenNumber,
             appointment: {
-                id: newAppointment.id,
-                token_number: newAppointment.tokenNumber,
-                status: newAppointment.status,
+                id:               newAppointment.id,
+                token_number:     newAppointment.tokenNumber,
+                status:           newAppointment.status,
                 appointment_date: newAppointment.appointmentDate,
                 appointment_time: newAppointment.appointmentTime,
             },
             patient: {
-                id: patient.id,
-                name: patient.name,
+                id:    patient.id,
+                name:  patient.name,
                 phone: patient.phone,
-                role: patient.role,
-                age: patient.age,
+                role:  patient.role,
+                age:   patient.age,
             },
             hospital,
             payment: paymentRecord
                 ? {
-                    id: paymentRecord.id,
+                    id:             paymentRecord.id,
                     payment_method: paymentRecord.paymentMethod,
                     payment_status: paymentRecord.paymentStatus,
                 }

@@ -48,6 +48,11 @@ export type OTP = $Result.DefaultSelection<Prisma.$OTPPayload>
  * 
  */
 export type Notification = $Result.DefaultSelection<Prisma.$NotificationPayload>
+/**
+ * Model PendingBooking
+ * 
+ */
+export type PendingBooking = $Result.DefaultSelection<Prisma.$PendingBookingPayload>
 
 /**
  * Enums
@@ -359,6 +364,16 @@ export class PrismaClient<
     * ```
     */
   get notification(): Prisma.NotificationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.pendingBooking`: Exposes CRUD operations for the **PendingBooking** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PendingBookings
+    * const pendingBookings = await prisma.pendingBooking.findMany()
+    * ```
+    */
+  get pendingBooking(): Prisma.PendingBookingDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -806,7 +821,8 @@ export namespace Prisma {
     Appointment: 'Appointment',
     Payment: 'Payment',
     OTP: 'OTP',
-    Notification: 'Notification'
+    Notification: 'Notification',
+    PendingBooking: 'PendingBooking'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -825,7 +841,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "hospital" | "staff" | "patient" | "appointment" | "payment" | "oTP" | "notification"
+      modelProps: "hospital" | "staff" | "patient" | "appointment" | "payment" | "oTP" | "notification" | "pendingBooking"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1347,6 +1363,80 @@ export namespace Prisma {
           }
         }
       }
+      PendingBooking: {
+        payload: Prisma.$PendingBookingPayload<ExtArgs>
+        fields: Prisma.PendingBookingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PendingBookingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PendingBookingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>
+          }
+          findFirst: {
+            args: Prisma.PendingBookingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PendingBookingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>
+          }
+          findMany: {
+            args: Prisma.PendingBookingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>[]
+          }
+          create: {
+            args: Prisma.PendingBookingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>
+          }
+          createMany: {
+            args: Prisma.PendingBookingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PendingBookingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>[]
+          }
+          delete: {
+            args: Prisma.PendingBookingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>
+          }
+          update: {
+            args: Prisma.PendingBookingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>
+          }
+          deleteMany: {
+            args: Prisma.PendingBookingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PendingBookingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PendingBookingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>[]
+          }
+          upsert: {
+            args: Prisma.PendingBookingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PendingBookingPayload>
+          }
+          aggregate: {
+            args: Prisma.PendingBookingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePendingBooking>
+          }
+          groupBy: {
+            args: Prisma.PendingBookingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PendingBookingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PendingBookingCountArgs<ExtArgs>
+            result: $Utils.Optional<PendingBookingCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1450,6 +1540,7 @@ export namespace Prisma {
     payment?: PaymentOmit
     oTP?: OTPOmit
     notification?: NotificationOmit
+    pendingBooking?: PendingBookingOmit
   }
 
   /* Types for Logging */
@@ -10202,6 +10293,1023 @@ export namespace Prisma {
 
 
   /**
+   * Model PendingBooking
+   */
+
+  export type AggregatePendingBooking = {
+    _count: PendingBookingCountAggregateOutputType | null
+    _min: PendingBookingMinAggregateOutputType | null
+    _max: PendingBookingMaxAggregateOutputType | null
+  }
+
+  export type PendingBookingMinAggregateOutputType = {
+    id: string | null
+    phone: string | null
+    otp: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PendingBookingMaxAggregateOutputType = {
+    id: string | null
+    phone: string | null
+    otp: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PendingBookingCountAggregateOutputType = {
+    id: number
+    phone: number
+    data: number
+    otp: number
+    expiresAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PendingBookingMinAggregateInputType = {
+    id?: true
+    phone?: true
+    otp?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PendingBookingMaxAggregateInputType = {
+    id?: true
+    phone?: true
+    otp?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PendingBookingCountAggregateInputType = {
+    id?: true
+    phone?: true
+    data?: true
+    otp?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PendingBookingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PendingBooking to aggregate.
+     */
+    where?: PendingBookingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PendingBookings to fetch.
+     */
+    orderBy?: PendingBookingOrderByWithRelationInput | PendingBookingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PendingBookingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PendingBookings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PendingBookings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PendingBookings
+    **/
+    _count?: true | PendingBookingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PendingBookingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PendingBookingMaxAggregateInputType
+  }
+
+  export type GetPendingBookingAggregateType<T extends PendingBookingAggregateArgs> = {
+        [P in keyof T & keyof AggregatePendingBooking]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePendingBooking[P]>
+      : GetScalarType<T[P], AggregatePendingBooking[P]>
+  }
+
+
+
+
+  export type PendingBookingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PendingBookingWhereInput
+    orderBy?: PendingBookingOrderByWithAggregationInput | PendingBookingOrderByWithAggregationInput[]
+    by: PendingBookingScalarFieldEnum[] | PendingBookingScalarFieldEnum
+    having?: PendingBookingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PendingBookingCountAggregateInputType | true
+    _min?: PendingBookingMinAggregateInputType
+    _max?: PendingBookingMaxAggregateInputType
+  }
+
+  export type PendingBookingGroupByOutputType = {
+    id: string
+    phone: string
+    data: JsonValue
+    otp: string
+    expiresAt: Date
+    createdAt: Date
+    updatedAt: Date
+    _count: PendingBookingCountAggregateOutputType | null
+    _min: PendingBookingMinAggregateOutputType | null
+    _max: PendingBookingMaxAggregateOutputType | null
+  }
+
+  type GetPendingBookingGroupByPayload<T extends PendingBookingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PendingBookingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PendingBookingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PendingBookingGroupByOutputType[P]>
+            : GetScalarType<T[P], PendingBookingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PendingBookingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    phone?: boolean
+    data?: boolean
+    otp?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pendingBooking"]>
+
+  export type PendingBookingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    phone?: boolean
+    data?: boolean
+    otp?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pendingBooking"]>
+
+  export type PendingBookingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    phone?: boolean
+    data?: boolean
+    otp?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pendingBooking"]>
+
+  export type PendingBookingSelectScalar = {
+    id?: boolean
+    phone?: boolean
+    data?: boolean
+    otp?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PendingBookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "phone" | "data" | "otp" | "expiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["pendingBooking"]>
+
+  export type $PendingBookingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PendingBooking"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      phone: string
+      data: Prisma.JsonValue
+      otp: string
+      expiresAt: Date
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["pendingBooking"]>
+    composites: {}
+  }
+
+  type PendingBookingGetPayload<S extends boolean | null | undefined | PendingBookingDefaultArgs> = $Result.GetResult<Prisma.$PendingBookingPayload, S>
+
+  type PendingBookingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PendingBookingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PendingBookingCountAggregateInputType | true
+    }
+
+  export interface PendingBookingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PendingBooking'], meta: { name: 'PendingBooking' } }
+    /**
+     * Find zero or one PendingBooking that matches the filter.
+     * @param {PendingBookingFindUniqueArgs} args - Arguments to find a PendingBooking
+     * @example
+     * // Get one PendingBooking
+     * const pendingBooking = await prisma.pendingBooking.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PendingBookingFindUniqueArgs>(args: SelectSubset<T, PendingBookingFindUniqueArgs<ExtArgs>>): Prisma__PendingBookingClient<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PendingBooking that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PendingBookingFindUniqueOrThrowArgs} args - Arguments to find a PendingBooking
+     * @example
+     * // Get one PendingBooking
+     * const pendingBooking = await prisma.pendingBooking.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PendingBookingFindUniqueOrThrowArgs>(args: SelectSubset<T, PendingBookingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PendingBookingClient<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PendingBooking that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PendingBookingFindFirstArgs} args - Arguments to find a PendingBooking
+     * @example
+     * // Get one PendingBooking
+     * const pendingBooking = await prisma.pendingBooking.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PendingBookingFindFirstArgs>(args?: SelectSubset<T, PendingBookingFindFirstArgs<ExtArgs>>): Prisma__PendingBookingClient<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PendingBooking that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PendingBookingFindFirstOrThrowArgs} args - Arguments to find a PendingBooking
+     * @example
+     * // Get one PendingBooking
+     * const pendingBooking = await prisma.pendingBooking.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PendingBookingFindFirstOrThrowArgs>(args?: SelectSubset<T, PendingBookingFindFirstOrThrowArgs<ExtArgs>>): Prisma__PendingBookingClient<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PendingBookings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PendingBookingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PendingBookings
+     * const pendingBookings = await prisma.pendingBooking.findMany()
+     * 
+     * // Get first 10 PendingBookings
+     * const pendingBookings = await prisma.pendingBooking.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const pendingBookingWithIdOnly = await prisma.pendingBooking.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PendingBookingFindManyArgs>(args?: SelectSubset<T, PendingBookingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PendingBooking.
+     * @param {PendingBookingCreateArgs} args - Arguments to create a PendingBooking.
+     * @example
+     * // Create one PendingBooking
+     * const PendingBooking = await prisma.pendingBooking.create({
+     *   data: {
+     *     // ... data to create a PendingBooking
+     *   }
+     * })
+     * 
+     */
+    create<T extends PendingBookingCreateArgs>(args: SelectSubset<T, PendingBookingCreateArgs<ExtArgs>>): Prisma__PendingBookingClient<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PendingBookings.
+     * @param {PendingBookingCreateManyArgs} args - Arguments to create many PendingBookings.
+     * @example
+     * // Create many PendingBookings
+     * const pendingBooking = await prisma.pendingBooking.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PendingBookingCreateManyArgs>(args?: SelectSubset<T, PendingBookingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PendingBookings and returns the data saved in the database.
+     * @param {PendingBookingCreateManyAndReturnArgs} args - Arguments to create many PendingBookings.
+     * @example
+     * // Create many PendingBookings
+     * const pendingBooking = await prisma.pendingBooking.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PendingBookings and only return the `id`
+     * const pendingBookingWithIdOnly = await prisma.pendingBooking.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PendingBookingCreateManyAndReturnArgs>(args?: SelectSubset<T, PendingBookingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PendingBooking.
+     * @param {PendingBookingDeleteArgs} args - Arguments to delete one PendingBooking.
+     * @example
+     * // Delete one PendingBooking
+     * const PendingBooking = await prisma.pendingBooking.delete({
+     *   where: {
+     *     // ... filter to delete one PendingBooking
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PendingBookingDeleteArgs>(args: SelectSubset<T, PendingBookingDeleteArgs<ExtArgs>>): Prisma__PendingBookingClient<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PendingBooking.
+     * @param {PendingBookingUpdateArgs} args - Arguments to update one PendingBooking.
+     * @example
+     * // Update one PendingBooking
+     * const pendingBooking = await prisma.pendingBooking.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PendingBookingUpdateArgs>(args: SelectSubset<T, PendingBookingUpdateArgs<ExtArgs>>): Prisma__PendingBookingClient<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PendingBookings.
+     * @param {PendingBookingDeleteManyArgs} args - Arguments to filter PendingBookings to delete.
+     * @example
+     * // Delete a few PendingBookings
+     * const { count } = await prisma.pendingBooking.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PendingBookingDeleteManyArgs>(args?: SelectSubset<T, PendingBookingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PendingBookings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PendingBookingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PendingBookings
+     * const pendingBooking = await prisma.pendingBooking.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PendingBookingUpdateManyArgs>(args: SelectSubset<T, PendingBookingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PendingBookings and returns the data updated in the database.
+     * @param {PendingBookingUpdateManyAndReturnArgs} args - Arguments to update many PendingBookings.
+     * @example
+     * // Update many PendingBookings
+     * const pendingBooking = await prisma.pendingBooking.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PendingBookings and only return the `id`
+     * const pendingBookingWithIdOnly = await prisma.pendingBooking.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PendingBookingUpdateManyAndReturnArgs>(args: SelectSubset<T, PendingBookingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PendingBooking.
+     * @param {PendingBookingUpsertArgs} args - Arguments to update or create a PendingBooking.
+     * @example
+     * // Update or create a PendingBooking
+     * const pendingBooking = await prisma.pendingBooking.upsert({
+     *   create: {
+     *     // ... data to create a PendingBooking
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PendingBooking we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PendingBookingUpsertArgs>(args: SelectSubset<T, PendingBookingUpsertArgs<ExtArgs>>): Prisma__PendingBookingClient<$Result.GetResult<Prisma.$PendingBookingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PendingBookings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PendingBookingCountArgs} args - Arguments to filter PendingBookings to count.
+     * @example
+     * // Count the number of PendingBookings
+     * const count = await prisma.pendingBooking.count({
+     *   where: {
+     *     // ... the filter for the PendingBookings we want to count
+     *   }
+     * })
+    **/
+    count<T extends PendingBookingCountArgs>(
+      args?: Subset<T, PendingBookingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PendingBookingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PendingBooking.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PendingBookingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PendingBookingAggregateArgs>(args: Subset<T, PendingBookingAggregateArgs>): Prisma.PrismaPromise<GetPendingBookingAggregateType<T>>
+
+    /**
+     * Group by PendingBooking.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PendingBookingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PendingBookingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PendingBookingGroupByArgs['orderBy'] }
+        : { orderBy?: PendingBookingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PendingBookingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPendingBookingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PendingBooking model
+   */
+  readonly fields: PendingBookingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PendingBooking.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PendingBookingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PendingBooking model
+   */
+  interface PendingBookingFieldRefs {
+    readonly id: FieldRef<"PendingBooking", 'String'>
+    readonly phone: FieldRef<"PendingBooking", 'String'>
+    readonly data: FieldRef<"PendingBooking", 'Json'>
+    readonly otp: FieldRef<"PendingBooking", 'String'>
+    readonly expiresAt: FieldRef<"PendingBooking", 'DateTime'>
+    readonly createdAt: FieldRef<"PendingBooking", 'DateTime'>
+    readonly updatedAt: FieldRef<"PendingBooking", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PendingBooking findUnique
+   */
+  export type PendingBookingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * Filter, which PendingBooking to fetch.
+     */
+    where: PendingBookingWhereUniqueInput
+  }
+
+  /**
+   * PendingBooking findUniqueOrThrow
+   */
+  export type PendingBookingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * Filter, which PendingBooking to fetch.
+     */
+    where: PendingBookingWhereUniqueInput
+  }
+
+  /**
+   * PendingBooking findFirst
+   */
+  export type PendingBookingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * Filter, which PendingBooking to fetch.
+     */
+    where?: PendingBookingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PendingBookings to fetch.
+     */
+    orderBy?: PendingBookingOrderByWithRelationInput | PendingBookingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PendingBookings.
+     */
+    cursor?: PendingBookingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PendingBookings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PendingBookings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PendingBookings.
+     */
+    distinct?: PendingBookingScalarFieldEnum | PendingBookingScalarFieldEnum[]
+  }
+
+  /**
+   * PendingBooking findFirstOrThrow
+   */
+  export type PendingBookingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * Filter, which PendingBooking to fetch.
+     */
+    where?: PendingBookingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PendingBookings to fetch.
+     */
+    orderBy?: PendingBookingOrderByWithRelationInput | PendingBookingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PendingBookings.
+     */
+    cursor?: PendingBookingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PendingBookings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PendingBookings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PendingBookings.
+     */
+    distinct?: PendingBookingScalarFieldEnum | PendingBookingScalarFieldEnum[]
+  }
+
+  /**
+   * PendingBooking findMany
+   */
+  export type PendingBookingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * Filter, which PendingBookings to fetch.
+     */
+    where?: PendingBookingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PendingBookings to fetch.
+     */
+    orderBy?: PendingBookingOrderByWithRelationInput | PendingBookingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PendingBookings.
+     */
+    cursor?: PendingBookingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PendingBookings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PendingBookings.
+     */
+    skip?: number
+    distinct?: PendingBookingScalarFieldEnum | PendingBookingScalarFieldEnum[]
+  }
+
+  /**
+   * PendingBooking create
+   */
+  export type PendingBookingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PendingBooking.
+     */
+    data: XOR<PendingBookingCreateInput, PendingBookingUncheckedCreateInput>
+  }
+
+  /**
+   * PendingBooking createMany
+   */
+  export type PendingBookingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PendingBookings.
+     */
+    data: PendingBookingCreateManyInput | PendingBookingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PendingBooking createManyAndReturn
+   */
+  export type PendingBookingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * The data used to create many PendingBookings.
+     */
+    data: PendingBookingCreateManyInput | PendingBookingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PendingBooking update
+   */
+  export type PendingBookingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PendingBooking.
+     */
+    data: XOR<PendingBookingUpdateInput, PendingBookingUncheckedUpdateInput>
+    /**
+     * Choose, which PendingBooking to update.
+     */
+    where: PendingBookingWhereUniqueInput
+  }
+
+  /**
+   * PendingBooking updateMany
+   */
+  export type PendingBookingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PendingBookings.
+     */
+    data: XOR<PendingBookingUpdateManyMutationInput, PendingBookingUncheckedUpdateManyInput>
+    /**
+     * Filter which PendingBookings to update
+     */
+    where?: PendingBookingWhereInput
+    /**
+     * Limit how many PendingBookings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PendingBooking updateManyAndReturn
+   */
+  export type PendingBookingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * The data used to update PendingBookings.
+     */
+    data: XOR<PendingBookingUpdateManyMutationInput, PendingBookingUncheckedUpdateManyInput>
+    /**
+     * Filter which PendingBookings to update
+     */
+    where?: PendingBookingWhereInput
+    /**
+     * Limit how many PendingBookings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PendingBooking upsert
+   */
+  export type PendingBookingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PendingBooking to update in case it exists.
+     */
+    where: PendingBookingWhereUniqueInput
+    /**
+     * In case the PendingBooking found by the `where` argument doesn't exist, create a new PendingBooking with this data.
+     */
+    create: XOR<PendingBookingCreateInput, PendingBookingUncheckedCreateInput>
+    /**
+     * In case the PendingBooking was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PendingBookingUpdateInput, PendingBookingUncheckedUpdateInput>
+  }
+
+  /**
+   * PendingBooking delete
+   */
+  export type PendingBookingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+    /**
+     * Filter which PendingBooking to delete.
+     */
+    where: PendingBookingWhereUniqueInput
+  }
+
+  /**
+   * PendingBooking deleteMany
+   */
+  export type PendingBookingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PendingBookings to delete
+     */
+    where?: PendingBookingWhereInput
+    /**
+     * Limit how many PendingBookings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PendingBooking without action
+   */
+  export type PendingBookingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PendingBooking
+     */
+    select?: PendingBookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PendingBooking
+     */
+    omit?: PendingBookingOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -10344,12 +11452,32 @@ export namespace Prisma {
   export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
+  export const PendingBookingScalarFieldEnum: {
+    id: 'id',
+    phone: 'phone',
+    data: 'data',
+    otp: 'otp',
+    expiresAt: 'expiresAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PendingBookingScalarFieldEnum = (typeof PendingBookingScalarFieldEnum)[keyof typeof PendingBookingScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -10366,6 +11494,15 @@ export namespace Prisma {
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -10559,6 +11696,20 @@ export namespace Prisma {
    * Reference to a field of type 'NotificationType[]'
    */
   export type ListEnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -11269,6 +12420,68 @@ export namespace Prisma {
     type?: EnumNotificationTypeWithAggregatesFilter<"Notification"> | $Enums.NotificationType
     isRead?: BoolWithAggregatesFilter<"Notification"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Notification"> | Date | string
+  }
+
+  export type PendingBookingWhereInput = {
+    AND?: PendingBookingWhereInput | PendingBookingWhereInput[]
+    OR?: PendingBookingWhereInput[]
+    NOT?: PendingBookingWhereInput | PendingBookingWhereInput[]
+    id?: StringFilter<"PendingBooking"> | string
+    phone?: StringFilter<"PendingBooking"> | string
+    data?: JsonFilter<"PendingBooking">
+    otp?: StringFilter<"PendingBooking"> | string
+    expiresAt?: DateTimeFilter<"PendingBooking"> | Date | string
+    createdAt?: DateTimeFilter<"PendingBooking"> | Date | string
+    updatedAt?: DateTimeFilter<"PendingBooking"> | Date | string
+  }
+
+  export type PendingBookingOrderByWithRelationInput = {
+    id?: SortOrder
+    phone?: SortOrder
+    data?: SortOrder
+    otp?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PendingBookingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    phone?: string
+    AND?: PendingBookingWhereInput | PendingBookingWhereInput[]
+    OR?: PendingBookingWhereInput[]
+    NOT?: PendingBookingWhereInput | PendingBookingWhereInput[]
+    data?: JsonFilter<"PendingBooking">
+    otp?: StringFilter<"PendingBooking"> | string
+    expiresAt?: DateTimeFilter<"PendingBooking"> | Date | string
+    createdAt?: DateTimeFilter<"PendingBooking"> | Date | string
+    updatedAt?: DateTimeFilter<"PendingBooking"> | Date | string
+  }, "id" | "phone">
+
+  export type PendingBookingOrderByWithAggregationInput = {
+    id?: SortOrder
+    phone?: SortOrder
+    data?: SortOrder
+    otp?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PendingBookingCountOrderByAggregateInput
+    _max?: PendingBookingMaxOrderByAggregateInput
+    _min?: PendingBookingMinOrderByAggregateInput
+  }
+
+  export type PendingBookingScalarWhereWithAggregatesInput = {
+    AND?: PendingBookingScalarWhereWithAggregatesInput | PendingBookingScalarWhereWithAggregatesInput[]
+    OR?: PendingBookingScalarWhereWithAggregatesInput[]
+    NOT?: PendingBookingScalarWhereWithAggregatesInput | PendingBookingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PendingBooking"> | string
+    phone?: StringWithAggregatesFilter<"PendingBooking"> | string
+    data?: JsonWithAggregatesFilter<"PendingBooking">
+    otp?: StringWithAggregatesFilter<"PendingBooking"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"PendingBooking"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"PendingBooking"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PendingBooking"> | Date | string
   }
 
   export type HospitalCreateInput = {
@@ -12055,6 +13268,76 @@ export namespace Prisma {
     type?: EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
     isRead?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PendingBookingCreateInput = {
+    id?: string
+    phone: string
+    data: JsonNullValueInput | InputJsonValue
+    otp: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PendingBookingUncheckedCreateInput = {
+    id?: string
+    phone: string
+    data: JsonNullValueInput | InputJsonValue
+    otp: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PendingBookingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    otp?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PendingBookingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    otp?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PendingBookingCreateManyInput = {
+    id?: string
+    phone: string
+    data: JsonNullValueInput | InputJsonValue
+    otp: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PendingBookingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    otp?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PendingBookingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    otp?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -12897,6 +14180,83 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumNotificationTypeFilter<$PrismaModel>
     _max?: NestedEnumNotificationTypeFilter<$PrismaModel>
+  }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type PendingBookingCountOrderByAggregateInput = {
+    id?: SortOrder
+    phone?: SortOrder
+    data?: SortOrder
+    otp?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PendingBookingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    phone?: SortOrder
+    otp?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PendingBookingMinOrderByAggregateInput = {
+    id?: SortOrder
+    phone?: SortOrder
+    otp?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type StaffCreateNestedManyWithoutHospitalInput = {
@@ -13943,6 +15303,29 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumNotificationTypeFilter<$PrismaModel>
     _max?: NestedEnumNotificationTypeFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type StaffCreateWithoutHospitalInput = {

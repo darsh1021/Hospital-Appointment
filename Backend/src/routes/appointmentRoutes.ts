@@ -1,9 +1,19 @@
 import { Router } from "express";
-import { bookToken, getDoctorsByCategory, getCategories } from "../controllers/appointmentController.js";
+import { bookToken, verifyBookingOtp, getDoctorsByCategory, getCategories } from "../controllers/appointmentController.js";
 
 export const router = Router();
 
 // Public routes — no authentication required
-router.get("/categories", getCategories);       // GET  /appointments/categories
-// router.get("/doctors", getDoctorsByCategory);   // GET  /appointments/doctors?category=Dermatology
-router.post("/book-token", bookToken);           // POST /appointments/book-token
+
+// GET  /appointments/categories
+router.get("/categories", getCategories);
+
+// POST /appointments/book-token
+// Step 1: Validate form + send OTP to patient's phone.
+// Returns { otpSent: true, phone } — frontend should show OTP input next.
+router.post("/book-token", bookToken);
+
+// POST /appointments/verify-booking-otp
+// Step 2: Verify OTP, create patient (if new), create appointment, issue JWT.
+// Body: { phone, otp }
+router.post("/verify-booking-otp", verifyBookingOtp);

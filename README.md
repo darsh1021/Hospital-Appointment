@@ -1,6 +1,6 @@
-# Clearskin Clinic - Digital Queue Management System
+# hospital queue managegment system
 
-This repository contains the source code for the Clearskin Clinic Digital Queue Management System, designed to digitize the manual paper waiting queue at the clinic.
+This repository contains the source code for the hospital queue managegment system, designed to digitize the manual paper waiting queue at the clinic.
 
 ## Project Structure
 

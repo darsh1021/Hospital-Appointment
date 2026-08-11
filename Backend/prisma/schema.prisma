@@ -258,3 +258,20 @@ model Notification {
 
   @@index([userId])
 }
+
+// =======================
+// PENDING BOOKING (OTP-gated appointment booking)
+// =======================
+// Stores the booking form data + a short-lived OTP between
+// Step 1 (form submit) and Step 2 (OTP verify + finalize booking).
+// One pending booking per phone number at a time.
+
+model PendingBooking {
+  id        String   @id @default(cuid())
+  phone     String   @unique    // keyed by patient phone
+  data      Json               // all booking fields serialised as JSON
+  otp       String             // 6-digit OTP code
+  expiresAt DateTime           // OTP expiry (5 minutes from creation)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -17,8 +17,8 @@ const sendStaffTokenResponse = (
     res: Response
 ) => {
     const roleMap: Record<string, string> = {
-        ADMIN:        "admin",
-        DOCTOR:       "doctor",
+        ADMIN: "admin",
+        DOCTOR: "doctor",
         RECEPTIONIST: "reception",
     };
     const mappedRole = roleMap[staff.role] ?? staff.role.toLowerCase();
@@ -28,20 +28,20 @@ const sendStaffTokenResponse = (
     res.cookie("token", token, {
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure:   process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production",
     });
 
     res.status(statusCode).json({
         success: true,
         token,
         user: {
-            id:          staff.id,
-            name:        staff.name,
-            email:       staff.email,
-            phone:       staff.phone,
-            role:        mappedRole,
+            id: staff.id,
+            name: staff.name,
+            email: staff.email,
+            phone: staff.phone,
+            role: mappedRole,
             hospital_id: staff.hospitalId,
-            created_at:  staff.createdAt,
+            created_at: staff.createdAt,
         },
     });
 };
@@ -57,19 +57,19 @@ const sendPatientTokenResponse = (
     res.cookie("token", token, {
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure:   process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production",
     });
 
     res.status(statusCode).json({
         success: true,
         token,
         user: {
-            id:          patient.id,
-            name:        patient.name,
-            phone:       patient.phone,
-            role:        "patient",
+            id: patient.id,
+            name: patient.name,
+            phone: patient.phone,
+            role: "patient",
             hospital_id: patient.hospitalId,
-            created_at:  patient.createdAt,
+            created_at: patient.createdAt,
         },
     });
 };
@@ -93,7 +93,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
         if (!isStrongPassword(password)) {
             res.status(400).json({
                 success: false,
-                error:   "Password must be at least 8 characters with uppercase, lowercase, number and special character.",
+                error: "Password must be at least 8 characters with uppercase, lowercase, number and special character.",
             });
             return;
         }
@@ -123,9 +123,9 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
                 name,
                 email,
                 phone,
-                password:   hashedPassword,
-                role:       normalizedRole as "ADMIN" | "DOCTOR" | "RECEPTIONIST",
-                gender:     req.body.gender ?? "OTHER",
+                password: hashedPassword,
+                role: normalizedRole as "ADMIN" | "DOCTOR" | "RECEPTIONIST",
+                gender: req.body.gender ?? "OTHER",
                 hospitalId: resolvedHospitalId,
             },
         });
@@ -140,7 +140,15 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
 // ─── login (staff email+password  OR  patient phone→OTP step 1) ───────────────
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { email, password, phone } = req.body;
+        // const { email, password, phone } = req.body;
+        // console.log("Email = ", email)
+        // console.log("Password = ", password)
+        // console.log("Phone Number = ", phone)
+        const { name, phone, email, password } = req.body;
+        console.log(req.body)
+        console.log("Name = ", name)
+        console.log("Phone Number = ", phone)
+
 
         // OTP flow: patient login via phone
         if (phone) {
@@ -148,21 +156,19 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
             const existing = await prisma.patient.findUnique({ where: { phone } });
             if (!existing) {
                 // Return early telling frontend the patient doesn't exist yet – they should register
-                res.status(200).json({
-                    success:   true,
-                    message:   "Patient is not registered. Please Register first.",
+                res.status(404).json({
+                    success: false,
+                    message: "Patient is not registered. Please Register first.",
                     phone,
-                    isNewUser: true,
                 });
                 return;
             }
 
             await createAndSendOtp(phone);
             res.status(200).json({
-                success:   true,
-                message:   "OTP sent successfully to your registered phone number.",
+                success: true,
+                message: "OTP sent successfully to your registered phone number.",
                 phone,
-                isNewUser: false,
             });
             return;
         }
@@ -215,26 +221,8 @@ export const verifyOtp = async (req: Request, res: Response, next: NextFunction)
         let patient = await prisma.patient.findUnique({ where: { phone } });
 
         if (!patient) {
-            // Auto-register patient
-            let resolvedHospitalId = hospital_id as string | undefined;
-            if (!resolvedHospitalId) {
-                const hospital = await prisma.hospital.findFirst({ select: { id: true } });
-                resolvedHospitalId = hospital?.id;
-            }
-            if (!resolvedHospitalId) {
-                res.status(400).json({ success: false, error: "No hospital found to register patient." });
-                return;
-            }
-
-            const defaultName = name || `Patient-${phone.slice(-4)}`;
-            patient = await prisma.patient.create({
-                data: {
-                    name:       defaultName,
-                    phone,
-                    gender:     "OTHER",
-                    hospitalId: resolvedHospitalId,
-                },
-            });
+            res.status(404).json({ success: false, error: "Patient is not registered. Please register first." });
+            return;
         }
 
         sendPatientTokenResponse(patient, 200, res);
@@ -247,7 +235,7 @@ export const verifyOtp = async (req: Request, res: Response, next: NextFunction)
 export const logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         res.cookie("token", "none", {
-            expires:  new Date(Date.now() + 5 * 1000), // expire in 5 seconds so that it is cleared immediately
+            expires: new Date(Date.now() + 5 * 1000), // expire in 5 seconds so that it is cleared immediately
             httpOnly: true,
         });
         res.status(200).json({ success: true, message: "Logged out successfully." });

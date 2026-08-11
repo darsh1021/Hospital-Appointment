@@ -5,7 +5,7 @@ export const generateOtpValue = (): string => {
 };
 
 export const createAndSendOtp = async (phoneNumber: string): Promise<string> => {
-    const otp       = generateOtpValue();
+    const otp = generateOtpValue();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP will expire in 5 minutes
 
     // Look up the patient by phone number
@@ -38,7 +38,7 @@ export const verifyOtpValue = async (phoneNumber: string, inputOtp: string): Pro
     const record = await prisma.oTP.findFirst({
         where: {
             patientId: patient.id,
-            otp:       inputOtp,
+            otp: inputOtp,
             expiresAt: { gt: new Date() },
         },
     });

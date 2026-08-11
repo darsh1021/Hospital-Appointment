@@ -1,6 +1,6 @@
 # Backend Program Flow & Architecture Documentation
 
-Welcome to the backend documentation for the **Clearskin Clinic - Digital Queue Management System**. This document serves as a guide for new developers to quickly grasp the backend execution flow, request-response lifecycle, database layer, error handling, real-time sockets, and design choices.
+Welcome to the backend documentation for the **hospital queue managegment system**. This document serves as a guide for new developers to quickly grasp the backend execution flow, request-response lifecycle, database layer, error handling, real-time sockets, and design choices.
 
 ---
 
