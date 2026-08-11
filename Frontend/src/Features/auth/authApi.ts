@@ -17,9 +17,21 @@ export const login = async (
 // Login a patient using name or phone number.
 export const patientLoginApi = async (
     data: { name: string; phone: string }
+): Promise<any> => {
+    const response = await axiosInstance.post<any>(
+        "/api/auth/patient-login",
+        data
+    );
+
+    return response.data;
+};
+
+// Verify OTP for patient login
+export const verifyOtpApi = async (
+    data: { phone: string; otp: string }
 ): Promise<LoginResponse> => {
     const response = await axiosInstance.post<LoginResponse>(
-        "/api/auth/patient-login",
+        "/api/auth/verify-otp",
         data
     );
 

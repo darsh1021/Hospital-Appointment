@@ -29,6 +29,7 @@ export interface authState {
     user: User | null;
     isAuthenticated: boolean;
     loading: boolean;
+    initializing: boolean;  // true only while initializeAuth is in flight
     error: string | null;
 }
 

@@ -4,12 +4,12 @@ import { initializeAuth } from "../Features/auth/authSlice";
 
 export const AuthInit = ({ children }: { children: React.ReactNode }) => {
     const dispatch = useAppDispatch();
-    const { loading } = useAppSelector((state) => state.auth);
+    const { initializing } = useAppSelector((state) => state.auth);
     useEffect(() => {
         dispatch(initializeAuth());
     }, [dispatch]);
 
-    if (loading) {
+    if (initializing) {
         return (
             <div className="flex h-screen w-screen items-center justify-center bg-[#fafafa] dark:bg-[#0a0a0a]">
                 <div className="flex flex-col items-center gap-3 text-center">
@@ -22,4 +22,6 @@ export const AuthInit = ({ children }: { children: React.ReactNode }) => {
 
     return <>{children}</>;
 };
+
+
 

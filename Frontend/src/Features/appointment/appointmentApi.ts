@@ -4,12 +4,23 @@ import type { BookTokenPayload, BookTokenResponse, Appointment } from "./appoint
 // Book a patient token
 export const bookPatientToken = async (
     data: BookTokenPayload
-): Promise<BookTokenResponse> => {
-    const response = await axiosInstance.post<BookTokenResponse>(
+): Promise<any> => {
+    const response = await axiosInstance.post<any>(
         "/api/appointment/book-token",
         data
     );
 
+    return response.data;
+};
+
+// Verify booking OTP
+export const verifyBookingOtpApi = async (
+    data: { phone: string; otp: string }
+): Promise<any> => {
+    const response = await axiosInstance.post<any>(
+        "/api/appointment/verify-booking-otp",
+        data
+    );
     return response.data;
 };
 

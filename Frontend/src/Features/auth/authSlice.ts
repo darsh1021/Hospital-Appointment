@@ -1,12 +1,21 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { login as loginApi, logout as logoutApi, getCurrentUser, patientLoginApi } from "./authApi";
+import { login as loginApi, logout as logoutApi, getCurrentUser, patientLoginApi, verifyOtpApi } from "./authApi";
 import type { authState, LoginPayload, LoginResponse, User } from "./authType";
-import { bookAppointmentUser } from "../appointment/appointmentSlice";
+import { verifyBookingOtpThunk } from "../appointment/appointmentSlice";
+
+const mapApiUser = (user: any): User | null => {
+    if (!user) return null;
+    return {
+        ...user,
+        phone_number: user.phone_number || user.phone || "",
+    };
+};
 
 const initialState: authState = {
     user: null,
     isAuthenticated: false,
-    loading: true,
+    loading: false,
+    initializing: true,
     error: null,
 };
 
@@ -49,6 +58,19 @@ export const loginPatientUser = createAsyncThunk(
     }
 );
 
+// Verify patient OTP
+export const verifyPatientOtp = createAsyncThunk(
+    "auth/verifyPatientOtp",
+    async (data: { phone: string; otp: string }, { rejectWithValue }) => {
+        try {
+            const response = await verifyOtpApi(data);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.error || error?.response?.data?.message || "OTP verification failed");
+        }
+    }
+);
+
 // Logout a user
 export const logoutUser = createAsyncThunk(
     "auth/logout",
@@ -67,7 +89,7 @@ const authSlice = createSlice({
     reducers: {
         // Login success
         loginSuccess(state, action: PayloadAction<LoginResponse | { user: User }>) {
-            state.user = action.payload.user;
+            state.user = mapApiUser(action.payload.user);
             state.isAuthenticated = true;
             state.loading = false;
             state.error = null;
@@ -85,23 +107,30 @@ const authSlice = createSlice({
         setAuthLoading(state, action: PayloadAction<boolean>) {
             state.loading = action.payload;
         },
+
+        // Clear auth error
+        clearError(state) {
+            state.error = null;
+        },
     },
 
     extraReducers: (builder) => {
         builder
             // initializeAuth
             .addCase(initializeAuth.pending, (state) => {
-                state.loading = true;
+                state.initializing = true;
             })
             .addCase(initializeAuth.fulfilled, (state, action: PayloadAction<User>) => {
-                state.user = action.payload;
+                state.user = mapApiUser(action.payload);
                 state.isAuthenticated = true;
+                state.initializing = false;
                 state.loading = false;
                 state.error = null;
             })
             .addCase(initializeAuth.rejected, (state) => {
                 state.user = null;
                 state.isAuthenticated = false;
+                state.initializing = false;
                 state.loading = false;
             })
 
@@ -111,7 +140,7 @@ const authSlice = createSlice({
                 state.error = null;
             })
             .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
-                state.user = action.payload.user;
+                state.user = mapApiUser(action.payload.user);
                 state.isAuthenticated = true;
                 state.loading = false;
                 state.error = null;
@@ -128,9 +157,7 @@ const authSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(loginPatientUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
-                state.user = action.payload.user;
-                state.isAuthenticated = true;
+            .addCase(loginPatientUser.fulfilled, (state) => {
                 state.loading = false;
                 state.error = null;
             })
@@ -141,12 +168,30 @@ const authSlice = createSlice({
                 state.error = (action.payload as string) || "Patient login failed";
             })
 
-            // bookAppointmentUser
-            .addCase(bookAppointmentUser.pending, (state) => {
+            // verifyPatientOtp
+            .addCase(verifyPatientOtp.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(bookAppointmentUser.fulfilled, (state, action) => {
+            .addCase(verifyPatientOtp.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
+                state.user = mapApiUser(action.payload.user);
+                state.isAuthenticated = true;
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(verifyPatientOtp.rejected, (state, action) => {
+                state.user = null;
+                state.isAuthenticated = false;
+                state.loading = false;
+                state.error = (action.payload as string) || "OTP verification failed";
+            })
+
+            // verifyBookingOtpThunk
+            .addCase(verifyBookingOtpThunk.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(verifyBookingOtpThunk.fulfilled, (state, action) => {
                 // The backend returns a `patient` object (not `user`) on book-token.
                 // Build the auth user from it so the patient sidebar/role resolves correctly.
                 const resp: any = action.payload;
@@ -159,14 +204,14 @@ const authSlice = createSlice({
                     }
                     : null);
 
-                state.user = user;
+                state.user = mapApiUser(user);
                 state.isAuthenticated = true;
                 state.loading = false;
                 state.error = null;
             })
-            .addCase(bookAppointmentUser.rejected, (state, action) => {
+            .addCase(verifyBookingOtpThunk.rejected, (state, action) => {
                 state.loading = false;
-                state.error = (action.payload as string) || "Token booking failed";
+                state.error = (action.payload as string) || "Booking verification failed";
             })
 
             // logoutUser
@@ -188,6 +233,7 @@ export const {
     loginSuccess,
     logout,
     setAuthLoading,
+    clearError,
 } = authSlice.actions;
 
 export default authSlice.reducer;

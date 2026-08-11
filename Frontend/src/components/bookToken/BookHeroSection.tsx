@@ -1,5 +1,5 @@
 import AppointmentSummaryCard from "./AppointmentSummaryCard"
-import { ArrowRight, CalendarDays, Info, PersonStanding } from "lucide-react"
+import { ArrowRight, PersonStanding } from "lucide-react"
 
 // ════════════════════════════════════════════════════
 // BOOK TOKEN — HERO SECTION

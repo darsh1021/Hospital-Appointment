@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { bookPatientToken, fetchPatientAppointmentsApi } from "./appointmentApi";
+import { bookPatientToken, verifyBookingOtpApi, fetchPatientAppointmentsApi } from "./appointmentApi";
 import type { AppointmentState, BookTokenPayload, BookTokenResponse, Appointment } from "./appointmentType";
 
 const initialState: AppointmentState = {
@@ -22,6 +22,23 @@ export const bookAppointmentUser = createAsyncThunk(
                 error?.response?.data?.error ||
                 error?.response?.data?.message ||
                 "Token booking failed"
+            );
+        }
+    }
+);
+
+// Verify booking OTP
+export const verifyBookingOtpThunk = createAsyncThunk(
+    "appointment/verifyBookingOtp",
+    async (data: { phone: string; otp: string }, { rejectWithValue }) => {
+        try {
+            const response = await verifyBookingOtpApi(data);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue(
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
+                "OTP verification failed"
             );
         }
     }
@@ -62,21 +79,35 @@ const appointmentSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Book an appointment
+            // Book an appointment (Step 1)
             .addCase(bookAppointmentUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(bookAppointmentUser.fulfilled, (state, action: PayloadAction<BookTokenResponse>) => {
-                state.newlyBookedAppointment = action.payload.appointment;
-                state.appointments = action.payload.allAppointments || [];
-                state.estimatedWaitTime = action.payload.estimated_wait_time_minutes || null;
+            .addCase(bookAppointmentUser.fulfilled, (state) => {
                 state.loading = false;
                 state.error = null;
             })
             .addCase(bookAppointmentUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = (action.payload as string) || "Token booking failed";
+            })
+
+            // Verify booking OTP (Step 2)
+            .addCase(verifyBookingOtpThunk.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(verifyBookingOtpThunk.fulfilled, (state, action: PayloadAction<any>) => {
+                state.newlyBookedAppointment = action.payload.appointment;
+                state.appointments = action.payload.allAppointments || [];
+                state.estimatedWaitTime = action.payload.estimated_wait_time_minutes || null;
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(verifyBookingOtpThunk.rejected, (state, action) => {
+                state.loading = false;
+                state.error = (action.payload as string) || "OTP verification failed";
             })
 
             // Fetch patient appointments

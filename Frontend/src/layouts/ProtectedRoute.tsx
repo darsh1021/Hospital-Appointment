@@ -2,9 +2,9 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAppSelector } from "../app/store";
 
 const ProtectedRoute = ({ allowedRoles }: { allowedRoles: string[] }) => {
-    const { isAuthenticated, user, loading } = useAppSelector((state) => state.auth);
+    const { isAuthenticated, user, initializing } = useAppSelector((state) => state.auth);
 
-    if (loading) {
+    if (initializing) {
         return (
             <div className="flex h-screen w-screen items-center justify-center bg-[#fafafa] dark:bg-[#0a0a0a]">
                 <div className="flex flex-col items-center gap-3 text-center">
@@ -14,6 +14,7 @@ const ProtectedRoute = ({ allowedRoles }: { allowedRoles: string[] }) => {
             </div>
         );
     }
+
 
     if (!isAuthenticated) {
         return <Navigate to="/auth/login" replace />;

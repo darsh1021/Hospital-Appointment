@@ -1,10 +1,9 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import {
-    getPatientAppointmentsApi,
     getPatientPrescriptionsApi,
     updatePatientProfileApi
 } from "./patientAPI";
-import type { PatientState, PatientAppointment, PatientPrescription } from "./patientType";
+import type { PatientState, PatientPrescription } from "./patientType";
 
 const initialState: PatientState = {
     appointments: [],

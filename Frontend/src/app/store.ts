@@ -5,6 +5,7 @@ import appointmentSlice from '../Features/appointment/appointmentSlice'
 import adminSlice from '../Features/admin/adminSlice'
 import doctorSlice from '../Features/doctor/doctorSlice'
 import patientSlice from '../Features/patient/patientSlice'
+import receptionSlice from '../Features/reception/receptionSlice'
 
 export const store = configureStore({
     reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
         admin: adminSlice,
         doctor: doctorSlice,
         patient: patientSlice,
+        reception: receptionSlice,
     }
 })
 

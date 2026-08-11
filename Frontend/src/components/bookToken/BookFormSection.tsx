@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
 import { departments } from "./bookTokenData"
 import { useAppDispatch, useAppSelector } from "../../app/store"
-import { bookAppointmentUser } from "../../Features/appointment/appointmentSlice"
-// import { SelectGroup } from "@base-ui/react/select"
+import { bookAppointmentUser, verifyBookingOtpThunk } from "../../Features/appointment/appointmentSlice"
+import { OtpInput } from "../common/OtpInput"
 
 import {
   Select,
@@ -39,13 +39,35 @@ const BookFormSection = () => {
     dob: ""
   })
 
-  const items = [
+  const genderItems = [
     { label: "Male", value: "male" },
     { label: "Female", value: "female" },
     { label: "Other", value: "other" },
   ]
 
+  const [step, setStep] = useState<'form' | 'otp'>('form')
+  const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""))
+  const [successMessage, setSuccessMessage] = useState("")
+  const [timer, setTimer] = useState(60)
+  const [canResend, setCanResend] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  // Countdown timer logic for resend OTP
+  useEffect(() => {
+    let interval: any
+    if (step === 'otp' && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            setCanResend(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [step, timer])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,13 +101,66 @@ const BookFormSection = () => {
         })
       ).unwrap()
 
-      if (result?.appointment || result?.user) {
-        // Directly redirect to patient dashboard with newly booked token session
-        navigate("/dashboard/patient")
+      if (result?.success || result?.otpSent) {
+        setSuccessMessage(result?.message || "Verification code sent successfully.")
+        setOtpDigits(Array(6).fill(""))
+        setTimer(60)
+        setCanResend(false)
+        setStep('otp')
       }
     } catch (err: any) {
       console.error("Failed to book token:", err)
       setErrorMessage(typeof err === "string" ? err : "Failed to book token. Please try again.")
+    }
+  }
+
+  const handleResend = async () => {
+    if (!canResend || appointmentLoading) return
+    try {
+      setErrorMessage(null)
+      const result = await dispatch(
+        bookAppointmentUser({
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          category: formData.category,
+          gender: formData.gender,
+          dob: formData.dob,
+        })
+      ).unwrap()
+      if (result?.success || result?.otpSent) {
+        setSuccessMessage("OTP resent successfully.")
+        setOtpDigits(Array(6).fill(""))
+        setTimer(60)
+        setCanResend(false)
+      }
+    } catch (err: any) {
+      setErrorMessage(typeof err === "string" ? err : "Failed to resend OTP. Please try again.")
+    }
+  }
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErrorMessage(null)
+    const otp = otpDigits.join("")
+    if (otp.length !== 6) {
+      setErrorMessage("Please enter the full 6-digit OTP.")
+      return
+    }
+
+    try {
+      const result = await dispatch(
+        verifyBookingOtpThunk({
+          phone: formData.phone.trim(),
+          otp,
+        })
+      ).unwrap()
+
+      if (result?.success || result?.redirectToDashboard) {
+        navigate("/dashboard/patient")
+      }
+    } catch (err: any) {
+      console.error("Failed to verify OTP:", err)
+      setErrorMessage(typeof err === "string" ? err : "Invalid or expired OTP. Please try again.")
     }
   }
 
@@ -160,7 +235,7 @@ const BookFormSection = () => {
             <h3
               className="mb-6 text-[18px] font-semibold tracking-[-0.5px] text-[#171717] dark:text-white"
             >
-              Book your slot
+              {step === "form" ? "Book your slot" : "Verify Booking"}
             </h3>
 
             {(errorMessage || appointmentError) && (
@@ -169,195 +244,254 @@ const BookFormSection = () => {
               </div>
             )}
 
-            <form className="relative flex flex-col gap-5" onSubmit={handleSubmit}>
+            {step === "form" ? (
+              <form className="relative flex flex-col gap-5" onSubmit={handleSubmit}>
 
-              {/* Patient name */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="patient-name"
-                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
-                >
-                  Patient name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="patient-name"
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  autoComplete="name"
-                  placeholder="Full name"
+                {/* Patient name */}
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="book-patient-name"
+                    className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                  >
+                    Patient name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="book-patient-name"
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    autoComplete="name"
+                    placeholder="Full name."
+                    disabled={appointmentLoading}
+                    className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                {/* Phone number */}
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="book-patient-phone"
+                    className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                  >
+                    Phone number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="book-patient-phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                    required
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    autoComplete="tel"
+                    placeholder="e.g. 9876543210"
+                    disabled={appointmentLoading}
+                    className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                {/* Gender */}
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="gender"
+                    className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                  >
+                    Gender <span className="text-red-500">*</span>
+                  </label>
+                  <Select
+                    selectedKey={formData.gender || null}
+                    onSelectionChange={(key) =>
+                      setFormData({ ...formData, gender: key as string })
+                    }
+                    isDisabled={appointmentLoading}
+                  >
+                    <SelectTrigger className="w-full h-11 rounded-[8px] border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)]">
+                      <SelectValue>
+                        {({ selectedText }) => selectedText || <span className="text-[#aaa] dark:text-[#475569]">Select gender…</span>}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#fafafa] text-[#1f2937] dark:bg-[#18181b] dark:text-[#f9fafb]">
+                      <SelectGroup>
+                        {genderItems.map((item) => (
+                          <SelectItem key={item.value} id={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Birth Date*/}
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="book-dob"
+                    className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                  >
+                    Birth Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="book-dob"
+                    type="date"
+                    name="dob"
+                    value={formData.dob}
+                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                    required
+                    disabled={appointmentLoading}
+                    className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                {/* Category */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]">
+                    Department <span className="text-red-500">*</span>
+                  </label>
+                  <Select
+                    selectedKey={formData.category || null}
+                    onSelectionChange={(key) =>
+                      setFormData({ ...formData, category: key as string })
+                    }
+                    isDisabled={appointmentLoading}
+                  >
+                    <SelectTrigger className="w-full h-11 rounded-[8px] border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)]">
+                      <SelectValue>
+                        {({ selectedText }) =>
+                          selectedText || (
+                            <span className="text-[#aaa] dark:text-[#475569]">
+                              Select a department…
+                            </span>
+                          )
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#fafafa] text-[#1f2937] dark:bg-[#18181b] dark:text-[#f9fafb]">
+                      <SelectGroup>
+                        {departments.map((d) => (
+                          <SelectItem key={d} id={d}>
+                            {d}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Address */}
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="book-address"
+                    className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                  >
+                    Address
+                  </label>
+                  <textarea
+                    id="book-address"
+                    name="address"
+                    rows={3}
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    autoComplete="address"
+                    placeholder="Enter your address"
+                    disabled={appointmentLoading}
+                    className="min-h-16 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 py-2 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
                   disabled={appointmentLoading}
-                  className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
-
-              {/* Phone number */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="patient-phone"
-                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
+                  className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#171717] dark:bg-white px-6 text-[14px] font-semibold text-white dark:text-[#0a0a0f] transition-all hover:bg-[#2a2a2a] dark:hover:bg-[#e2e8f0] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7]"
                 >
-                  Phone number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="patient-phone"
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  required
-                  autoComplete="tel"
-                  placeholder="e.g. 9876543210"
-                  disabled={appointmentLoading}
-                  className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
+                  {appointmentLoading ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+                      Sending OTP…
+                    </>
+                  ) : (
+                    <>
+                      Get My Token & Open Dashboard
+                      <ArrowRight size={15} aria-hidden="true" />
+                    </>
+                  )}
+                </button>
+              </form>
+            ) : (
+              <form className="relative flex flex-col gap-5 animate-in fade-in duration-200" onSubmit={handleVerifyOtp}>
+                <div className="flex flex-col gap-1 text-center">
+                  <p className="text-[14px] font-semibold text-[#171717] dark:text-white">
+                    Enter verification code
+                  </p>
+                  <p className="text-[12px] text-[#888888] dark:text-[#a1a1aa]">
+                    We sent a 6-digit code to <span className="font-semibold text-[#171717] dark:text-white">+91 {formData.phone}</span>
+                  </p>
+                </div>
 
-              {/* Gender */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="gender"
-                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
-                >
-                  Gender <span className="text-red-500">*</span>
-                </label>
-                {/* <select
-                  id="gender"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                  disabled={appointmentLoading}
-                  className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">Select gender...</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select> */}
-
-
-                <Select
-                  selectedKey={formData.gender || null}
-                  onSelectionChange={(key) =>
-                    setFormData({ ...formData, gender: key as string })
-                  }
-                  isDisabled={appointmentLoading}
-                >
-                  <SelectTrigger className="w-full h-11 rounded-[8px] border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)]">
-                    <SelectValue>
-                      {({ selectedText }) => selectedText || <span className="text-[#aaa] dark:text-[#475569]">Select gender…</span>}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#fafafa] text-[#1f2937] dark:bg-[#18181b] dark:text-[#f9fafb]">
-                    <SelectGroup>
-                      {items.map((item) => (
-                        <SelectItem key={item.value} id={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-              </div>
-
-              {/* Birth Date*/}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="dob"
-                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
-                >
-                  Birth Date <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="dob"
-                  type="date"
-                  name="dob"
-                  value={formData.dob}
-                  onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                  required
-                  disabled={appointmentLoading}
-                  className="h-11 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
-
-              {/* Category */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]">
-                  Department <span className="text-red-500">*</span>
-                </label>
-                <Select
-                  selectedKey={formData.category || null}
-                  onSelectionChange={(key) =>
-                    setFormData({ ...formData, category: key as string })
-                  }
-                  isDisabled={appointmentLoading}
-                >
-                  <SelectTrigger className="w-full h-11 rounded-[8px] border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)]">
-                    <SelectValue>
-                      {({ selectedText }) =>
-                        selectedText || (
-                          <span className="text-[#aaa] dark:text-[#475569]">
-                            Select a department…
-                          </span>
-                        )
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#fafafa] text-[#1f2937] dark:bg-[#18181b] dark:text-[#f9fafb]">
-                    <SelectGroup>
-                      {departments.map((d) => (
-                        <SelectItem key={d} id={d}>
-                          {d}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Address */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="address"
-                  className="text-[13px] font-medium text-[#171717] dark:text-[#e2e8f0]"
-                >
-                  Address
-                </label>
-                <textarea
-                  id="address"
-                  name="address"
-                  rows={3}
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  autoComplete="address"
-                  placeholder="Enter your address"
-                  disabled={appointmentLoading}
-                  className="min-h-16 rounded-[8px] border border-[#e5e7eb] dark:border-[rgba(255,255,255,0.10)] bg-white dark:bg-[#0a0a0f] px-3 py-2 text-[14px] text-[#171717] dark:text-white placeholder:text-[#aaa] dark:placeholder:text-[#475569] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={appointmentLoading}
-                className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#171717] dark:bg-white px-6 text-[14px] font-semibold text-white dark:text-[#0a0a0f] transition-all hover:bg-[#2a2a2a] dark:hover:bg-[#e2e8f0] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7]"
-              >
-                {appointmentLoading ? (
-                  <>
-                    <Loader2 size={15} className="animate-spin" aria-hidden="true" />
-                    Generating token & signing in…
-                  </>
-                ) : (
-                  <>
-                    Get My Token & Open Dashboard
-                    <ArrowRight size={15} aria-hidden="true" />
-                  </>
+                {successMessage && (
+                  <div className="rounded-[6px] bg-[#f0fdf4] p-2.5 text-[12px] text-[#166534] dark:bg-[#052e16] dark:text-[#86efac]">
+                    {successMessage}
+                  </div>
                 )}
-              </button>
-            </form>
+
+                <OtpInput
+                  value={otpDigits}
+                  onChange={setOtpDigits}
+                  disabled={appointmentLoading}
+                />
+
+                <div className="flex items-center justify-between text-[12px]">
+                  {canResend ? (
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={appointmentLoading}
+                      className="font-medium text-emerald-600 dark:text-emerald-400 hover:underline disabled:opacity-50"
+                    >
+                      Resend OTP
+                    </button>
+                  ) : (
+                    <span className="text-[#888888] dark:text-[#a1a1aa] tabular-nums">
+                      Resend in <span className="font-semibold text-[#171717] dark:text-white">{timer}s</span>
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep("form")
+                      setOtpDigits(Array(6).fill(""))
+                      setErrorMessage(null)
+                      setSuccessMessage("")
+                    }}
+                    className="text-[#888888] hover:text-[#171717] dark:hover:text-white hover:underline"
+                  >
+                    Edit details
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={appointmentLoading || otpDigits.join("").length !== 6}
+                  className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#171717] dark:bg-white px-6 text-[14px] font-semibold text-white dark:text-[#0a0a0f] transition-all hover:bg-[#2a2a2a] dark:hover:bg-[#e2e8f0] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7]"
+                >
+                  {appointmentLoading ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+                      Verifying OTP…
+                    </>
+                  ) : (
+                    <>
+                      Verify & Confirm Booking
+                      <ArrowRight size={15} aria-hidden="true" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>
@@ -366,4 +500,3 @@ const BookFormSection = () => {
 }
 
 export default BookFormSection
-

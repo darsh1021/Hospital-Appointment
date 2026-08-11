@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import {
   LayoutDashboard,
   Users,
@@ -77,6 +77,11 @@ const navByRole: Record<string, NavItem[]> = {
       label: "Follow-up",
       to: "/dashboard/reception/follow-up",
       icon: History,
+    },
+    {
+      label: "Register Patient",
+      to: "/dashboard/reception/register",
+      icon: UserRound,
     },
   ],
   patient: [
