@@ -25,6 +25,7 @@
     --radius-md: calc(var(--radius) * 0.8);
 }
 
+/* ─── Light Mode Tokens ────────────────────────────────────── */
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
@@ -43,6 +44,7 @@
     --radius: 0.625rem;
 }
 
+/* ─── Dark Mode Tokens ─────────────────────────────────────── */
 .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
@@ -60,14 +62,316 @@
     --ring: oklch(0.556 0 0);
 }
 
+/* ─── Base Layer ───────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
-    @apply bg-background text-foreground;
-    }
+    @apply bg-background text-foreground antialiased;
+  }
   html {
     @apply font-sans;
-    }
-} 
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL DESIGN SYSTEM — Shared across Admin, Doctor & Patient
+   dashboards. Use these utility classes everywhere.
+   ═══════════════════════════════════════════════════════════════ */
+@layer utilities {
+
+  /* ────────────────────────────────────────────────────────────
+     TYPOGRAPHY — Headlines & Labels
+     ──────────────────────────────────────────────────────────── */
+
+  /* Large page heading — used at the top of every dashboard page */
+  .page-title {
+    @apply text-[24px] md:text-[28px] font-semibold tracking-[-0.022em] leading-tight
+           text-[#0a0a0a] dark:text-white;
+  }
+
+  /* Supporting description below a page title */
+  .page-subtitle {
+    @apply text-[13.5px] md:text-[14px] font-normal leading-relaxed
+           text-[#737373] dark:text-[#737373];
+  }
+
+  /* Section heading inside a page (e.g., "Appointment History") */
+  .section-title {
+    @apply text-[16px] md:text-[17px] font-semibold tracking-tight
+           text-[#0a0a0a] dark:text-white;
+  }
+
+  /* Card or row heading (e.g., doctor name, patient name) */
+  .card-title {
+    @apply text-[14.5px] font-medium text-[#0a0a0a] dark:text-white;
+  }
+
+  /* Eyebrow / label above a stat or field — uppercase mono */
+  .label-eyebrow {
+    @apply font-mono text-[10.5px] font-medium uppercase tracking-[0.08em]
+           text-[#737373] dark:text-[#737373];
+  }
+
+  /* Table column header */
+  .table-col-header {
+    @apply font-mono text-[10.5px] font-medium uppercase tracking-[0.08em]
+           text-[#737373] dark:text-[#737373];
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     METRIC DISPLAY — Stats & Numbers
+     ──────────────────────────────────────────────────────────── */
+
+  /* Primary large metric number (stat cards) */
+  .metric-value {
+    @apply font-mono text-[28px] md:text-[32px] font-semibold tracking-tight leading-none
+           text-[#0a0a0a] dark:text-white;
+  }
+
+  /* Secondary smaller metric (operational indicators) */
+  .metric-value-sm {
+    @apply font-mono text-[22px] md:text-[24px] font-semibold tracking-tight leading-none
+           text-[#0a0a0a] dark:text-white;
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     BODY TEXT — General Content
+     ──────────────────────────────────────────────────────────── */
+
+  /* Standard readable body copy */
+  .body-text {
+    @apply text-[14px] font-normal leading-relaxed text-[#404040] dark:text-[#a3a3a3];
+  }
+
+  /* Smaller secondary body copy (descriptions, notes) */
+  .body-text-sm {
+    @apply text-[13px] font-normal leading-relaxed text-[#737373] dark:text-[#737373];
+  }
+
+  /* Technical mono data — IDs, phone numbers, codes, counts */
+  .data-text {
+    @apply font-mono text-[13px] font-normal text-[#404040] dark:text-[#a3a3a3];
+  }
+
+  /* Smaller mono data — dates, sub-labels */
+  .data-text-sm {
+    @apply font-mono text-[12px] font-normal text-[#737373] dark:text-[#737373];
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     CARD SURFACES — Containers & Layouts
+     ──────────────────────────────────────────────────────────── */
+
+  /* Primary white card — main content blocks */
+  .card {
+    @apply rounded-xl border border-[#e5e5e5] bg-white
+           shadow-[0px_1px_2px_rgba(0,0,0,0.04),0px_4px_16px_-4px_rgba(0,0,0,0.04)]
+           dark:border-white/[0.08] dark:bg-[#0a0a0a];
+  }
+
+  /* Subtle surface — slightly off-white, for secondary sections */
+  .card-muted {
+    @apply rounded-xl border border-[#e5e5e5] bg-[#fafafa]
+           dark:border-white/[0.06] dark:bg-[#141414];
+  }
+
+  /* Inset surface — for nested panels inside cards */
+  .card-inset {
+    @apply rounded-lg border border-[#e5e5e5] bg-[#f5f5f5]
+           dark:border-white/[0.06] dark:bg-[#1a1a1a];
+  }
+
+  /* Card section header bar (top strip of a card with label) */
+  .card-header {
+    @apply border-b border-[#e5e5e5] bg-[#fafafa] px-5 py-3
+           dark:border-white/[0.06] dark:bg-[#141414];
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     PAGE LAYOUT HELPERS
+     ──────────────────────────────────────────────────────────── */
+
+  /* Wrapper for an entire dashboard page */
+  .dash-page {
+    @apply space-y-6 md:space-y-7 font-sans;
+  }
+
+  /* Top header section of a page, with bottom divider */
+  .page-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4
+           border-b border-[#e5e5e5] pb-6 dark:border-white/[0.06];
+  }
+
+  /* Divider line for separating sections */
+  .section-divider {
+    @apply border-t border-[#e5e5e5] dark:border-white/[0.06];
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     FORM ELEMENTS
+     ──────────────────────────────────────────────────────────── */
+
+  /* Standard form input / textarea */
+  .field-input {
+    @apply w-full rounded-lg border border-[#e5e5e5] bg-white px-3.5 py-2.5
+           text-[14px] font-normal text-[#0a0a0a]
+           placeholder:text-[#a3a3a3]
+           transition-colors
+           focus:border-[#0a0a0a] focus:ring-2 focus:ring-[#0a0a0a]/[0.06] focus:outline-none
+           dark:border-white/[0.08] dark:bg-[#0a0a0a] dark:text-white
+           dark:placeholder:text-[#525252]
+           dark:focus:border-white/40 dark:focus:ring-white/[0.06];
+  }
+
+  /* Form label */
+  .field-label {
+    @apply text-[13px] font-medium text-[#0a0a0a] dark:text-white;
+  }
+
+  /* Helper text below a field */
+  .field-helper {
+    @apply text-[12px] font-normal text-[#737373] dark:text-[#737373];
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     BUTTONS
+     ──────────────────────────────────────────────────────────── */
+
+  /* Primary CTA button — high contrast fill */
+  .btn-primary {
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg
+           bg-[#0a0a0a] px-4 text-[13.5px] font-medium text-white
+           transition-colors hover:bg-[#262626]
+           dark:bg-white dark:text-[#0a0a0a] dark:hover:bg-[#e5e5e5]
+           cursor-pointer shadow-[0px_1px_2px_rgba(0,0,0,0.12)];
+  }
+
+  /* Secondary outlined button */
+  .btn-secondary {
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg
+           border border-[#e5e5e5] bg-white px-4 text-[13.5px] font-medium text-[#0a0a0a]
+           transition-colors hover:bg-[#fafafa] hover:border-[#d4d4d4]
+           dark:border-white/[0.08] dark:bg-transparent dark:text-white dark:hover:bg-white/[0.04]
+           cursor-pointer;
+  }
+
+  /* Destructive / danger outlined button */
+  .btn-danger {
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg
+           bg-[#dc2626] px-4 text-[13.5px] font-medium text-white
+           transition-colors hover:bg-[#b91c1c]
+           cursor-pointer shadow-[0px_1px_2px_rgba(0,0,0,0.12)];
+  }
+
+  /* Small icon-only button (e.g., "..." menu button) */
+  .btn-icon {
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-lg
+           border border-[#e5e5e5] bg-white text-[#737373]
+           transition-colors hover:bg-[#fafafa] hover:text-[#0a0a0a]
+           dark:border-white/[0.08] dark:bg-transparent dark:hover:bg-white/[0.04] dark:hover:text-white
+           cursor-pointer;
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     STATUS BADGES
+     ──────────────────────────────────────────────────────────── */
+
+  /* Base badge — apply on every status badge */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5
+           font-mono text-[11px] font-medium border;
+  }
+
+  .badge-active {
+    @apply bg-[#eff6ff] text-[#1d4ed8] border-[#bfdbfe]
+           dark:bg-[#1d4ed8]/10 dark:text-[#93c5fd] dark:border-[#1d4ed8]/20;
+  }
+
+  .badge-completed {
+    @apply bg-[#f0fdf4] text-[#15803d] border-[#bbf7d0]
+           dark:bg-[#15803d]/10 dark:text-[#86efac] dark:border-[#15803d]/20;
+  }
+
+  .badge-cancelled {
+    @apply bg-[#fef2f2] text-[#dc2626] border-[#fecaca]
+           dark:bg-[#dc2626]/10 dark:text-[#fca5a5] dark:border-[#dc2626]/20;
+  }
+
+  .badge-pending {
+    @apply bg-[#fffbeb] text-[#b45309] border-[#fde68a]
+           dark:bg-[#b45309]/10 dark:text-[#fcd34d] dark:border-[#b45309]/20;
+  }
+
+  .badge-neutral {
+    @apply bg-[#fafafa] text-[#737373] border-[#e5e5e5]
+           dark:bg-white/[0.04] dark:text-[#737373] dark:border-white/[0.06];
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     ALERT / NOTICE BANNERS
+     ──────────────────────────────────────────────────────────── */
+
+  .alert-error {
+    @apply flex items-center gap-2.5 rounded-xl border border-[#fecaca] bg-[#fef2f2]
+           px-4 py-3 text-[13px] font-medium text-[#dc2626]
+           dark:border-[#dc2626]/20 dark:bg-[#dc2626]/[0.06] dark:text-[#fca5a5];
+  }
+
+  .alert-info {
+    @apply flex items-center gap-2.5 rounded-xl border border-[#bfdbfe] bg-[#eff6ff]
+           px-4 py-3 text-[13px] font-medium text-[#1d4ed8]
+           dark:border-[#1d4ed8]/20 dark:bg-[#1d4ed8]/[0.06] dark:text-[#93c5fd];
+  }
+
+  .alert-warning {
+    @apply flex items-center gap-2.5 rounded-xl border border-[#fde68a] bg-[#fffbeb]
+           px-4 py-3 text-[13px] font-medium text-[#b45309]
+           dark:border-[#b45309]/20 dark:bg-[#b45309]/[0.06] dark:text-[#fcd34d];
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     TABLE ROWS
+     ──────────────────────────────────────────────────────────── */
+
+  /* Table header strip */
+  .table-header {
+    @apply border-b border-[#e5e5e5] bg-[#fafafa] px-5 py-3
+           dark:border-white/[0.06] dark:bg-[#141414];
+  }
+
+  /* Single data row */
+  .table-row {
+    @apply flex items-center gap-4 px-5 py-3.5 transition-colors
+           border-b border-[#e5e5e5] last:border-0
+           hover:bg-[#fafafa]
+           dark:border-white/[0.04] dark:hover:bg-white/[0.02];
+  }
+
+
+  /* ────────────────────────────────────────────────────────────
+     LOADING / EMPTY STATES
+     ──────────────────────────────────────────────────────────── */
+
+  .loading-state {
+    @apply flex items-center justify-center gap-2.5 p-12
+           text-[13.5px] font-medium text-[#737373] dark:text-[#737373];
+  }
+
+  .empty-state {
+    @apply flex flex-col items-center justify-center gap-2.5 py-16
+           text-center;
+  }
+
+}
