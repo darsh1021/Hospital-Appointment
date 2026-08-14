@@ -2,16 +2,22 @@ import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/tool
 import {
     getDoctorsAdmin as getDoctorsAdminApi,
     createDoctorAdmin as createDoctorAdminApi,
+    createReceptionistAdmin as createReceptionistAdminApi,
     updateDoctorAdmin as updateDoctorAdminApi,
     deleteDoctorAdmin as deleteDoctorAdminApi,
     getPatientsAdmin as getPatientsAdminApi,
-    getReportsAdmin as getReportsAdminApi
+    getReportsAdmin as getReportsAdminApi,
+    getPatientDetailAdminApi,
+    deletePatientAdminApi,
+    getReceptionistsAdmin as getReceptionistsAdminApi
 } from "./adminAPI";
-import type { AdminState, AdminDoctor, AdminPatient, AdminStatistics } from "./adminType";
+import type { AdminState, AdminDoctor, AdminPatient, AdminStatistics, AdminReceptionist } from "./adminType";
 
 const initialState: AdminState = {
     doctors: [],
+    receptionists: [],
     patients: [],
+    patientDetails: [],
     statistics: null,
     loading: false,
     error: null,
@@ -29,6 +35,18 @@ export const fetchDoctorsAdmin = createAsyncThunk(
     }
 );
 
+export const fetchReceptionistsAdmin = createAsyncThunk(
+    "admin/fetchReceptionists",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await getReceptionistsAdminApi();
+            return response.receptionists;
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.error || "Failed to fetch receptionists");
+        }
+    }
+);
+
 export const addDoctorAdmin = createAsyncThunk(
     "admin/addDoctor",
     async (data: any, { rejectWithValue }) => {
@@ -37,6 +55,18 @@ export const addDoctorAdmin = createAsyncThunk(
             return response.doctor; // Return created doctor to append to state
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.error || "Failed to add doctor");
+        }
+    }
+);
+
+export const addReceptionistAdmin = createAsyncThunk(
+    "admin/addReceptionist",
+    async (data: any, { rejectWithValue }) => {
+        try {
+            const response = await createReceptionistAdminApi(data);
+            return response.receptionist;
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.error || "Failed to add receptionist");
         }
     }
 );
@@ -67,12 +97,36 @@ export const removeDoctorAdmin = createAsyncThunk(
 
 export const fetchPatientsAdmin = createAsyncThunk(
     "admin/fetchPatients",
-    async (search: string | undefined, { rejectWithValue }) => {
+    async (search: string | void, { rejectWithValue }) => {
         try {
-            const response = await getPatientsAdminApi(search);
+            const response = await getPatientsAdminApi(search || undefined);
             return response.patients;
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.error || "Failed to fetch patients");
+        }
+    }
+);
+
+export const fetchPatientDetail = createAsyncThunk(
+    "admin/fetchPatientDetail",
+    async (id: string, { rejectWithValue }) => {
+        try {
+            const response = await getPatientDetailAdminApi(id);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.error || "Failed to fetch patient detail");
+        }
+    }
+);
+
+export const removePatientAdmin = createAsyncThunk(
+    "admin/removePatient",
+    async (id: string, { rejectWithValue }) => {
+        try {
+            await deletePatientAdminApi(id);
+            return id;
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.error || "Failed to delete patient");
         }
     }
 );
@@ -99,6 +153,7 @@ const adminSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+
             // Fetch Doctors
             .addCase(fetchDoctorsAdmin.pending, (state) => {
                 state.loading = true;
@@ -112,6 +167,21 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
+
+            // Fetch Receptionists
+            .addCase(fetchReceptionistsAdmin.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchReceptionistsAdmin.fulfilled, (state, action: PayloadAction<AdminReceptionist[]>) => {
+                state.loading = false;
+                state.receptionists = action.payload;
+            })
+            .addCase(fetchReceptionistsAdmin.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+
             // Add Doctor
             .addCase(addDoctorAdmin.pending, (state) => {
                 state.loading = true;
@@ -125,6 +195,21 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
+
+            // Add Receptionist
+            .addCase(addReceptionistAdmin.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(addReceptionistAdmin.fulfilled, (state, action: PayloadAction<AdminReceptionist>) => {
+                state.loading = false;
+                state.receptionists.push(action.payload);
+            })
+            .addCase(addReceptionistAdmin.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+
             // Update Doctor
             .addCase(updateDoctorDetailsAdmin.pending, (state) => {
                 state.loading = true;
@@ -141,6 +226,7 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
+
             // Remove Doctor
             .addCase(removeDoctorAdmin.pending, (state) => {
                 state.loading = true;
@@ -154,6 +240,7 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
+
             // Fetch Patients
             .addCase(fetchPatientsAdmin.pending, (state) => {
                 state.loading = true;
@@ -167,6 +254,35 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
+
+            // Fetch Details
+            .addCase(fetchPatientDetail.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchPatientDetail.fulfilled, (state, action: PayloadAction<AdminPatient>) => {
+                state.loading = false;
+                state.patientDetails.push(action.payload);
+            })
+            .addCase(fetchPatientDetail.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+
+            // Remove Patient
+            .addCase(removePatientAdmin.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(removePatientAdmin.fulfilled, (state, action: PayloadAction<string>) => {
+                state.loading = false;
+                state.patients = state.patients.filter(p => p.id !== action.payload);
+            })
+            .addCase(removePatientAdmin.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+
             // Fetch Reports
             .addCase(fetchReportsAdmin.pending, (state) => {
                 state.loading = true;
