@@ -25,6 +25,7 @@ export interface BookTokenPayload {
   category: string;
   gender: string;
   dob: string;
+  address: string
 }
 
 // Booking token response interface
