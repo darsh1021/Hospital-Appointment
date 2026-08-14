@@ -1,7 +1,7 @@
 import { Bell, Search } from "lucide-react"
 import { ThemeToggle } from "./ThemeToggle"
 import { useLocation } from "react-router-dom"
-
+import { useAppSelector } from "../../app/store"
 // ── Derive a human-readable title from the pathname ──
 const pageTitleFromPath = (pathname: string): string => {
   const segment = pathname.split("/").filter(Boolean).pop() ?? "Dashboard"
@@ -13,6 +13,9 @@ const pageTitleFromPath = (pathname: string): string => {
 const Header = () => {
   const location = useLocation()
   const title = pageTitleFromPath(location.pathname)
+
+  const user = useAppSelector((state) => state.auth)
+
 
   return (
     <header
@@ -74,7 +77,7 @@ const Header = () => {
           aria-label="Open user menu"
           className="inline-flex size-7 items-center justify-center rounded-full bg-[#171717] text-[15px] font-semibold text-white focus-visible:outline-none focus-  :ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-1 dark:bg-white dark:text-[#171717]"
         >
-          U
+          {user?.user?.name?.charAt(0).toUpperCase()}
         </button>
       </div>
     </header>
