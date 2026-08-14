@@ -256,3 +256,51 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response, next:
         next(error);
     }
 };
+
+// ─── updatePassword (Staff password change) ───────────────────────────────────
+export const updatePassword = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        if (!req.user || !req.user.id) {
+            res.status(401).json({ success: false, error: "Not authorized." });
+            return;
+        }
+
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            res.status(400).json({ success: false, error: "Please provide current and new passwords." });
+            return;
+        }
+
+        const staff = await prisma.staff.findUnique({ where: { id: req.user.id } });
+        if (!staff) {
+            res.status(404).json({ success: false, error: "User profile not found." });
+            return;
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, staff.password);
+        if (!isMatch) {
+            res.status(400).json({ success: false, error: "Incorrect current password." });
+            return;
+        }
+
+        if (!isStrongPassword(newPassword)) {
+            res.status(400).json({
+                success: false,
+                error: "Password must be at least 8 characters with uppercase, lowercase, number and special character.",
+            });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await prisma.staff.update({
+            where: { id: staff.id },
+            data: { password: hashedPassword }
+        });
+
+        res.status(200).json({ success: true, message: "Password updated successfully." });
+    } catch (error) {
+        next(error);
+    }
+};
+

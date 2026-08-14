@@ -10,24 +10,62 @@ export const getDoctorsAdmin = async (
 ): Promise<void> => {
     try {
         const doctors = await prisma.staff.findMany({
-            where:   { role: "DOCTOR" },
+            where: { role: "DOCTOR" },
             include: { hospital: { select: { id: true, name: true } } },
             orderBy: { name: "asc" },
         });
 
         const result = doctors.map((d) => ({
-            id:             d.id,
-            name:           d.name,
-            email:          d.email,
-            phone:          d.phone,
+            id: d.id,
+            name: d.name,
+            email: d.email,
+            phone: d.phone,
             specialization: d.specialization,
-            experience:     d.experience,
-            status:         d.status,
-            hospital_id:    d.hospital?.id ?? null,
-            hospital_name:  d.hospital?.name ?? null,
+            experience: d.experience,
+            status: d.status,
+            gender: d.gender,
+            dob: d.dob,
+            address: d.address,
+            qualification: d.qualification,
+            avatar: d.avatar,
+            hospital_id: d.hospital?.id ?? null,
+            hospital_name: d.hospital?.name ?? null,
         }));
 
         res.status(200).json({ success: true, count: result.length, doctors: result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getReceptionistsAdmin = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const receptionists = await prisma.staff.findMany({
+            where: { role: "RECEPTIONIST" },
+            include: { hospital: { select: { id: true, name: true } } },
+            orderBy: { name: "asc" },
+        });
+
+        const result = receptionists.map((r) => ({
+            id: r.id,
+            name: r.name,
+            email: r.email,
+            phone: r.phone,
+            status: r.status,
+            gender: r.gender,
+            dob: r.dob,
+            address: r.address,
+            qualification: r.qualification,
+            avatar: r.avatar,
+            hospital_id: r.hospital?.id ?? null,
+            hospital_name: r.hospital?.name ?? null,
+        }));
+
+        res.status(200).json({ success: true, count: result.length, receptionists: result });
     } catch (error) {
         next(error);
     }
@@ -39,12 +77,12 @@ export const createDoctorAdmin = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { name, email, phone, password, specialization, experience, hospital_id } = req.body;
+        const { name, email, phone, password, specialization, experience, hospital_id, qualification, dob, address } = req.body;
 
         if (!name || !email || !phone || !password || !specialization) {
             res.status(400).json({
                 success: false,
-                error:   "Please provide doctor name, email, phone number, password, and specialization.",
+                error: "Please provide doctor name, email, phone number, password, and specialization.",
             });
             return;
         }
@@ -55,7 +93,7 @@ export const createDoctorAdmin = async (
         if (existing) {
             res.status(400).json({
                 success: false,
-                error:   "Email or phone number is already registered to another account.",
+                error: "Email or phone number is already registered to another account.",
             });
             return;
         }
@@ -78,13 +116,16 @@ export const createDoctorAdmin = async (
                 name,
                 email,
                 phone,
-                password:       hashedPassword,
-                role:           "DOCTOR",
-                gender:         req.body.gender ?? "OTHER",
-                hospitalId:     targetHospitalId,
+                password: hashedPassword,
+                role: "DOCTOR",
+                gender: req.body.gender ?? "OTHER",
+                hospitalId: targetHospitalId,
                 specialization,
-                experience:     experience ? Number(experience) : undefined,
-                status:         "ACTIVE",
+                experience: experience ? Number(experience) : undefined,
+                qualification: qualification || undefined,
+                dob: dob ? new Date(dob) : undefined,
+                address: address || undefined,
+                status: "ACTIVE",
             },
         });
 
@@ -92,12 +133,12 @@ export const createDoctorAdmin = async (
             success: true,
             message: "Doctor account created successfully.",
             doctor: {
-                id:             doctor.id,
-                name:           doctor.name,
-                email:          doctor.email,
-                phone:          doctor.phone,
+                id: doctor.id,
+                name: doctor.name,
+                email: doctor.email,
+                phone: doctor.phone,
                 specialization: doctor.specialization,
-                hospital_id:    doctor.hospitalId,
+                hospital_id: doctor.hospitalId,
             },
         });
     } catch (error) {
@@ -115,7 +156,7 @@ export const updateDoctorAdmin = async (
         const { name, email, phone, specialization, experience, is_available, hospital_id } = req.body;
 
         const doctor = await prisma.staff.findFirst({
-            where:  { id: doctorId, role: "DOCTOR" },
+            where: { id: doctorId, role: "DOCTOR" },
             select: { id: true },
         });
         if (!doctor) { res.status(404).json({ success: false, error: "Doctor profile not found." }); return; }
@@ -133,13 +174,13 @@ export const updateDoctorAdmin = async (
         await prisma.staff.update({
             where: { id: doctorId },
             data: {
-                ...(name           ? { name }                                                    : {}),
-                ...(email          ? { email }                                                   : {}),
-                ...(phone          ? { phone }                                                   : {}),
-                ...(specialization ? { specialization }                                          : {}),
-                ...(experience !== undefined ? { experience: Number(experience) }               : {}),
-                ...(is_available   !== undefined ? { status: is_available ? "ACTIVE" : "INACTIVE" } : {}),
-                ...(hospital_id    ? { hospitalId: String(hospital_id) }                         : {}),
+                ...(name ? { name } : {}),
+                ...(email ? { email } : {}),
+                ...(phone ? { phone } : {}),
+                ...(specialization ? { specialization } : {}),
+                ...(experience !== undefined ? { experience: Number(experience) } : {}),
+                ...(is_available !== undefined ? { status: is_available ? "ACTIVE" : "INACTIVE" } : {}),
+                ...(hospital_id ? { hospitalId: String(hospital_id) } : {}),
             },
         });
 
@@ -161,7 +202,7 @@ export const deleteDoctorAdmin = async (
         const doctorId = String(req.params.id);
 
         const doctor = await prisma.staff.findFirst({
-            where:  { id: doctorId, role: "DOCTOR" },
+            where: { id: doctorId, role: "DOCTOR" },
             select: { id: true },
         });
         if (!doctor) { res.status(404).json({ success: false, error: "Doctor profile not found." }); return; }
@@ -188,29 +229,102 @@ export const getPatientsAdmin = async (
         const patients = await prisma.patient.findMany({
             where: search
                 ? {
-                      OR: [
-                          { name:  { contains: String(search), mode: "insensitive" } },
-                          { phone: { contains: String(search), mode: "insensitive" } },
-                      ],
-                  }
+                    OR: [
+                        { name: { contains: String(search), mode: "insensitive" } },
+                        { phone: { contains: String(search), mode: "insensitive" } },
+                    ],
+                }
                 : {},
-            select:  { id: true, name: true, phone: true, address: true, createdAt: true },
+            select: {
+                id: true,
+                name: true,
+                phone: true,
+                age: true,
+                address: true,
+                createdAt: true,
+                appointments: {
+                    select: {
+                        appointmentDate: true,
+                    },
+                    orderBy: {
+                        appointmentDate: "desc",
+                    },
+                },
+            },
             orderBy: { name: "asc" },
         });
 
-        const result = patients.map((p) => ({
-            id:         p.id,
-            name:       p.name,
-            phone:      p.phone,
-            address:    p.address,
-            created_at: p.createdAt,
-        }));
+        const result = patients.map((p) => {
+            const lastVisit = p.appointments.length > 0 ? p.appointments[0].appointmentDate : null;
+            return {
+                id: p.id,
+                name: p.name,
+                phone: p.phone,
+                age: p.age,
+                address: p.address,
+                created_at: p.createdAt,
+                total_appointments: p.appointments.length,
+                last_visit: lastVisit,
+            };
+        });
 
         res.status(200).json({ success: true, count: result.length, patients: result });
     } catch (error) {
         next(error);
     }
 };
+
+export const getPatientDetailsAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const id = (req.params.id || req.query.id) as string;
+
+        const patient = await prisma.patient.findUnique({
+            where: { id: String(id) },
+            select: {
+                id: true,
+                name: true,
+                age: true,
+                address: true,
+                phone: true,
+                createdAt: true,
+                appointments: {
+                    select: {
+                        id: true,
+                        appointmentDate: true,
+                        status: true,
+                        tokenNumber: true,
+                        appointmentTime: true,
+                        payment: {
+                            select: {
+                                totalAmount: true,
+
+                            }
+                        }
+                    },
+                    orderBy: {
+                        appointmentDate: "desc",
+                    }
+                }
+            }
+        })
+
+        console.log("==========================================================")
+        console.log(patient)
+        const totalAppointments = patient?.appointments?.length;
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                patient,
+                stats: {
+                    totalAppointments,
+                }
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 export const getReportsAdmin = async (
     req: AuthenticatedRequest,
@@ -222,7 +336,7 @@ export const getReportsAdmin = async (
 
         const dateFilter: Record<string, Date> = {};
         if (startDate) dateFilter.gte = new Date(String(startDate));
-        if (endDate)   dateFilter.lte = new Date(String(endDate));
+        if (endDate) dateFilter.lte = new Date(String(endDate));
 
         const appointmentWhere = Object.keys(dateFilter).length
             ? { appointmentDate: dateFilter }
@@ -234,7 +348,7 @@ export const getReportsAdmin = async (
         // 2. Revenue
         const revenueAgg = await prisma.payment.aggregate({
             where: { appointment: appointmentWhere },
-            _sum:  { totalAmount: true },
+            _sum: { totalAmount: true },
         });
         const revenueGenerated = Number(revenueAgg._sum.totalAmount ?? 0);
 
@@ -279,7 +393,7 @@ export const getReportsAdmin = async (
 
         // 4. Doctor utilization
         const doctors = await prisma.staff.findMany({
-            where:   { role: "DOCTOR" },
+            where: { role: "DOCTOR" },
             include: {
                 appointments: { where: appointmentWhere, select: { status: true } },
             },
@@ -287,14 +401,14 @@ export const getReportsAdmin = async (
         });
 
         const doctorUtilization = doctors.map((d) => {
-            const total     = d.appointments.length;
+            const total = d.appointments.length;
             const completed = d.appointments.filter((a) => a.status === "completed").length;
-            const rate      = total > 0 ? (completed / total) * 100 : 0.0;
+            const rate = total > 0 ? (completed / total) * 100 : 0.0;
             return {
-                doctor_id:                   d.id,
-                doctor_name:                 d.name,
-                total_appointments:          total,
-                completed_appointments:      completed,
+                doctor_id: d.id,
+                doctor_name: d.name,
+                total_appointments: total,
+                completed_appointments: completed,
                 utilization_rate_percentage: parseFloat(rate.toFixed(1)),
             };
         });
@@ -302,10 +416,110 @@ export const getReportsAdmin = async (
         res.status(200).json({
             success: true,
             statistics: {
-                total_appointments:           totalAppointments,
-                revenue_generated:            revenueGenerated,
+                total_appointments: totalAppointments,
+                revenue_generated: revenueGenerated,
                 average_waiting_time_minutes: avgWaitingTimeMinutes,
-                doctor_utilization:           doctorUtilization,
+                doctor_utilization: doctorUtilization,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deletePatientAdmin = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const patientId = String(req.params.id);
+
+        const patient = await prisma.patient.findUnique({ where: { id: patientId } });
+        if (!patient) {
+            res.status(404).json({ success: false, error: "Patient profile not found." });
+            return;
+        }
+
+        await prisma.appointment.deleteMany({ where: { patientId } });
+        await prisma.payment.deleteMany({ where: { patientId } });
+        await prisma.oTP.deleteMany({ where: { patientId } });
+        await prisma.patient.delete({ where: { id: patientId } });
+
+        res.status(200).json({
+            success: true,
+            message: "Patient deleted successfully.",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const createReceptionistAdmin = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { name, email, phone, password, gender, qualification, address, dob, hospital_id } = req.body;
+
+        if (!name || !email || !phone || !password || !gender) {
+            res.status(400).json({
+                success: false,
+                error: "Please provide name, email, phone, password, and gender.",
+            });
+            return;
+        }
+
+        const existing = await prisma.staff.findFirst({
+            where: { OR: [{ email }, { phone }] },
+        });
+        if (existing) {
+            res.status(400).json({
+                success: false,
+                error: "Email or phone number is already registered to another account.",
+            });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        let targetHospitalId = hospital_id ? String(hospital_id) : undefined;
+        if (!targetHospitalId) {
+            const fallback = await prisma.hospital.findFirst({ select: { id: true } });
+            targetHospitalId = fallback?.id;
+        }
+        if (!targetHospitalId) {
+            res.status(400).json({ success: false, error: "No hospital found to assign the receptionist." });
+            return;
+        }
+
+        const staff = await prisma.staff.create({
+            data: {
+                name,
+                email,
+                phone,
+                password: hashedPassword,
+                role: "RECEPTIONIST",
+                gender,
+                hospitalId: targetHospitalId,
+                qualification: qualification || undefined,
+                address: address || undefined,
+                dob: dob ? new Date(dob) : undefined,
+                status: "ACTIVE",
+            },
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Receptionist account created successfully.",
+            receptionist: {
+                id: staff.id,
+                name: staff.name,
+                email: staff.email,
+                phone: staff.phone,
+                role: staff.role,
+                status: staff.status,
             },
         });
     } catch (error) {
