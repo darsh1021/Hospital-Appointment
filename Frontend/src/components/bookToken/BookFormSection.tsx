@@ -98,8 +98,11 @@ const BookFormSection = () => {
           category: formData.category,
           gender: formData.gender,
           dob: formData.dob,
+          address: formData.address,
         })
       ).unwrap()
+
+      console.log(result)
 
       if (result?.success || result?.otpSent) {
         setSuccessMessage(result?.message || "Verification code sent successfully.")
@@ -125,6 +128,7 @@ const BookFormSection = () => {
           category: formData.category,
           gender: formData.gender,
           dob: formData.dob,
+          address: formData.address
         })
       ).unwrap()
       if (result?.success || result?.otpSent) {
