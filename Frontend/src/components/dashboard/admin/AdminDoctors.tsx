@@ -1,119 +1,223 @@
-import { Stethoscope, Clock, Users, TrendingUp, MoreHorizontal } from "lucide-react"
-
-import { useEffect } from "react";
+import {
+  Stethoscope,
+  MoreHorizontal,
+  Loader2,
+  AlertTriangle,
+  Plus,
+  X,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  GraduationCap,
+  Briefcase,
+  Sparkles,
+  Building,
+  User
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/store";
 import { fetchDoctorsAdmin } from "../../../Features/admin/adminSlice";
+import CreateStaffForm from "../../common/CreateStaffForm";
+import type { AdminDoctor } from "../../../Features/admin/adminType";
 
 const AdminDoctors = () => {
   const dispatch = useAppDispatch();
   const { doctors, loading, error } = useAppSelector((state) => state.admin);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState<AdminDoctor | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     dispatch(fetchDoctorsAdmin());
   }, [dispatch]);
 
-  if (loading) {
-    return <div className="text-[#888888] p-6">Loading doctors...</div>;
+  if (loading && doctors.length === 0) {
+    return (
+      <div className="loading-state">
+        <Loader2 size={16} className="animate-spin" /> Loading doctors...
+      </div>
+    );
   }
+
   if (error) {
-    return <div className="text-red-500 p-6">Error: {error}</div>;
+    return (
+      <div className="alert-error mt-2">
+        <AlertTriangle size={16} className="shrink-0" /> {error}
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="dash-page">
+      {/* Page Header */}
+      <div className="page-header">
         <div>
-          <h1 className="text-[28px] md:text-[32px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white">
-            Doctors
-          </h1>
-          <p className="mt-1 md:mt-2 text-[15px] md:text-[16px] text-[#4d4d4d] dark:text-[#888888]">
-            Manage doctors, session hours, and view today's performance.
-          </p>
+          <h1 className="page-title">Doctors Directory</h1>
+          <p className="page-subtitle mt-1">Manage profiles, availability, and consultation fees.</p>
         </div>
         <button
           id="btn-add-doctor"
-          className="flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-full bg-[#171717] px-5 text-[14px] font-medium text-white transition hover:bg-[#171717]/90 dark:bg-white dark:text-[#171717]"
+          className="btn-primary"
+          onClick={() => setShowAddModal(true)}
         >
-          <Stethoscope size={15} />
-          Add Doctor
+          <Plus size={15} /> Add Doctor
         </button>
       </div>
 
-      {/* Summary strip */}
+      {/* Stats Strip */}
       <div className="grid grid-cols-3 gap-3 md:gap-4">
         {[
-          { label: "Total Doctors",  value: doctors.length },
-          { label: "Active Today",   value: doctors.filter(d => d.is_available).length },
-          { label: "Off-duty",       value: doctors.filter(d => !d.is_available).length },
+          { label: "Total", value: doctors.length },
+          { label: "Active", value: doctors.filter(d => d.status === "ACTIVE").length },
+          { label: "Off-Duty", value: doctors.filter(d => d.status === "INACTIVE").length },
         ].map(s => (
-          <div key={s.label} className="flex flex-col gap-1 rounded-xl border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]">
-            <p className="text-[24px] md:text-[28px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white leading-none">{s.value}</p>
-            <p className="text-[11px] md:text-[13px] text-[#888888]">{s.label}</p>
+          <div key={s.label} className="card-muted p-4 md:p-5 flex flex-col gap-1.5">
+            <p className="metric-value">{s.value}</p>
+            <p className="label-eyebrow">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Doctor cards */}
-      <div className="flex flex-col gap-4">
-        {doctors.map(doc => (
-          <div
-            key={doc.doctor_id}
-            className="flex flex-col md:flex-row md:items-center gap-4 rounded-xl border border-[#ebebeb] bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]"
-          >
-            {/* Avatar + info */}
-            <div className="flex items-start gap-4 flex-1 min-w-0">
-              <div className="flex h-12 w-12 md:h-14 md:w-14 shrink-0 items-center justify-center rounded-full bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
-                <Stethoscope size={20} className="text-[#888888]" />
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-0 flex-1">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h3 className="text-[15px] md:text-[16px] font-semibold text-[#171717] dark:text-white">{doc.name}</h3>
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                    doc.is_available
-                      ? "bg-[#d3e5ff] text-[#0761d1] dark:bg-[#0070f3]/20 dark:text-[#50e3c2]"
-                      : "bg-[#fafafa] text-[#888888] dark:bg-white/5"
-                  }`}>
-                    {doc.is_available ? "Active" : "Off-duty"}
-                  </span>
+      {/* Doctor List */}
+      <div className="card overflow-hidden">
+        {doctors.length === 0 ? (
+          <div className="empty-state py-20">
+            <Stethoscope size={24} className="text-[#a3a3a3]" />
+            <p className="page-subtitle">No doctors found in the directory.</p>
+          </div>
+        ) : (
+          <div>
+            {doctors.map((doc, idx) => (
+              <div
+                key={doc.id}
+                className={`flex flex-col md:flex-row md:items-center gap-4 px-5 py-4 transition-colors hover:bg-[#fafafa] dark:hover:bg-white/[0.02] cursor-pointer ${idx !== doctors.length - 1 ? "border-b border-[#e5e5e5] dark:border-white/[0.04]" : ""
+                  }`}
+                onClick={() => {
+                  setSelectedDoctor(doc);
+                  setShowDetailModal(true);
+                }}
+              >
+                {/* Avatar */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full card-inset font-medium text-[14px] text-[#0a0a0a] dark:text-white">
+                  {doc.name.charAt(0).toUpperCase()}
                 </div>
-                <p className="text-[13px] text-[#888888]">{doc.specialization} · ₹{doc.consultation_fee}</p>
-                <div className="flex items-center gap-1.5 text-[12px] text-[#888888]">
-                  <Clock size={12} />
-                  <span>N/A</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Stats */}
-            <div className="flex items-center gap-4 md:gap-6 border-t border-[#ebebeb] pt-4 md:border-0 md:pt-0 dark:border-white/10">
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-1.5">
-                  <Users size={13} className="text-[#888888]" />
-                  <span className="font-mono text-[10px] uppercase text-[#888888]">Today</span>
+                {/* Info */}
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className="card-title">{doc.name}</span>
+                    <span className={`badge ${doc.status === "ACTIVE" ? "badge-active" : "badge-neutral"}`}>
+                      {doc.status === "ACTIVE" ? "Active" : "Off-duty"}
+                    </span>
+                  </div>
+                  <p className="data-text-sm mt-0.5">
+                    {doc.specialization} &middot; ₹{doc.consultation_fee} fee
+                    {doc.phone && ` · ${doc.phone}`}
+                  </p>
                 </div>
-                <p className="text-[18px] font-semibold text-[#171717] dark:text-white">-</p>
+
+                {/* Action */}
+                <button
+                  id={`btn-doctor-menu-${doc.id}`}
+                  className="btn-icon ml-auto md:ml-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <MoreHorizontal size={15} />
+                </button>
               </div>
-              <div className="w-px h-8 bg-[#ebebeb] dark:bg-white/10" />
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-1.5">
-                  <TrendingUp size={13} className="text-[#888888]" />
-                  <span className="font-mono text-[10px] uppercase text-[#888888]">Avg.</span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Add Doctor Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CreateStaffForm
+              role="DOCTOR"
+              hospitalId=""
+              onSuccess={() => {
+                setShowAddModal(false);
+                dispatch(fetchDoctorsAdmin());
+              }}
+              onCancel={() => setShowAddModal(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Doctor Detail Modal */}
+      {showDetailModal && selectedDoctor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto card p-6 space-y-5">
+
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 section-divider">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full card-inset text-[17px] font-medium text-[#0a0a0a] dark:text-white">
+                  {selectedDoctor.name.charAt(0).toUpperCase()}
                 </div>
-                <p className="text-[18px] font-semibold text-[#171717] dark:text-white">-m</p>
+                <div>
+                  <h2 className="section-title">{selectedDoctor.name}</h2>
+                  <p className="data-text-sm mt-0.5">Doctor ID: {selectedDoctor.id}</p>
+                </div>
               </div>
               <button
-                id={`btn-doctor-menu-${doc.doctor_id}`}
-                className="ml-auto flex h-8 w-8 items-center justify-center rounded-full border border-[#ebebeb] text-[#888888] transition hover:bg-[#fafafa] dark:border-white/10 dark:hover:bg-white/5"
+                onClick={() => setShowDetailModal(false)}
+                className="btn-icon -mt-1 -mr-1"
               >
-                <MoreHorizontal size={15} />
+                <X size={16} />
               </button>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
-export default AdminDoctors
+            {/* Info Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { icon: Mail, label: "Email", value: selectedDoctor.email || "N/A" },
+                { icon: Phone, label: "Phone", value: selectedDoctor.phone || "N/A" },
+                { icon: Sparkles, label: "Specialization", value: selectedDoctor.specialization || "N/A" },
+                { icon: GraduationCap, label: "Qualification", value: selectedDoctor.qualification || "N/A" },
+                { icon: Briefcase, label: "Experience", value: selectedDoctor.experience !== undefined ? `${selectedDoctor.experience} Years` : "N/A" },
+                { icon: Calendar, label: "Date of Birth", value: selectedDoctor.dob ? new Date(selectedDoctor.dob).toLocaleDateString() : "N/A" },
+                { icon: Building, label: "Hospital", value: selectedDoctor.hospital_name || "N/A" },
+                { icon: User, label: "Gender", value: selectedDoctor.gender || "N/A" },
+              ].map(({ icon: Icon, label, value }) => (
+                <div key={label} className="card-muted p-3.5 flex items-center gap-3">
+                  <Icon size={14} className="text-[#a3a3a3] shrink-0" />
+                  <div className="min-w-0">
+                    <p className="label-eyebrow">{label}</p>
+                    <p className="data-text mt-0.5 truncate">{value}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Address (Span full-width) */}
+              <div className="card-muted p-3.5 flex items-start gap-3 md:col-span-2">
+                <MapPin size={14} className="text-[#a3a3a3] shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <p className="label-eyebrow">Address</p>
+                  <p className="data-text mt-0.5 whitespace-pre-wrap">{selectedDoctor.address || "N/A"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Info */}
+            <div className="flex items-center justify-between p-3.5 card-inset">
+              <span className="text-[13px] font-medium text-muted-foreground">Current Account Status</span>
+              <span className={`badge ${selectedDoctor.status === "ACTIVE" ? "badge-active" : "badge-neutral"}`}>
+                {selectedDoctor.status === "ACTIVE" ? "Active" : "Inactive"}
+              </span>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminDoctors;

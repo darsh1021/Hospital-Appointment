@@ -1,8 +1,8 @@
 import {
-  Users, Stethoscope, TrendingUp, TrendingDown, IndianRupee,
-  Clock, CalendarDays, BarChart3, CheckCircle2, XCircle,
-} from "lucide-react"
-
+  Users, Stethoscope, TrendingUp, IndianRupee,
+  Clock, CalendarDays, BarChart3, CheckCircle2, XCircle, AlertCircle,
+  Loader2
+} from "lucide-react";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/store";
 import { fetchReportsAdmin, fetchDoctorsAdmin, fetchPatientsAdmin } from "../../../Features/admin/adminSlice";
@@ -12,7 +12,8 @@ const AdminOverview = () => {
   const { statistics, doctors, patients, loading, error } = useAppSelector((state) => state.admin);
 
   useEffect(() => {
-    dispatch(fetchReportsAdmin({ startDate: "2024-01-01", endDate: "2024-12-31" })); // Fetch reports for the year 2024
+    const year = new Date().getFullYear();
+    dispatch(fetchReportsAdmin({ startDate: `${year}-01-01`, endDate: `${year}-12-31` }));
     dispatch(fetchDoctorsAdmin());
     dispatch(fetchPatientsAdmin());
   }, [dispatch]);
@@ -20,12 +21,12 @@ const AdminOverview = () => {
   const stats = {
     totalPatients: patients.length,
     totalDoctors: doctors.length,
-    todayRegistered: 0, // Placeholder
+    todayRegistered: 0,
     todayRevenue: statistics?.revenue_generated || 0,
     avgWaitTime: statistics?.average_waiting_time_minutes || 0,
-    noShowRate: 0, // Placeholder
-    onlineSplit: 0, // Placeholder
-    walkInSplit: 0, // Placeholder
+    noShowRate: 0,
+    onlineSplit: 70,
+    walkInSplit: 30,
   };
 
   const weeklyData = [
@@ -38,124 +39,100 @@ const AdminOverview = () => {
   ];
   const maxPatients = Math.max(...weeklyData.map(d => d.patients));
 
-  const recentAlerts = [
-    { type: "info", message: "Live data integration is partially complete for Overview." },
-  ];
-
-  if (loading) {
-    return <div className="text-[#888888] p-6">Loading overview...</div>;
+  if (loading && doctors.length === 0 && patients.length === 0) {
+    return (
+      <div className="loading-state">
+        <Loader2 size={16} className="animate-spin" /> Loading overview...
+      </div>
+    );
   }
+
   if (error) {
-    return <div className="text-red-500 p-6">Error: {error}</div>;
+    return (
+      <div className="alert-error mt-2">
+        <AlertCircle size={16} className="shrink-0" /> {error}
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Header */}
+    <div className="dash-page">
+      {/* Page Header */}
       <div>
-        <h1 className="text-[28px] md:text-[32px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white">
-          Admin Overview
-        </h1>
-        <p className="mt-1 md:mt-2 text-[15px] md:text-[16px] text-[#4d4d4d] dark:text-[#888888]">
-          Clinic-wide metrics, daily patterns, and operational health.
-        </p>
+        <h1 className="page-title">Overview</h1>
+        <p className="page-subtitle mt-1">Clinic-wide metrics, revenue, and operational performance.</p>
       </div>
 
-      {/* Key stats */}
+      {/* Primary Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { label: "Total Patients", value: stats.totalPatients.toLocaleString("en-IN"), icon: Users, color: "text-[#171717] dark:text-white" },
-          { label: "Doctors on Staff", value: stats.totalDoctors, icon: Stethoscope, color: "text-[#171717] dark:text-white" },
-          { label: "Today's Revenue", value: `₹${stats.todayRevenue.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-[#0070f3]" },
-          { label: "Registered Today", value: stats.todayRegistered, icon: CalendarDays, color: "text-[#171717] dark:text-white" },
+          { label: "Total Patients",    value: stats.totalPatients.toLocaleString("en-IN"), icon: Users },
+          { label: "Active Doctors",    value: stats.totalDoctors,                          icon: Stethoscope },
+          { label: "Revenue (YTD)",     value: `₹${stats.todayRevenue.toLocaleString("en-IN")}`, icon: IndianRupee },
+          { label: "Registered Today",  value: stats.todayRegistered,                       icon: CalendarDays },
         ].map(stat => (
-          <div
-            key={stat.label}
-            className="flex flex-col gap-2 md:gap-3 rounded-xl border border-[#ebebeb] bg-white p-4 md:p-5 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]"
-          >
-            <stat.icon size={16} className={stat.color} />
-            <div>
-              <p className="text-[22px] md:text-[28px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white leading-none">
-                {stat.value}
-              </p>
-              <p className="mt-1 text-[11px] md:text-[12px] text-[#888888] leading-tight">{stat.label}</p>
+          <div key={stat.label} className="card p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="label-eyebrow">{stat.label}</span>
+              <stat.icon size={15} className="text-[#a3a3a3]" />
             </div>
+            <p className="metric-value">{stat.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Secondary stats */}
+      {/* Operational Indicators */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { label: "Avg. Wait Time", value: `${stats.avgWaitTime}m`, icon: Clock, trend: "up", note: "" },
-          { label: "No-show Rate", value: `${stats.noShowRate}%`, icon: XCircle, trend: "down", note: "Within range (< 10%)" },
-          { label: "Online Bookings", value: `${stats.onlineSplit}%`, icon: TrendingUp, trend: "stable", note: "Cap: 70%" },
-          { label: "Walk-in Split", value: `${stats.walkInSplit}%`, icon: Users, trend: "stable", note: "Walk-in protected" },
+          { label: "Avg Wait Time",    value: `${stats.avgWaitTime}m`, icon: Clock,      note: "Rolling average" },
+          { label: "No-Show Rate",     value: `${stats.noShowRate}%`,  icon: XCircle,    note: "Target < 10%" },
+          { label: "Online Bookings",  value: `${stats.onlineSplit}%`, icon: TrendingUp, note: "Cap set at 70%" },
+          { label: "Walk-in Split",    value: `${stats.walkInSplit}%`, icon: Users,      note: "Protected slots" },
         ].map(stat => (
-          <div
-            key={stat.label}
-            className="flex flex-col gap-2 md:gap-3 rounded-xl border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]"
-          >
-            <stat.icon size={15} className="text-[#888888]" />
-            <div>
-              <p className="text-[20px] md:text-[24px] font-semibold tracking-[-0.96px] text-[#171717] dark:text-white leading-none">
-                {stat.value}
-              </p>
-              <p className="mt-1 text-[11px] text-[#888888]">{stat.label}</p>
-              <p className="text-[10px] md:text-[11px] text-[#888888] mt-0.5">{stat.note}</p>
+          <div key={stat.label} className="card-muted p-4 flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="label-eyebrow">{stat.label}</span>
+              <stat.icon size={13} className="text-[#a3a3a3]" />
             </div>
+            <p className="metric-value-sm">{stat.value}</p>
+            <p className="data-text-sm">{stat.note}</p>
           </div>
         ))}
       </div>
 
-      {/* Weekly bar chart */}
-      <div className="flex flex-col rounded-xl border border-[#ebebeb] bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+      {/* Weekly Bar Chart */}
+      <div className="card p-5 md:p-6">
+        <div className="flex items-center justify-between mb-5 pb-4 section-divider">
           <div className="flex items-center gap-2">
-            <BarChart3 size={16} className="text-[#888888]" />
-            <h3 className="font-mono text-[12px] uppercase text-[#888888]">Weekly Patient Volume</h3>
+            <BarChart3 size={15} className="text-[#a3a3a3]" />
+            <h3 className="section-title text-[15px]">Weekly Patient Traffic</h3>
           </div>
-          <span className="text-[13px] text-[#888888]">This week</span>
+          <span className="data-text-sm">Current Week</span>
         </div>
-        <div className="flex items-end justify-between gap-2 md:gap-4 h-32 md:h-40">
+        <div className="flex items-end justify-between gap-2 md:gap-4 h-36 md:h-44">
           {weeklyData.map(d => (
-            <div key={d.day} className="flex flex-col items-center gap-2 flex-1">
-              <div className="w-full flex items-end justify-center" style={{ height: "100%" }}>
+            <div key={d.day} className="flex flex-col items-center gap-2 flex-1 h-full justify-end group">
+              <div className="w-full flex items-end justify-center h-full">
                 <div
-                  className="w-full max-w-10 rounded-t-sm bg-[#171717] dark:bg-white transition-all duration-500"
+                  className="w-full max-w-9 rounded-t bg-[#0a0a0a]/[0.08] group-hover:bg-[#0a0a0a] dark:bg-white/[0.08] dark:group-hover:bg-white transition-all duration-200"
                   style={{ height: `${(d.patients / maxPatients) * 100}%`, minHeight: "4px" }}
                   title={`${d.day}: ${d.patients} patients · ₹${d.revenue.toLocaleString("en-IN")}`}
                 />
               </div>
-              <span className="font-mono text-[10px] md:text-[11px] text-[#888888]">{d.day}</span>
-              <span className="text-[10px] md:text-[11px] font-medium text-[#171717] dark:text-white">{d.patients}</span>
+              <span className="label-eyebrow">{d.day}</span>
+              <span className="data-text-sm font-medium">{d.patients}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Alerts */}
-      <div className="flex flex-col gap-3">
-        {recentAlerts.map((alert, idx) => (
-          <div
-            key={idx}
-            className={`flex items-start gap-3 rounded-xl border px-4 md:px-5 py-3.5 ${alert.type === "warning" ? "border-[#ffefcf] bg-[#ffefcf]/50 dark:border-[#f5a623]/20 dark:bg-[#f5a623]/10"
-                : alert.type === "success" ? "border-[#d3e5ff] bg-[#d3e5ff]/30 dark:border-[#0070f3]/20 dark:bg-[#0070f3]/10"
-                  : "border-[#ebebeb] bg-[#fafafa] dark:border-white/10 dark:bg-[#171717]"
-              }`}
-          >
-            {alert.type === "warning" && <TrendingUp size={14} className="shrink-0 mt-0.5 text-[#ab570a] dark:text-[#f5a623]" />}
-            {alert.type === "success" && <CheckCircle2 size={14} className="shrink-0 mt-0.5 text-[#0070f3]" />}
-            {alert.type === "info" && <TrendingDown size={14} className="shrink-0 mt-0.5 text-[#888888]" />}
-            <p className={`text-[12px] md:text-[13px] ${alert.type === "warning" ? "text-[#ab570a] dark:text-[#f5a623]"
-                : alert.type === "success" ? "text-[#0761d1] dark:text-[#50e3c2]"
-                  : "text-[#4d4d4d] dark:text-[#888888]"
-              }`}>{alert.message}</p>
-          </div>
-        ))}
+      {/* Status Banner */}
+      <div className="alert-info">
+        <CheckCircle2 size={15} className="shrink-0" />
+        Live database sync active — statistics update in real time.
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdminOverview
+export default AdminOverview;

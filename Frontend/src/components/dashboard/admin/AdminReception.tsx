@@ -1,112 +1,222 @@
-import { Users, Clock, Mail, Phone, MoreHorizontal, UserPlus } from "lucide-react"
-
-type ReceptionistEntry = {
-  id: number
-  name: string
-  email: string
-  phone: string
-  shift: string
-  status: "active" | "off-duty"
-}
-
-const receptionists: ReceptionistEntry[] = [
-  { id: 1, name: "Anita Patel", email: "anita@clearskin.clinic", phone: "+91 98765 00001", shift: "Morning (8 AM - 4 PM)", status: "active" },
-  { id: 2, name: "Ravi Sharma", email: "ravi@clearskin.clinic", phone: "+91 98765 00002", shift: "Evening (1 PM - 9 PM)", status: "active" },
-  { id: 3, name: "Sneha Desai", email: "sneha@clearskin.clinic", phone: "+91 98765 00003", shift: "Morning (8 AM - 4 PM)", status: "off-duty" },
-]
+import {
+  Mail,
+  Phone,
+  MoreHorizontal,
+  UserPlus,
+  X,
+  Calendar,
+  MapPin,
+  GraduationCap,
+  Building,
+  User,
+  Loader2,
+  AlertTriangle
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../../app/store";
+import { fetchReceptionistsAdmin } from "../../../Features/admin/adminSlice";
+import CreateStaffForm from "../../common/CreateStaffForm";
+import type { AdminReceptionist } from "../../../Features/admin/adminType";
 
 const AdminReception = () => {
+  const dispatch = useAppDispatch();
+  const { receptionists, loading, error } = useAppSelector((state) => state.admin);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<AdminReceptionist | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchReceptionistsAdmin());
+  }, [dispatch]);
+
+  if (loading && receptionists.length === 0) {
+    return (
+      <div className="loading-state">
+        <Loader2 size={16} className="animate-spin" /> Loading receptionists...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="alert-error mt-2">
+        <AlertTriangle size={16} className="shrink-0" /> {error}
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="dash-page">
+      {/* Page Header */}
+      <div className="page-header">
         <div>
-          <h1 className="text-[28px] md:text-[32px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white">
-            Reception Staff
-          </h1>
-          <p className="mt-1 md:mt-2 text-[15px] md:text-[16px] text-[#4d4d4d] dark:text-[#888888]">
-            Manage receptionists, contact details, and their current shifts.
-          </p>
+          <h1 className="page-title">Reception Staff</h1>
+          <p className="page-subtitle mt-1">Manage receptionists, contact details, and schedules.</p>
         </div>
         <button
           id="btn-add-receptionist"
-          className="flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-full bg-[#171717] px-5 text-[14px] font-medium text-white transition hover:bg-[#171717]/90 dark:bg-white dark:text-[#171717]"
+          className="btn-primary"
+          onClick={() => setShowAddModal(true)}
         >
-          <UserPlus size={15} />
-          Add Staff
+          <UserPlus size={15} /> Add Staff
         </button>
       </div>
 
-      {/* Summary strip */}
+      {/* Stats Strip */}
       <div className="grid grid-cols-3 gap-3 md:gap-4">
         {[
-          { label: "Total Staff",  value: receptionists.length },
-          { label: "Active Today", value: receptionists.filter(r => r.status === "active").length },
-          { label: "Off-duty",     value: receptionists.filter(r => r.status === "off-duty").length },
+          { label: "Total Staff", value: receptionists.length },
+          { label: "Active", value: receptionists.filter(r => r.status === "ACTIVE").length },
+          { label: "Off-Duty", value: receptionists.filter(r => r.status === "INACTIVE").length },
         ].map(s => (
-          <div key={s.label} className="flex flex-col gap-1 rounded-xl border border-[#ebebeb] bg-[#fafafa] p-4 md:p-5 dark:border-white/10 dark:bg-[#171717]">
-            <p className="text-[24px] md:text-[28px] font-semibold tracking-[-1.28px] text-[#171717] dark:text-white leading-none">{s.value}</p>
-            <p className="text-[11px] md:text-[13px] text-[#888888]">{s.label}</p>
+          <div key={s.label} className="card-muted p-4 md:p-5 flex flex-col gap-1.5">
+            <p className="metric-value">{s.value}</p>
+            <p className="label-eyebrow">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Staff cards */}
-      <div className="flex flex-col gap-4">
-        {receptionists.map(staff => (
-          <div
-            key={staff.id}
-            className="flex flex-col md:flex-row md:items-center gap-4 rounded-xl border border-[#ebebeb] bg-white p-5 md:p-6 shadow-[0px_2px_2px_#0000000a,0px_8px_16px_-4px_#0000000a] dark:border-white/10 dark:bg-[#0a0a0a]"
-          >
-            {/* Avatar + info */}
-            <div className="flex items-start gap-4 flex-1 min-w-0">
-              <div className="flex h-12 w-12 md:h-14 md:w-14 shrink-0 items-center justify-center rounded-full bg-[#fafafa] border border-[#ebebeb] dark:border-white/10 dark:bg-white/5">
-                <Users size={20} className="text-[#888888]" />
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-0 flex-1">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h3 className="text-[15px] md:text-[16px] font-semibold text-[#171717] dark:text-white">{staff.name}</h3>
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                    staff.status === "active"
-                      ? "bg-[#d3e5ff] text-[#0761d1] dark:bg-[#0070f3]/20 dark:text-[#50e3c2]"
-                      : "bg-[#fafafa] text-[#888888] dark:bg-white/5"
-                  }`}>
-                    {staff.status === "active" ? "Active" : "Off-duty"}
-                  </span>
-                </div>
-                
-                <div className="flex flex-wrap items-center gap-3 text-[12px] text-[#888888] mt-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <Mail size={12} />
-                    <span>{staff.email}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Phone size={12} />
-                    <span>{staff.phone}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-1.5 text-[12px] text-[#888888] mt-1">
-                  <Clock size={12} />
-                  <span>{staff.shift}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-4 md:gap-6 border-t border-[#ebebeb] pt-4 md:border-0 md:pt-0 dark:border-white/10">
-              <button
-                id={`btn-staff-menu-${staff.id}`}
-                className="ml-auto flex h-8 w-8 items-center justify-center rounded-full border border-[#ebebeb] text-[#888888] transition hover:bg-[#fafafa] dark:border-white/10 dark:hover:bg-white/5"
+      {/* Staff List */}
+      <div className="card overflow-hidden">
+        {receptionists.length === 0 ? (
+          <div className="empty-state py-20 text-center flex flex-col items-center justify-center gap-2">
+            <User size={24} className="text-[#a3a3a3]" />
+            <p className="page-subtitle">No receptionists found in the directory.</p>
+          </div>
+        ) : (
+          <div>
+            {receptionists.map((staff, idx) => (
+              <div
+                key={staff.id}
+                className={`flex flex-col md:flex-row md:items-center gap-4 px-5 py-4 transition-colors hover:bg-[#fafafa] dark:hover:bg-white/[0.02] cursor-pointer ${idx !== receptionists.length - 1 ? "border-b border-[#e5e5e5] dark:border-white/[0.04]" : ""
+                  }`}
+                onClick={() => {
+                  setSelectedStaff(staff);
+                  setShowDetailModal(true);
+                }}
               >
-                <MoreHorizontal size={15} />
+                {/* Avatar */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full card-inset font-medium text-[14px] text-[#0a0a0a] dark:text-white">
+                  {staff.name.charAt(0).toUpperCase()}
+                </div>
+
+                {/* Info */}
+                <div className="flex flex-col gap-1 flex-1 min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className="card-title">{staff.name}</span>
+                    <span className={`badge ${staff.status === "ACTIVE" ? "badge-active" : "badge-neutral"}`}>
+                      {staff.status === "ACTIVE" ? "Active" : "Off-duty"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-0.5">
+                    <span className="data-text-sm flex items-center gap-1.5">
+                      <Mail size={12} className="text-[#a3a3a3]" /> {staff.email}
+                    </span>
+                    <span className="data-text-sm flex items-center gap-1.5">
+                      <Phone size={12} className="text-[#a3a3a3]" /> {staff.phone}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action */}
+                <button
+                  id={`btn-staff-menu-${staff.id}`}
+                  className="btn-icon ml-auto md:ml-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <MoreHorizontal size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Add Receptionist Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CreateStaffForm
+              role="RECEPTIONIST"
+              hospitalId=""
+              onSuccess={() => {
+                setShowAddModal(false);
+                dispatch(fetchReceptionistsAdmin());
+              }}
+              onCancel={() => setShowAddModal(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Receptionist Detail Modal */}
+      {showDetailModal && selectedStaff && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto card p-6 space-y-5">
+
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 section-divider">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full card-inset text-[17px] font-medium text-[#0a0a0a] dark:text-white">
+                  {selectedStaff.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="section-title">{selectedStaff.name}</h2>
+                  <p className="data-text-sm mt-0.5">Receptionist ID: {selectedStaff.id}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="btn-icon -mt-1 -mr-1"
+              >
+                <X size={16} />
               </button>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
-export default AdminReception
+            {/* Info Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { icon: Mail, label: "Email", value: selectedStaff.email || "N/A" },
+                { icon: Phone, label: "Phone", value: selectedStaff.phone || "N/A" },
+                { icon: GraduationCap, label: "Qualification", value: selectedStaff.qualification || "N/A" },
+                { icon: Calendar, label: "Date of Birth", value: selectedStaff.dob ? new Date(selectedStaff.dob).toLocaleDateString() : "N/A" },
+                { icon: Building, label: "Hospital", value: selectedStaff.hospital_name || "N/A" },
+                { icon: User, label: "Gender", value: selectedStaff.gender || "N/A" },
+              ].map(({ icon: Icon, label, value }) => (
+                <div key={label} className="card-muted p-3.5 flex items-center gap-3">
+                  <Icon size={14} className="text-[#a3a3a3] shrink-0" />
+                  <div className="min-w-0">
+                    <p className="label-eyebrow">{label}</p>
+                    <p className="data-text mt-0.5 truncate">{value}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Address (Span full-width) */}
+              <div className="card-muted p-3.5 flex items-start gap-3 md:col-span-2">
+                <MapPin size={14} className="text-[#a3a3a3] shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <p className="label-eyebrow">Address</p>
+                  <p className="data-text mt-0.5 whitespace-pre-wrap">{selectedStaff.address || "N/A"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Info */}
+            <div className="flex items-center justify-between p-3.5 card-inset">
+              <span className="text-[13px] font-medium text-muted-foreground">Current Account Status</span>
+              <span className={`badge ${selectedStaff.status === "ACTIVE" ? "badge-active" : "badge-neutral"}`}>
+                {selectedStaff.status === "ACTIVE" ? "Active" : "Inactive"}
+              </span>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminReception;
